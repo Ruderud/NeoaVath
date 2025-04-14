@@ -4,7 +4,9 @@
   "license": "MIT",
   "packageManager": "pnpm@10.8.1",
   "scripts": {
-    "nx": "nx"
+    "nx": "nx",
+    "run:neoavath": "nx serve neoavath",
+    "build:neoavath": "nx build neoavath"
   },
   "private": true,
   "dependencies": {
