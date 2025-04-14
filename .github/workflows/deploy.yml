@@ -78,10 +78,11 @@ jobs:
       - name: Build
         run: pnpm build:neoavath
 
+      - name: Install Wrangler
+        run: pnpm install -g wrangler
+
       - name: Deploy to Cloudflare Pages
-        uses: cloudflare/wrangler-action@v3
-        with:
-          apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
-          accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
-          command: pages deploy apps/neoavath/dist --project-name=neoavath
-          packageManager: npm
+        run: wrangler pages deploy apps/neoavath/dist --project-name=neoavath
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
