@@ -78,10 +78,7 @@ jobs:
       - name: Build
         run: pnpm build:neoavath
 
-      - name: Install Wrangler
-        run: pnpm install -g wrangler
-
       - name: Deploy to Cloudflare Pages
-        run: wrangler pages deploy apps/neoavath/dist --project-name=neoavath
+        run: pnpm deploy:neoavath
         env:
           CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
