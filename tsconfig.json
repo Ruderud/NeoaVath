@@ -4,10 +4,10 @@
   "files": [],
   "references": [
     {
-      "path": "./apps/neoavath-e2e"
+      "path": "./apps/neoavath"
     },
     {
-      "path": "./apps/neoavath"
+      "path": "./libs/neople-api"
     }
   ]
 }
