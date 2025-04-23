@@ -1,10 +1,5 @@
 import { useRef, useEffect } from 'react';
-import {
-  createChart,
-  ColorType,
-  LineStyle,
-  LineSeries,
-} from 'lightweight-charts';
+import { createChart, ColorType, LineSeries } from 'lightweight-charts';
 
 type ChartProps = {
   data: { time: string; value: number }[];

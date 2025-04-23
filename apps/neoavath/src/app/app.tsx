@@ -1,5 +1,5 @@
-import { Route, Routes, Link } from 'react-router-dom';
-import { Chart } from './components/chart';
+import { Route, Routes, Link, Navigate } from 'react-router-dom';
+import { Chart } from '@/components/Chart';
 
 const data = [
   { time: '2019-04-11', value: 80.01 },
@@ -16,20 +16,14 @@ const data = [
 
 export const App = () => {
   return (
-    <div>
-      <div role="navigation">
-        <ul>
-          <li>
-            <Link to="/">Home</Link>
-          </li>
-          <li>
-            <Link to="/page-2">Page 2</Link>
-          </li>
-        </ul>
-      </div>
+    <>
+      <nav>
+        <Link to="/home">Home</Link>
+        <Link to="/page-2">Page 2</Link>
+      </nav>
       <Routes>
         <Route
-          path="/"
+          path="/home"
           element={
             <div>
               This is the generated root route.{' '}
@@ -47,9 +41,10 @@ export const App = () => {
             </div>
           }
         />
+
+        <Route path="/" element={<Navigate to="/home" replace />} />
       </Routes>
-      {/* END: routes */}
-    </div>
+    </>
   );
 };
 

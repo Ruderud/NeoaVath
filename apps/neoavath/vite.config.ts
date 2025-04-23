@@ -1,6 +1,7 @@
 /// <reference types='vitest' />
 import { defineConfig } from 'vite';
 import react from '@vitejs/plugin-react';
+import { resolve } from 'path';
 
 export default defineConfig(() => ({
   root: __dirname,
@@ -18,6 +19,11 @@ export default defineConfig(() => ({
   // worker: {
   //  plugins: [ nxViteTsPaths() ],
   // },
+  resolve: {
+    alias: {
+      '@/components': resolve(__dirname, './src/app/components'),
+    },
+  },
   build: {
     outDir: './dist',
     emptyOutDir: true,
