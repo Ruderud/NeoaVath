@@ -8,6 +8,12 @@
     },
     {
       "path": "./libs/neople-api"
+    },
+    {
+      "path": "./apps/df-auction-crawling-e2e"
+    },
+    {
+      "path": "./apps/df-auction-crawling"
     }
   ]
 }
