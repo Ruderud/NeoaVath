@@ -8,10 +8,12 @@
     "run:neoavath": "nx serve neoavath",
     "build:neoavath": "nx build neoavath",
     "deploy:neoavath": "wrangler pages deploy apps/neoavath/dist --project-name=neoavath",
+    "test:neople-api": "nx test neople-api",
     "wrangler": "wrangler"
   },
   "private": true,
   "dependencies": {
+    "axios": "^1.8.4",
     "lightweight-charts": "^5.0.5",
     "react": "19.0.0",
     "react-dom": "19.0.0",
@@ -42,6 +44,7 @@
     "@types/react": "19.0.0",
     "@types/react-dom": "19.0.0",
     "@vitejs/plugin-react": "^4.2.0",
+    "@vitest/coverage-v8": "^3.0.5",
     "@vitest/ui": "^3.0.0",
     "autoprefixer": "10.4.13",
     "babel-jest": "^29.7.0",
@@ -56,6 +59,7 @@
     "jest-environment-jsdom": "^29.7.0",
     "jiti": "2.4.2",
     "jsdom": "~22.1.0",
+    "jsonc-eslint-parser": "^2.1.0",
     "nx": "20.8.0",
     "postcss": "8.4.38",
     "prettier": "^2.6.2",
@@ -67,8 +71,5 @@
     "typescript-eslint": "^8.19.0",
     "vite": "^6.0.0",
     "vitest": "^3.0.0"
-  },
-  "workspaces": [
-    "apps/*"
-  ]
+  }
 }
