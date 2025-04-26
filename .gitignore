@@ -46,3 +46,7 @@ vitest.config.*.timestamp*
 test-output
 
 .env
+
+# devops configs
+.devops
+.devops/
