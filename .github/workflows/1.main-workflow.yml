@@ -11,6 +11,9 @@ permissions:
   contents: read
   checks: write
 
+env:
+  Apps: ['neoavath', 'df-auction-crawling']
+
 jobs:
   affected:
     runs-on: ubuntu-latest
@@ -37,13 +40,22 @@ jobs:
       - name: Get affected apps
         id: affected
         run: |
-          APPS=$(pnpm nx show projects --affected --base=${{ github.event.before }} --head=${{ github.sha }} --plain | awk 'NF' | sed 's/^/"/;s/$/"/' | paste -sd, - | sed 's/^/[/;s/$/]/')
-          if [ "$APPS" != "[]" ]; then
-            echo "영향받은 앱: $APPS"
-          else
-            echo "영향받은 앱이 없습니다."
+          AFFECTED=$(pnpm nx show projects --affected --base=${{ github.event.before }} --head=${{ github.sha }} --plain)
+          SHOULD_DEPLOY=false
+
+          # 영향받은 앱들 중에 Apps 환경변수에 포함된 것이 있는지 체크
+          for APP in ${{ env.Apps }}; do
+            if echo "$AFFECTED" | grep -qw "$APP"; then
+              SHOULD_DEPLOY=true
+              echo "Affected apps: $APP"
+            fi
+          done
+
+          if [ "$SHOULD_DEPLOY" = "false" ]; then
+            echo "배포 대상 앱에 영향받은 것이 없습니다."
           fi
-          echo "affected-apps=$APPS" >> "$GITHUB_OUTPUT"
+
+          echo "should_deploy=$SHOULD_DEPLOY" >> "$GITHUB_OUTPUT"
 
   deploy:
     uses: ./.github/workflows/2.neoavath-fe-workflow.yml
