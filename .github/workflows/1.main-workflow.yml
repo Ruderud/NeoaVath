@@ -37,15 +37,9 @@ jobs:
       - name: Get affected apps
         id: affected
         run: |
-          RAW_APPS=$(pnpm nx show projects --affected --base=${{ github.event.before }} --head=${{ github.sha }} --json)
-          if [ -z "$RAW_APPS" ]; then
-            APPS="[]"
-          else
-            APPS=$(echo "$RAW_APPS" | jq -c '[to_entries[] | select(.value.projectType == "application") | .key]')
-          fi
-
+          APPS=$(pnpm nx show projects --affected --base=${{ github.event.before }} --head=${{ github.sha }} --plain | awk 'NF' | sed 's/^/"/;s/$/"/' | paste -sd, - | sed 's/^/[/;s/$/]/')
           if [ "$APPS" != "[]" ]; then
-            echo "영향받은 앱: $(echo $APPS | jq -r '.[]' | xargs)"
+            echo "영향받은 앱: $APPS"
           else
             echo "영향받은 앱이 없습니다."
           fi
