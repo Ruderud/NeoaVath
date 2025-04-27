@@ -1,8 +1,8 @@
 module.exports = {
   apps: [
     {
-      name: 'neoavath-crawler',
-      script: 'dist/apps/crawler/main.js',
+      name: 'df-auction-crawling',
+      script: 'dist/apps/df-auction-crawling/main.js',
       instances: 1,
       autorestart: true,
       watch: false,

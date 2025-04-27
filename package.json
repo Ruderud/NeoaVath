@@ -11,7 +11,8 @@
     "build:neoavath": "nx build neoavath",
     "deploy:neoavath": "wrangler pages deploy apps/neoavath/dist --project-name=neoavath",
     "test:neople-api": "nx test neople-api",
-    "run:df-auction-crawling": "nx serve df-auction-crawling"
+    "run:df-auction-crawling": "nx serve df-auction-crawling",
+    "build:df-auction-crawling": "nx build df-auction-crawling"
   },
   "private": true,
   "devDependencies": {
