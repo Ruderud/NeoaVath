@@ -34,7 +34,7 @@ jobs:
       - name: Install dependencies
         run: pnpm install
 
-      - name: Get affected apps
+        - name: Get affected apps
         id: affected
         env:
           Apps: 'neoavath df-auction-crawling'
@@ -56,13 +56,21 @@ jobs:
             fi
           done
 
+          # 디버깅 정보 출력
+          echo "DEPLOY_APPS size: ${#DEPLOY_APPS[@]}"
+          echo "DEPLOY_APPS contents: ${DEPLOY_APPS[@]}"
+
           if [ "${#DEPLOY_APPS[@]}" -gt 0 ]; then
             # 배열을 JSON 형식으로 변환
             AFFECTED_APPS=$(printf '"%s",' "${DEPLOY_APPS[@]}" | sed 's/,$//' | awk '{print "["$0"]"}')
+            echo "Generated AFFECTED_APPS: $AFFECTED_APPS"
           fi
 
           echo "should_deploy=$SHOULD_DEPLOY" >> "$GITHUB_OUTPUT"
           echo "affected-apps=$AFFECTED_APPS" >> "$GITHUB_OUTPUT"
+
+          # GitHub 출력 확인
+          cat $GITHUB_OUTPUT
 
   deploy:
     needs: affected
