@@ -11,11 +11,6 @@ permissions:
   contents: read
   checks: write
 
-env:
-  Apps:
-    - neoavath
-    - df-auction-crawling
-
 jobs:
   affected:
     runs-on: ubuntu-latest
@@ -41,6 +36,8 @@ jobs:
 
       - name: Get affected apps
         id: affected
+        env:
+          Apps: 'neoavath, df-auction-crawling'
         run: |
           AFFECTED=$(pnpm nx show projects --affected --base=${{ github.event.before }} --head=${{ github.sha }} --plain)
           SHOULD_DEPLOY=false
