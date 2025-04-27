@@ -66,8 +66,8 @@ jobs:
             echo "Generated AFFECTED_APPS: $AFFECTED_APPS"
           fi
 
-          echo "should_deploy=$SHOULD_DEPLOY" >> "$GITHUB_OUTPUT"
           echo "affected-apps=$AFFECTED_APPS" >> "$GITHUB_OUTPUT"
+          echo "should_deploy=$SHOULD_DEPLOY" >> "$GITHUB_OUTPUT"
 
           # GitHub 출력 확인
           cat $GITHUB_OUTPUT
