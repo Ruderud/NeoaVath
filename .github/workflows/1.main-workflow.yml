@@ -34,16 +34,16 @@ jobs:
       - name: Install dependencies
         run: pnpm install
 
-      - name: Get affected projects
+      - name: Get affected apps
         id: affected
         run: |
-          AFFECTED=$(pnpm nx show projects --affected --base=${{ github.event.before }} --head=${{ github.sha }} --plain)
-          echo "Affected projects: $AFFECTED"
-          if echo "$AFFECTED" | grep -q "neoavath"; then
-            echo "should_deploy=true" >> "$GITHUB_OUTPUT"
+          APPS=$(pnpm nx show projects --affected --base=${{ github.event.before }} --head=${{ github.sha }} --json | jq -c '[to_entries[] | select(.value.projectType == "application") | .key]')
+          if [ "$APPS" != "[]" ]; then
+            echo "Affected apps: $(echo $APPS | jq -r '.[]' | xargs)"
           else
-            echo "should_deploy=false" >> "$GITHUB_OUTPUT"
+            echo "Affected apps: None"
           fi
+          echo "affected-apps=$APPS" >> "$GITHUB_OUTPUT"
 
   deploy:
     uses: ./.github/workflows/2.neoavath-fe-workflow.yml
