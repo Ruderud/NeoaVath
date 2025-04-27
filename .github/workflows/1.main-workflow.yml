@@ -83,7 +83,7 @@ jobs:
 
   deploy:
     needs: affected
-    if: needs.affected.outputs.should_deploy == true
+    if: needs.affected.outputs.affected-apps != '[]'
     uses: ./.github/workflows/2.neoavath-fe-workflow.yml
     with:
       temp: ${{ matrix.app }}
