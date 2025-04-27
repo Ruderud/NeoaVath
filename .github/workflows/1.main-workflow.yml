@@ -12,7 +12,9 @@ permissions:
   checks: write
 
 env:
-  Apps: ['neoavath', 'df-auction-crawling']
+  Apps:
+    - neoavath
+    - df-auction-crawling
 
 jobs:
   affected:
