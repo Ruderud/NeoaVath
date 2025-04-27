@@ -72,9 +72,18 @@ jobs:
           # GitHub 출력 확인
           cat $GITHUB_OUTPUT
 
+  debug-output:
+    needs: affected
+    runs-on: ubuntu-latest
+    steps:
+      - name: Debug output
+        run: |
+          echo "should_deploy: ${{ needs.affected.outputs.should_deploy }}"
+          echo "affected-apps: ${{ needs.affected.outputs.affected-apps }}"
+
   deploy:
     needs: affected
-    if: needs.affected.outputs.should_deploy == 'true'
+    if: needs.affected.outputs.should_deploy == true
     uses: ./.github/workflows/2.neoavath-fe-workflow.yml
     with:
       temp: ${{ matrix.app }}
