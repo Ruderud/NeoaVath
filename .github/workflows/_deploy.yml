@@ -2,9 +2,9 @@ name: Test and Deploy
 
 on:
   push:
-    branches: [main]
+    branches: []
   pull_request:
-    branches: [main]
+    branches: []
 
 jobs:
   # 지금은 테스트 사용x
