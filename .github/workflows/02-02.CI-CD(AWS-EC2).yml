@@ -51,7 +51,7 @@ jobs:
         run: pnpm install --no-frozen-lockfile
 
       - name: Build
-        run: pnpm nx build:${{ inputs.target }}
+        run: pnpm build:${{ inputs.target }}
 
       - name: Zip
         run: |
