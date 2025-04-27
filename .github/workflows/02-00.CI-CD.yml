@@ -14,6 +14,8 @@ env:
 jobs:
   router:
     runs-on: ubuntu-latest
+    outputs:
+      workflow: ${{ steps.determine-type.outputs.workflow }}
     steps:
       - name: Determine Deployment Type
         id: determine-type
