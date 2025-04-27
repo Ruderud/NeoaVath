@@ -41,6 +41,7 @@ jobs:
         run: |
           AFFECTED=$(pnpm nx show projects --affected --base=${{ github.event.before }} --head=${{ github.sha }} --plain)
           SHOULD_DEPLOY=false
+          echo "AFFECTED: $AFFECTED"
 
           # 영향받은 앱들 중에 Apps 환경변수에 포함된 것이 있는지 체크
           for APP in ${{ env.Apps }}; do
