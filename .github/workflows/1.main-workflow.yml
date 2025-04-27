@@ -40,7 +40,7 @@ jobs:
           Apps: 'neoavath df-auction-crawling'
         run: |
           AFFECTED=$(pnpm nx show projects --affected --base=${{ github.event.before }} --head=${{ github.sha }} --plain)
-          SHOULD_DEPLOY=false
+          SHOULD_DEPLOY="false"
           AFFECTED_APPS="[]"  # 기본값으로 빈 JSON 배열 설정
           echo "AFFECTED: $AFFECTED"
 
@@ -50,7 +50,7 @@ jobs:
           # 영향받은 앱들 중에 Apps 환경변수에 포함된 것이 있는지 체크
           for APP in ${{ env.Apps }}; do
             if echo "$AFFECTED" | grep -qw "$APP"; then
-              SHOULD_DEPLOY=true
+              SHOULD_DEPLOY="true"
               echo "Affected apps: $APP"
               DEPLOY_APPS+=("$APP")
             fi
