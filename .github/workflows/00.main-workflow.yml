@@ -20,7 +20,7 @@ jobs:
     if: needs.initialize.outputs.affected-apps != '[]'
     uses: ./.github/workflows/02-00.CI-CD.yml
     with:
-      temp: ${{ matrix.app }}
+      target: ${{ matrix.app }}
     secrets: inherit
     strategy:
       matrix:

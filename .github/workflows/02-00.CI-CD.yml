@@ -3,7 +3,7 @@ name: CI-CD
 on:
   workflow_call:
     inputs:
-      temp:
+      target:
         required: true
         type: string
 
@@ -18,14 +18,17 @@ jobs:
       - name: Determine Deployment Type
         id: determine-type
         run: |
+
+          echo "inputs.target: ${{ inputs.target }}"
+
           # CF_DEPLOY_APPS에 포함된 앱인 경우 CF 워크플로우 실행
-          if [[ "${{ env.CF_DEPLOY_APPS }}" == *"${{ inputs.temp }}"* ]]; then
+          if [[ "${{ env.CF_DEPLOY_APPS }}" == *"${{ inputs.target }}"* ]]; then
             echo "workflow=CF" >> $GITHUB_OUTPUT
           # AWS_EC2_DEPLOY_APPS에 포함된 앱인 경우 AWS-EC2 워크플로우 실행
-          elif [[ "${{ env.AWS_EC2_DEPLOY_APPS }}" == *"${{ inputs.temp }}"* ]]; then
+          elif [[ "${{ env.AWS_EC2_DEPLOY_APPS }}" == *"${{ inputs.target }}"* ]]; then
             echo "workflow=AWS-EC2" >> $GITHUB_OUTPUT
           else
-            echo "No matching deployment type found for ${{ inputs.temp }}"
+            echo "No matching deployment type found for ${{ inputs.target }}"
             exit 1
           fi
 
