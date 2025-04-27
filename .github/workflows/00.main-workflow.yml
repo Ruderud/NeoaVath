@@ -1,0 +1,27 @@
+name: Main Workflow
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+permissions:
+  actions: read
+  contents: read
+  checks: write
+
+jobs:
+  initialize:
+    uses: ./.github/workflows/01.initialize-matrix.yml
+
+  CI-CD:
+    needs: initialize
+    if: needs.initialize.outputs.affected-apps != '[]'
+    uses: ./.github/workflows/02-00.CI-CD.yml
+    with:
+      temp: ${{ matrix.app }}
+    secrets: inherit
+    strategy:
+      matrix:
+        app: ${{ fromJson(needs.initialize.outputs.affected-apps) }}

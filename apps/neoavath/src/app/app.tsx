@@ -17,7 +17,7 @@ const data = [
 export const App = () => {
   return (
     <>
-      <div>변경테스트13</div>
+      <div>변경테스트15</div>
       <nav>
         <Link to="/home">Home</Link>
         <Link to="/page-2">Page 2</Link>
