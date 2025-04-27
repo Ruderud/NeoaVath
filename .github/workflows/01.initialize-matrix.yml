@@ -31,8 +31,11 @@ jobs:
 
       - name: Get affected apps
         id: affected
+
+        # 배포대상 앱 추가시 업데이트 필요
         env:
           Apps: 'neoavath df-auction-crawling'
+
         run: |
           AFFECTED=$(pnpm nx show projects --affected --base=${{ github.event.before }} --head=${{ github.sha }} --plain)
           AFFECTED_APPS="[]"

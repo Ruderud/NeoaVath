@@ -21,16 +21,18 @@ jobs:
 
           echo "inputs.target: ${{ inputs.target }}"
 
-          # CF_DEPLOY_APPS에 포함된 앱인 경우 CF 워크플로우 실행
+          WORKFLOW=unknown
+
           if [[ "${{ env.CF_DEPLOY_APPS }}" == *"${{ inputs.target }}"* ]]; then
-            echo "workflow=CF" >> $GITHUB_OUTPUT
-          # AWS_EC2_DEPLOY_APPS에 포함된 앱인 경우 AWS-EC2 워크플로우 실행
+            WORKFLOW=CF
           elif [[ "${{ env.AWS_EC2_DEPLOY_APPS }}" == *"${{ inputs.target }}"* ]]; then
-            echo "workflow=AWS-EC2" >> $GITHUB_OUTPUT
+            WORKFLOW=AWS-EC2
           else
             echo "No matching deployment type found for ${{ inputs.target }}"
             exit 1
           fi
+
+          echo "workflow=$WORKFLOW" >> $GITHUB_OUTPUT
 
   cloudflare-workflow:
     needs: router
