@@ -23,5 +23,6 @@ jobs:
       target: ${{ matrix.app }}
     secrets: inherit
     strategy:
+      fail-fast: false
       matrix:
         app: ${{ fromJson(needs.initialize.outputs.affected-apps) }}
