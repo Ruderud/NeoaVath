@@ -34,7 +34,7 @@ jobs:
       - name: Install dependencies
         run: pnpm install
 
-        - name: Get affected apps
+      - name: Get affected apps
         id: affected
         env:
           Apps: 'neoavath df-auction-crawling'
