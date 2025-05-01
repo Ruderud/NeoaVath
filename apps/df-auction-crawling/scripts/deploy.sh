@@ -25,14 +25,22 @@ echo "=== 필요한 도구 설치 완료 ==="
 # 애플리케이션 디렉토리로 이동
 cd /home/ubuntu/app
 
+# pnpm 설정
+echo "=== pnpm 설정 시작 ==="
+pnpm config set store-dir /home/ubuntu/.pnpm-store
+pnpm config set node-linker hoisted
+pnpm config set network-concurrency 1
+pnpm config set child-concurrency 1
+echo "=== pnpm 설정 완료 ==="
+
 # 의존성 설치
 echo "=== 의존성 설치 시작 ==="
-pnpm install --no-frozen-lockfile
+NODE_OPTIONS="--max-old-space-size=256" pnpm install --no-frozen-lockfile --network-timeout 100000 --prefer-offline
 echo "=== 의존성 설치 완료 ==="
 
 # 빌드
 echo "=== 빌드 시작 ==="
-pnpm build:df-auction-crawling
+NODE_OPTIONS="--max-old-space-size=256" pnpm build:df-auction-crawling
 echo "=== 빌드 완료 ==="
 
 # 빌드 결과 확인
