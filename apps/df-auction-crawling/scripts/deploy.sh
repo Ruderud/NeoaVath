@@ -13,12 +13,12 @@ export NVM_DIR="$HOME/.nvm"
 echo "=== 필요한 도구 설치 시작 ==="
 if ! command -v pm2 &> /dev/null; then
     echo "PM2 설치 중..."
-    npm install -g pm2
+    sudo npm install -g pm2
 fi
 
 if ! command -v pnpm &> /dev/null; then
     echo "pnpm 설치 중..."
-    npm install -g pnpm
+    sudo npm install -g pnpm
 fi
 echo "=== 필요한 도구 설치 완료 ==="
 
