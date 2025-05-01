@@ -79,6 +79,6 @@ jobs:
       - name: Deploy
         run: |
           aws deploy create-deployment \
-            --application-name neoavath-${{ inputs.target }} \
+            --application-name neoavath \
             --deployment-group-name ${{ inputs.target }} \
             --s3-location bucket=neoavath-${{ inputs.target }},key=deploy-${{ inputs.target }}.zip,bundleType=zip
