@@ -11,15 +11,17 @@ if ! command -v pm2 &> /dev/null; then
     sudo npm install -g pm2
 fi
 
+# PM2 권한 설정
+echo "=== PM2 권한 설정 ==="
+sudo chown -R ubuntu:ubuntu /home/ubuntu/.pm2
+sudo chown -R ubuntu:ubuntu /home/ubuntu/.pm2/rpc.sock /home/ubuntu/.pm2/pub.sock
+
 # 애플리케이션 디렉토리로 이동
 cd /home/ubuntu/app
 
 # 로그 디렉토리 생성
 echo "=== 로그 디렉토리 설정 ==="
 mkdir -p logs
-
-echo "=== 권한 설정 ==="
-sudo chown -R ubuntu:ubuntu /home/ubuntu/.pm2
 
 # PM2 프로세스 관리
 echo "=== PM2 프로세스 관리 시작 ==="
