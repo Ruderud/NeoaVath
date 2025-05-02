@@ -18,7 +18,8 @@ fi
 
 if ! command -v pnpm &> /dev/null; then
     echo "pnpm 설치 중..."
-    sudo npm install -g pnpm
+    # 메모리 사용량을 최소화하기 위해 npm으로 pnpm 설치
+    sudo npm install -g pnpm@8.15.4
 fi
 echo "=== 필요한 도구 설치 완료 ==="
 
@@ -35,12 +36,12 @@ echo "=== pnpm 설정 완료 ==="
 
 # 의존성 설치
 echo "=== 의존성 설치 시작 ==="
-NODE_OPTIONS="--max-old-space-size=256" pnpm install --no-frozen-lockfile --network-timeout 100000 --prefer-offline
+pnpm install --frozen-lockfile
 echo "=== 의존성 설치 완료 ==="
 
 # 빌드
 echo "=== 빌드 시작 ==="
-NODE_OPTIONS="--max-old-space-size=256" pnpm build:df-auction-crawling
+pnpm build:df-auction-crawling
 echo "=== 빌드 완료 ==="
 
 # 빌드 결과 확인
