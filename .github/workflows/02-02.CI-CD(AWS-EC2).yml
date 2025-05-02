@@ -74,6 +74,26 @@ jobs:
           aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
           aws-region: ap-northeast-2
 
+      - name: Stop existing deployment
+        run: |
+          # 실행 중인 배포 목록 조회
+          DEPLOYMENTS=$(aws deploy list-deployments \
+            --application-name neoavath \
+            --deployment-group-name ${{ inputs.target }} \
+            --include-only-statuses InProgress \
+            --query 'deployments[0]' \
+            --output text)
+
+          # 실행 중인 배포가 있으면 중지
+          if [ "$DEPLOYMENTS" != "None" ]; then
+            echo "실행 중인 배포를 중지합니다: $DEPLOYMENTS"
+            aws deploy stop-deployment \
+              --deployment-id $DEPLOYMENTS
+            # 배포가 완전히 중지될 때까지 대기
+            aws deploy wait deployment-stopped \
+              --deployment-id $DEPLOYMENTS
+          fi
+
       - name: Upload to S3
         run: |
           aws s3 cp deploy-${{ inputs.target }}.zip s3://neoavath-${{ inputs.target }}/deploy-${{ inputs.target }}.zip
