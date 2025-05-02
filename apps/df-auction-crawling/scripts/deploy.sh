@@ -9,6 +9,8 @@ echo "=== PM2 설치 확인 ==="
 if ! command -v pm2 &> /dev/null; then
     echo "PM2 설치 중..."
     sudo npm install -g pm2
+    # PM2를 ubuntu 사용자로 실행되도록 설정
+    sudo env PATH=$PATH:/usr/bin pm2 startup ubuntu -u ubuntu --hp /home/ubuntu
 fi
 
 # 애플리케이션 디렉토리로 이동
@@ -16,9 +18,9 @@ cd /home/ubuntu/app
 
 # 로그 디렉토리 생성 및 권한 설정
 echo "=== 로그 디렉토리 설정 ==="
-sudo mkdir -p /home/ubuntu/app/logs
-sudo chown -R ubuntu:ubuntu /home/ubuntu/app/logs
-sudo chmod -R 755 /home/ubuntu/app/logs
+mkdir -p /home/ubuntu/app/logs
+chown -R ubuntu:ubuntu /home/ubuntu/app/logs
+chmod -R 755 /home/ubuntu/app/logs
 
 # PM2 프로세스 관리
 echo "=== PM2 프로세스 관리 시작 ==="
@@ -33,5 +35,9 @@ fi
 # PM2 프로세스 상태 확인
 echo "=== PM2 프로세스 상태 ==="
 pm2 list
+
+# PM2 프로세스 저장 및 자동 시작 설정
+echo "=== PM2 프로세스 저장 ==="
+pm2 save
 
 echo "=== 배포 스크립트 종료 ==="

@@ -52,4 +52,4 @@ test-output
 .devops/
 
 # logs
-.logs/*
+logs/*
