@@ -9,8 +9,6 @@ echo "=== PM2 설치 확인 ==="
 if ! command -v pm2 &> /dev/null; then
     echo "PM2 설치 중..."
     sudo npm install -g pm2
-    # PM2를 ubuntu 사용자로 실행되도록 설정
-    sudo env PATH=$PATH:/usr/bin pm2 startup ubuntu -u ubuntu --hp /home/ubuntu
 fi
 
 # 애플리케이션 디렉토리로 이동
