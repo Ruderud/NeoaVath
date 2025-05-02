@@ -89,9 +89,25 @@ jobs:
             echo "실행 중인 배포를 중지합니다: $DEPLOYMENTS"
             aws deploy stop-deployment \
               --deployment-id $DEPLOYMENTS
+
             # 배포가 완전히 중지될 때까지 대기
-            aws deploy wait deployment-stopped \
-              --deployment-id $DEPLOYMENTS
+            while true; do
+              STATUS=$(aws deploy get-deployment \
+                --deployment-id $DEPLOYMENTS \
+                --query 'deploymentInfo.status' \
+                --output text)
+
+              if [ "$STATUS" = "Stopped" ]; then
+                echo "배포가 중지되었습니다."
+                break
+              elif [ "$STATUS" = "Failed" ]; then
+                echo "배포 중지 중 오류가 발생했습니다."
+                break
+              fi
+
+              echo "배포 중지 대기 중... (현재 상태: $STATUS)"
+              sleep 10
+            done
           fi
 
       - name: Upload to S3
