@@ -22,15 +22,27 @@ mkdir -p logs
 echo "=== PM2 프로세스 관리 시작 ==="
 if pm2 list | grep -q "df-auction-crawling"; then
     echo "실행 중인 프로세스를 reload합니다..."
-    pm2 reload ecosystem.config.js
+    pm2 reload ecosystem.config.js || {
+        echo "PM2 reload 실패. 자세한 로그:"
+        pm2 logs df-auction-crawling --lines 100
+        exit 1
+    }
 else
     echo "새로운 프로세스를 시작합니다..."
-    pm2 start ecosystem.config.js
+    pm2 start ecosystem.config.js || {
+        echo "PM2 start 실패. 자세한 로그:"
+        pm2 logs df-auction-crawling --lines 100
+        exit 1
+    }
 fi
 
 # PM2 프로세스 상태 확인
 echo "=== PM2 프로세스 상태 ==="
 pm2 list
+
+# PM2 로그 확인
+echo "=== PM2 로그 확인 ==="
+pm2 logs df-auction-crawling --lines 50
 
 # PM2 프로세스 저장 및 자동 시작 설정
 echo "=== PM2 프로세스 저장 ==="
