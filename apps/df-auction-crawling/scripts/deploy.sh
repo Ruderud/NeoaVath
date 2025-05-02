@@ -28,10 +28,10 @@ cd /home/ubuntu/app
 
 # pnpm 설정
 echo "=== pnpm 설정 시작 ==="
-pnpm config set store-dir /home/ubuntu/.pnpm-store
-pnpm config set node-linker hoisted
-pnpm config set network-concurrency 1
-pnpm config set child-concurrency 1
+# pnpm config set store-dir /home/ubuntu/.pnpm-store
+# pnpm config set node-linker hoisted
+# pnpm config set network-concurrency 1
+# pnpm config set child-concurrency 1
 echo "=== pnpm 설정 완료 ==="
 
 # 의존성 설치
