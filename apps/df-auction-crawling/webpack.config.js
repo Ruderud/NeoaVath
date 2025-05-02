@@ -15,6 +15,17 @@ module.exports = {
       optimization: false,
       outputHashing: 'none',
       generatePackageJson: true,
+      externalDependencies: [
+        '@nestjs/common',
+        '@nestjs/core',
+        '@nestjs/microservices',
+        '@nestjs/websockets',
+        '@nestjs/platform-express',
+        'class-validator',
+        'class-transformer',
+        'reflect-metadata',
+        'rxjs',
+      ],
     }),
   ],
 };
