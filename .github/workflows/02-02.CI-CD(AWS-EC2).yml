@@ -53,15 +53,16 @@ jobs:
       - name: Build
         run: pnpm build:${{ inputs.target }}
 
-      - name: Zip
+      - name: Create deployment package
         run: |
           mkdir -p deploy-${{ inputs.target }}-package
-          cp -r ./apps/${{ inputs.target }}/dist/* deploy-${{ inputs.target }}-package/
-          cp package.json deploy-${{ inputs.target }}-package/
-          cp pnpm-lock.yaml deploy-${{ inputs.target }}-package/
+          # 실행에 필요한 파일만 복사
+          cp -r ./apps/${{ inputs.target }}/dist deploy-${{ inputs.target }}-package/
           cp ./apps/${{ inputs.target }}/ecosystem.config.js deploy-${{ inputs.target }}-package/
           cp ./apps/${{ inputs.target }}/appspec.yml deploy-${{ inputs.target }}-package/
           cp -r ./apps/${{ inputs.target }}/scripts deploy-${{ inputs.target }}-package/
+          # logs 디렉토리 생성
+          mkdir -p deploy-${{ inputs.target }}-package/logs
           cd deploy-${{ inputs.target }}-package
           zip -qq -r ../deploy-${{ inputs.target }}.zip .
           ls -l

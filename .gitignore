@@ -50,3 +50,6 @@ test-output
 # devops configs
 .devops
 .devops/
+
+# logs
+.logs/*

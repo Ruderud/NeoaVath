@@ -2,7 +2,7 @@ module.exports = {
   apps: [
     {
       name: 'df-auction-crawling',
-      script: 'dist/apps/df-auction-crawling/main.js',
+      script: 'dist/main.js',
       instances: 1,
       autorestart: true,
       watch: false,
@@ -10,8 +10,8 @@ module.exports = {
       env: {
         NODE_ENV: 'production',
       },
-      error_file: 'logs/err.log',
-      out_file: 'logs/out.log',
+      error_file: '.logs/err.log',
+      out_file: '.logs/out.log',
       time: true,
     },
   ],
