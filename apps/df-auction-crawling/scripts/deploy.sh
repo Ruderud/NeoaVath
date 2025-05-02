@@ -16,9 +16,9 @@ cd /home/ubuntu/app
 
 # 로그 디렉토리 생성 및 권한 설정
 echo "=== 로그 디렉토리 설정 ==="
-sudo mkdir -p /home/ubuntu/app/.logs
-sudo chown -R ubuntu:ubuntu /home/ubuntu/app/.logs
-sudo chmod -R 755 /home/ubuntu/app/.logs
+sudo mkdir -p /home/ubuntu/app/logs
+sudo chown -R ubuntu:ubuntu /home/ubuntu/app/logs
+sudo chmod -R 755 /home/ubuntu/app/logs
 
 # PM2 프로세스 관리
 echo "=== PM2 프로세스 관리 시작 ==="
