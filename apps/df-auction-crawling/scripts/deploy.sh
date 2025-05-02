@@ -12,9 +12,9 @@ if ! command -v pm2 &> /dev/null; then
 fi
 
 # PM2 권한 설정
-echo "=== PM2 권한 설정 ==="
-sudo chown -R ubuntu:ubuntu /home/ubuntu/.pm2
-sudo chown -R ubuntu:ubuntu /home/ubuntu/.pm2/rpc.sock /home/ubuntu/.pm2/pub.sock
+# echo "=== PM2 권한 설정 ==="
+# sudo chown -R ubuntu:ubuntu /home/ubuntu/.pm2
+# sudo chown -R ubuntu:ubuntu /home/ubuntu/.pm2/rpc.sock /home/ubuntu/.pm2/pub.sock
 
 # 애플리케이션 디렉토리로 이동
 cd /home/ubuntu/app
@@ -27,18 +27,18 @@ mkdir -p logs
 echo "=== PM2 프로세스 관리 시작 ==="
 if pm2 list | grep -q "df-auction-crawling"; then
     echo "실행 중인 프로세스를 reload합니다..."
-    pm2 reload ecosystem.config.js
+    sudo pm2 reload ecosystem.config.js
 else
     echo "새로운 프로세스를 시작합니다..."
-    pm2 start ecosystem.config.js
+    sudo pm2 start ecosystem.config.js
 fi
 
 # PM2 프로세스 상태 확인
 echo "=== PM2 프로세스 상태 ==="
-pm2 list
+sudo pm2 list
 
 # PM2 프로세스 저장 및 자동 시작 설정
 echo "=== PM2 프로세스 저장 ==="
-pm2 save
+sudo pm2 save
 
 echo "=== 배포 스크립트 종료 ==="
