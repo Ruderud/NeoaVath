@@ -14,6 +14,11 @@ files:
         mode: 755
         owner: ubuntu
         group: ubuntu
+      - object: /logs
+        pattern: '**'
+        mode: 755
+        owner: ubuntu
+        group: ubuntu
 hooks:
   ApplicationStart:
     - location: scripts/deploy.sh
