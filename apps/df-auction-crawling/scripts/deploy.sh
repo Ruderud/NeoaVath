@@ -4,11 +4,12 @@ set -e  # 오류 발생 시 즉시 종료
 echo "=== 배포 스크립트 시작 ==="
 echo "현재 디렉토리: $(pwd)"
 
-# PM2 재설치
-echo "=== PM2 재설치 ==="
-sudo npm remove pm2 -g
-sudo npm install -g pm2@latest
-sudo pm2 update
+# 필요한 도구 설치
+echo "=== PM2 설치 확인 ==="
+if ! command -v pm2 &> /dev/null; then
+    echo "PM2 설치 중..."
+    sudo npm install -g pm2
+fi
 
 # 애플리케이션 디렉토리로 이동
 cd /home/ubuntu/app
