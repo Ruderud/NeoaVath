@@ -58,6 +58,7 @@ jobs:
           mkdir -p deploy-${{ inputs.target }}-package
           cp -r ./apps/${{ inputs.target }}/dist/* deploy-${{ inputs.target }}-package/
           cp package.json deploy-${{ inputs.target }}-package/
+          cp pnpm-lock.yaml deploy-${{ inputs.target }}-package/
           cp ./apps/${{ inputs.target }}/ecosystem.config.js deploy-${{ inputs.target }}-package/
           cp ./apps/${{ inputs.target }}/appspec.yml deploy-${{ inputs.target }}-package/
           cp -r ./apps/${{ inputs.target }}/scripts deploy-${{ inputs.target }}-package/
