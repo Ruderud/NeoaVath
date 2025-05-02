@@ -10,26 +10,23 @@ sudo npm remove pm2 -g
 sudo npm install -g pm2@latest
 sudo pm2 update
 
-# PM2 데몬 재시작
-echo "=== PM2 데몬 재시작 ==="
-sudo pm2 kill
-sudo pm2 start
-
 # 애플리케이션 디렉토리로 이동
 cd /home/ubuntu/app
 
-# 로그 디렉토리 생성
+# 로그 디렉토리 생성 및 권한 설정
 echo "=== 로그 디렉토리 설정 ==="
 mkdir -p logs
+sudo chown -R ubuntu:ubuntu logs
+sudo chmod -R 755 logs
 
 # PM2 프로세스 관리
 echo "=== PM2 프로세스 관리 시작 ==="
 if pm2 list | grep -q "df-auction-crawling"; then
     echo "실행 중인 프로세스를 reload합니다..."
-    sudo pm2 reload ecosystem.config.js
+    pm2 reload ecosystem.config.js
 else
     echo "새로운 프로세스를 시작합니다..."
-    sudo pm2 start ecosystem.config.js
+    pm2 start ecosystem.config.js
 fi
 
 # PM2 프로세스 상태 확인
