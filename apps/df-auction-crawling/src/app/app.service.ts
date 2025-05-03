@@ -4,7 +4,7 @@ import { getAuctionItems } from '@neoavath/neople-api';
 @Injectable()
 export class AppService {
   getData(): { message: string } {
-    return { message: 'Hello API-13' };
+    return { message: 'Hello API-14' };
   }
 
   async getAuctionItems() {
