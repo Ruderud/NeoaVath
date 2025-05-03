@@ -57,7 +57,7 @@ jobs:
 
       - name: Upload to S3
         run: |
-          aws s3 cp deployment.zip s3://neoavath-${{ inputs.target }}/deploy-${{ inputs.target }}-${{ github.sha }}.zip
+          aws s3 cp deployment.zip s3://neoavath-${{ inputs.target }}/deploy-${{ inputs.target }}.zip
 
       - name: Deploy
         run: |
