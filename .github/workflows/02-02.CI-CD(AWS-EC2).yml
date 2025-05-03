@@ -45,7 +45,7 @@ jobs:
           shopt -s extglob
           cp -r !(deployment) deployment/
           cp apps/${{ inputs.target }}/appspec.yml deployment/
-          cp apps/${{ inputs.target }}/scripts/ deployment/
+          cp -r apps/${{ inputs.target }}/scripts/ deployment/
           cd deployment && zip -r ../deployment.zip .
 
       - name: Configure AWS credentials
