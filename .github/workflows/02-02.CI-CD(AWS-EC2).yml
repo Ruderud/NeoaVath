@@ -42,7 +42,8 @@ jobs:
       - name: Create deployment package
         run: |
           mkdir -p deployment
-          cp -r ./* deployment/
+          shopt -s extglob
+          cp -r !(deployment) deployment/
           cp apps/${{ inputs.target }}/appspec.yml deployment/
           cp apps/${{ inputs.target }}/scripts/ deployment/
           cd deployment && zip -r ../deployment.zip .
