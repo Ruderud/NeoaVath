@@ -9,9 +9,6 @@
     "typescript": "~5.7.2",
     "@nestjs/testing": "^10.4.17"
   },
-  "scripts": {
-    "start": "nest start"
-  },
   "nx": {
     "name": "df-auction-crawling",
     "targets": {
