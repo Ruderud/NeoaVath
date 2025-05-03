@@ -17,8 +17,10 @@ if ! command -v pm2 &> /dev/null; then
     sudo pnpm install -g pm2
 fi
 
+ls -al
+
 # 애플리케이션 디렉토리로 이동
-cd /home/ubuntu/deployment
+# cd /home/ubuntu/deployment
 
 # 의존성 설치
 pnpm install --frozen-lockfile
