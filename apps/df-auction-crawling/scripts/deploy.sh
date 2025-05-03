@@ -23,7 +23,7 @@ fi
 pnpm install --frozen-lockfile
 
 # 애플리케이션 실행
-pm2 start ecosystem.config.js --name "df-auction-crawling"
+pm2 start ./apps/df-auction-crawling/ecosystem.config.js --name "df-auction-crawling"
 
 # PM2 프로세스 저장 및 자동 시작 설정
 echo "=== PM2 프로세스 저장 ==="
