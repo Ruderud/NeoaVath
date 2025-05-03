@@ -1,8 +1,10 @@
 #!/bin/bash
 set -e  # 오류 발생 시 즉시 종료
 
+
 echo "=== 배포 스크립트 시작 ==="
-echo "현재 디렉토리: $(pwd)"
+APPLICATION_ROOT="/home/ubuntu/app"
+cd $APPLICATION_ROOT
 
 # pnpm 설치
 if ! command -v pnpm &> /dev/null; then
@@ -16,11 +18,6 @@ if ! command -v pm2 &> /dev/null; then
     echo "PM2 설치 중..."
     sudo pnpm install -g pm2
 fi
-
-ls -al
-
-# 애플리케이션 디렉토리로 이동
-# cd /home/ubuntu/deployment
 
 # 의존성 설치
 pnpm install --frozen-lockfile
