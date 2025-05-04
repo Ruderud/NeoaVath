@@ -13,6 +13,11 @@ if ! command -v pnpm &> /dev/null; then
 fi
 
 # 필요한 도구 설치
+echo "=== AWS CLI 설치 확인 ==="
+if ! command -v aws &> /dev/null; then
+    echo "AWS CLI 설치 중..."
+    sudo snap install aws-cli --classic
+fi
 echo "=== PM2 설치 확인 ==="
 if ! command -v pm2 &> /dev/null; then
     echo "PM2 설치 중..."
@@ -41,11 +46,12 @@ get_parameters() {
     --output text | while read -r name value; do
       # Parameter Store 경로에서 실제 환경변수 이름 추출
       env_name=$(basename "$name")
-      echo "$env_name=$value" > .env  # '>' 로 변경하여 파일 초기화
+      sudo sh -c "echo \"$env_name=$value\" > .env"
     done
 
-  # 파일 권한 설정
-  chmod 600 .env
+  # 파일 권한 및 소유권 설정
+  sudo chmod 600 .env
+  sudo chown ubuntu:ubuntu .env
 }
 
 # 함수 실행
