@@ -33,6 +33,10 @@ fi
 sudo pnpm install --frozen-lockfile --network-concurrency=4
 sudo pnpm build:df-auction-crawling
 
+# 빌드 결과 확인
+echo "=== 빌드 결과 확인 ==="
+ls -la dist/apps/df-auction-crawling/
+
 # 환경변수 주입
 get_parameters() {
   local env_prefix="/prod/neoavath/df-auction-crawling"
@@ -65,13 +69,13 @@ else
     exit 1
 fi
 
-# 환경변수 할당
-set +a
-source .env
-set -a
+# create logs directory
+sudo mkdir -p ${APPLICATION_ROOT}/apps/df-auction-crawling/logs
+sudo chown -R ubuntu:ubuntu ${APPLICATION_ROOT}/apps/df-auction-crawling/logs
+sudo chmod 755 ${APPLICATION_ROOT}/apps/df-auction-crawling/logs
 
 # 애플리케이션 실행
-pm2 start ./apps/df-auction-crawling/ecosystem.config.js --name "df-auction-crawling"
+pm2 start ${APPLICATION_ROOT}/apps/df-auction-crawling/ecosystem.config.js --name "df-auction-crawling"
 
 # PM2 프로세스 저장 및 자동 시작 설정
 echo "=== PM2 프로세스 저장 ==="
