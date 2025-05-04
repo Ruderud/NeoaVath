@@ -33,10 +33,6 @@ fi
 sudo pnpm install --frozen-lockfile --network-concurrency=4
 sudo pnpm build:df-auction-crawling
 
-# 빌드 결과 확인
-echo "=== 빌드 결과 확인 ==="
-ls -la dist/apps/df-auction-crawling/
-
 # 환경변수 주입
 get_parameters() {
   local env_prefix="/prod/neoavath/df-auction-crawling"
