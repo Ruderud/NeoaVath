@@ -16,11 +16,53 @@ fi
 echo "=== PM2 설치 확인 ==="
 if ! command -v pm2 &> /dev/null; then
     echo "PM2 설치 중..."
-    sudo pnpm install -g pm2
+    sudo npm install -g pm2
+fi
+echo "=== dotenv 설치 확인 ==="
+if ! npm list -g | grep dotenv &> /dev/null; then
+    echo "dotenv 설치 중..."
+    sudo npm install -g dotenv
 fi
 
 # 의존성 설치
-pnpm install --frozen-lockfile
+sudo pnpm install --frozen-lockfile --network-concurrency=4
+sudo pnpm build:df-auction-crawling
+
+# 환경변수 주입
+get_parameters() {
+  local env_prefix="/prod/neoavath/df-auction-crawling"
+
+  # 환경변수 가져오기
+  aws ssm get-parameters \
+    --names \
+      "${env_prefix}/NEOPLE_API_KEY" \
+    --with-decryption \
+    --query "Parameters[*].[Name,Value]" \
+    --output text | while read -r name value; do
+      # Parameter Store 경로에서 실제 환경변수 이름 추출
+      env_name=$(basename "$name")
+      echo "$env_name=$value" > .env  # '>' 로 변경하여 파일 초기화
+    done
+
+  # 파일 권한 설정
+  chmod 600 .env
+}
+
+# 함수 실행
+get_parameters
+
+# 환경변수 확인 (선택적)
+if [ -f .env ]; then
+    echo "환경변수 파일이 생성되었습니다."
+else
+    echo "환경변수 파일 생성 실패"
+    exit 1
+fi
+
+# 환경변수 할당
+set +a
+source .env
+set -a
 
 # 애플리케이션 실행
 pm2 start ./apps/df-auction-crawling/ecosystem.config.js --name "df-auction-crawling"
