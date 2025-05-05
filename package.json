@@ -1,6 +1,6 @@
 {
-  "name": "@neoavath/source",
-  "version": "0.0.0",
+  "name": "@neoavath/workspace",
+  "version": "1.0.0",
   "license": "MIT",
   "packageManager": "pnpm@10.8.1",
   "scripts": {
@@ -11,7 +11,8 @@
     "build:neoavath": "nx build neoavath",
     "deploy:neoavath": "wrangler pages deploy apps/neoavath/dist --project-name=neoavath",
     "test:neople-api": "nx test neople-api",
-    "run:df-auction-crawling": "nx serve df-auction-crawling"
+    "run:df-auction-crawling": "nx serve df-auction-crawling",
+    "build:df-auction-crawling": "nx build df-auction-crawling"
   },
   "private": true,
   "devDependencies": {
@@ -49,6 +50,7 @@
     "@vitest/ui": "^3.0.0",
     "autoprefixer": "10.4.13",
     "babel-jest": "^29.7.0",
+    "dotenv": "^16.5.0",
     "eslint": "^9.8.0",
     "eslint-config-prettier": "^10.0.0",
     "eslint-plugin-import": "2.31.0",
@@ -77,11 +79,13 @@
     "wrangler": "^4.10.0"
   },
   "dependencies": {
-    "@nestjs/common": "^10.0.2",
-    "@nestjs/core": "^10.0.2",
-    "@nestjs/platform-express": "^10.0.2",
+    "@nestjs/common": "^10.4.17",
+    "@nestjs/core": "^10.4.17",
+    "@nestjs/platform-express": "^10.4.17",
     "axios": "^1.6.0",
-    "reflect-metadata": "^0.1.13",
-    "rxjs": "^7.8.0"
+    "class-transformer": "^0.5.1",
+    "class-validator": "^0.14.1",
+    "reflect-metadata": "^0.1.14",
+    "rxjs": "^7.8.1"
   }
 }

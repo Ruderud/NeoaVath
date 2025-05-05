@@ -1,0 +1,53 @@
+name: CI-CD
+
+on:
+  workflow_call:
+    inputs:
+      target:
+        required: true
+        type: string
+
+env:
+  CF_DEPLOY_APPS: 'neoavath'
+  AWS_EC2_DEPLOY_APPS: 'df-auction-crawling'
+
+jobs:
+  router:
+    runs-on: ubuntu-latest
+    outputs:
+      workflow: ${{ steps.determine-type.outputs.workflow }}
+    steps:
+      - name: Determine Deployment Type
+        id: determine-type
+        run: |
+
+          echo "inputs.target: ${{ inputs.target }}"
+
+          WORKFLOW=unknown
+
+          if [[ "${{ env.CF_DEPLOY_APPS }}" == *"${{ inputs.target }}"* ]]; then
+            WORKFLOW=CF
+          elif [[ "${{ env.AWS_EC2_DEPLOY_APPS }}" == *"${{ inputs.target }}"* ]]; then
+            WORKFLOW=AWS-EC2
+          else
+            echo "No matching deployment type found for ${{ inputs.target }}"
+            exit 1
+          fi
+
+          echo "workflow=$WORKFLOW" >> $GITHUB_OUTPUT
+
+  cloudflare-workflow:
+    needs: router
+    if: needs.router.outputs.workflow == 'CF'
+    uses: ./.github/workflows/02-01.CI-CD(CF).yml
+    with:
+      target: ${{ inputs.target }}
+    secrets: inherit
+
+  aws-ec2-workflow:
+    needs: router
+    if: needs.router.outputs.workflow == 'AWS-EC2'
+    uses: ./.github/workflows/02-02.CI-CD(AWS-EC2).yml
+    with:
+      target: ${{ inputs.target }}
+    secrets: inherit

@@ -1,1 +1,1 @@
-export * from './lib/neople-api';
+export * from './lib/neople-api.ts';

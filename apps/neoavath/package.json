@@ -1,9 +1,17 @@
 {
-  "name": "@neoavath/neoavath",
+  "name": "neoavath",
   "version": "0.0.1",
   "private": true,
   "nx": {
-    "name": "neoavath"
+    "name": "neoavath",
+    "targets": {
+      "build": {
+        "executor": "@nx/vite:build",
+        "options": {
+          "outputPath": "apps/neoavath/dist"
+        }
+      }
+    }
   },
   "dependencies": {
     "lightweight-charts": "^5.0.5",

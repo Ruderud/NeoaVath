@@ -1,0 +1,67 @@
+name: CI-CD(AWS-EC2)
+
+on:
+  workflow_call:
+    inputs:
+      target:
+        description: '배포할 앱 이름'
+        required: true
+        type: string
+
+jobs:
+  CI:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+
+      - name: Install pnpm
+        uses: pnpm/action-setup@v4
+
+      - name: Install dependencies
+        run: pnpm install --no-frozen-lockfile
+
+      # 추후 활성화
+      # - name: Test
+      #   run: pnpm test
+
+  CD:
+    needs: CI
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Create deployment package
+        run: |
+          mkdir -p deployment
+          shopt -s extglob
+          cp -r !(deployment) deployment/
+          cp apps/${{ inputs.target }}/appspec.yml deployment/
+          cp -r apps/${{ inputs.target }}/scripts/ deployment/
+          cd deployment && zip -r ../deployment.zip .
+
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: ap-northeast-2
+
+      - name: Upload to S3
+        run: |
+          aws s3 cp deployment.zip s3://neoavath-${{ inputs.target }}/deploy-${{ inputs.target }}.zip
+
+      - name: Deploy
+        run: |
+          aws deploy create-deployment \
+            --application-name neoavath \
+            --deployment-group-name ${{ inputs.target }} \
+            --s3-location bucket=neoavath-${{ inputs.target }},key=deploy-${{ inputs.target }}.zip,bundleType=zip

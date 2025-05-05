@@ -1,0 +1,16 @@
+version: 0.0
+os: linux
+files:
+  - source: /
+    destination: /home/ubuntu/app
+    permissions:
+      - object: /scripts/deploy.sh
+        pattern: '**'
+        mode: 755
+        owner: ubuntu
+        group: ubuntu
+hooks:
+  ApplicationStart:
+    - location: scripts/deploy.sh
+      timeout: 1800
+      runas: ubuntu

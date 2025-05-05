@@ -1,11 +1,11 @@
-import { NEOPLE_API_KEY, NEOPLE_API_URL } from '../neople-api.const';
+import { NEOPLE_API_KEY, NEOPLE_API_URL } from '../neople-api.const.ts';
 import axios from 'axios';
-import { Character, Server } from './df-api.service.types';
+import { Character, Server } from './df-api.service.types.ts';
 import {
   GetAuctionItemsParams,
   GetCharacterTimelineParams,
   GetServerCharactorParams,
-} from './df-api.query.types';
+} from './df-api.query.types.ts';
 
 export const axiosInstance = axios.create({
   baseURL: NEOPLE_API_URL,

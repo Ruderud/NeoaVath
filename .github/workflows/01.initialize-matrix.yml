@@ -1,0 +1,61 @@
+name: Initialize Matrix
+
+on:
+  workflow_call:
+    outputs:
+      affected-apps:
+        description: '영향을 받은 앱 목록(JSON 배열 형식)'
+        value: ${{ jobs.affected.outputs.affected-apps }}
+
+jobs:
+  affected:
+    runs-on: ubuntu-latest
+    outputs:
+      affected-apps: ${{ steps.affected.outputs.affected-apps }}
+
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Install pnpm
+        uses: pnpm/action-setup@v4
+
+      - name: Install dependencies
+        run: pnpm install
+
+      - name: Get affected apps
+        id: affected
+
+        # 배포대상 앱 추가시 업데이트 필요
+        env:
+          Apps: 'neoavath df-auction-crawling'
+
+        run: |
+          AFFECTED=$(pnpm nx show projects --affected --base=${{ github.event.before }} --head=${{ github.sha }} --plain)
+          AFFECTED_APPS="[]"
+          echo "AFFECTED: $AFFECTED"
+
+          DEPLOY_APPS=()
+
+          for APP in ${{ env.Apps }}; do
+            if echo "$AFFECTED" | grep -qw "$APP"; then
+              echo "Affected apps: $APP"
+              DEPLOY_APPS+=("$APP")
+            fi
+          done
+
+          echo "DEPLOY_APPS size: ${#DEPLOY_APPS[@]}"
+          echo "DEPLOY_APPS contents: ${DEPLOY_APPS[@]}"
+
+          if [ "${#DEPLOY_APPS[@]}" -gt 0 ]; then
+            AFFECTED_APPS=$(printf '"%s",' "${DEPLOY_APPS[@]}" | sed 's/,$//' | awk '{print "["$0"]"}')
+            echo "Generated AFFECTED_APPS: $AFFECTED_APPS"
+          fi
+
+          echo "affected-apps=$AFFECTED_APPS" >> "$GITHUB_OUTPUT"
