@@ -8,6 +8,13 @@ export default defineConfig(() => ({
   server: {
     port: 4201,
     host: 'localhost',
+    // proxy: {
+    //   '/dundam': {
+    //     target: 'https://dundam.xyz',
+    //     changeOrigin: true,
+    //     rewrite: (path) => path.replace(/^\/dundam/, ''),
+    //   },
+    // },
   },
   preview: {
     port: 4301,
