@@ -69,7 +69,7 @@ export function Login() {
   const [groupName, setGroupName] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
-  const { readData } = useFirebase();
+  const { readData, findGroup } = useFirebase();
   const navigate = useNavigate();
 
   const handleLogin = async (e: React.FormEvent) => {
@@ -77,7 +77,12 @@ export function Login() {
     setError('');
 
     try {
-      const groupData = await readData(`groups/${groupName}`);
+      const { id: groupId } = await findGroup(groupName);
+      if (!groupId) {
+        setError('존재하지 않는 그룹입니다.');
+        return;
+      }
+      const groupData = await readData(`groups/${groupId}`);
 
       if (!groupData) {
         setError('존재하지 않는 그룹입니다.');

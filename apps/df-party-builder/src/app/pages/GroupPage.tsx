@@ -76,6 +76,21 @@ const PartyCard = styled.div`
   border-radius: 8px;
   padding: 16px;
   background: #f9f9f9;
+  cursor: move;
+  transition: all 0.2s;
+
+  &:hover {
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  }
+
+  &.dragging {
+    opacity: 0.5;
+  }
+
+  &.drag-over {
+    border-color: #2196f3;
+    background: #e3f2fd;
+  }
 `;
 
 const PartyHeader = styled.div`
@@ -122,6 +137,11 @@ const PartySlot = styled.div`
   &.empty {
     font-size: 0.95em;
     color: #666;
+  }
+
+  &.drag-over {
+    border-color: #2196f3;
+    background: #e3f2fd;
   }
 
   .character-image {
@@ -257,7 +277,7 @@ function ErrorFallback({
 }
 
 function GroupPageContent() {
-  const { groupId } = useParams<{ groupId: string }>();
+  const { groupName } = useParams<{ groupName: string }>();
   const [showPasswordDialog, setShowPasswordDialog] = useState(false);
   const [searchTerm, setSearchTerm] = useState('');
   const [shouldSearch, setShouldSearch] = useState(false);
@@ -302,35 +322,152 @@ function GroupPageContent() {
     );
   };
 
-  const handleDragStart = (character: CharacterData) => {
-    setDraggedCharacter(character);
+  const handlePartyDragStart = (
+    e: React.DragEvent<HTMLDivElement>,
+    partyId: string,
+    slotIndex: number,
+    character: CharacterData
+  ) => {
+    e.stopPropagation(); // 파티 카드로의 이벤트 전파 방지
+    e.dataTransfer.setData('character', JSON.stringify(character));
+    e.dataTransfer.setData('sourcePartyId', partyId);
+    e.dataTransfer.setData('sourceSlotIndex', String(slotIndex));
+    e.dataTransfer.setData('type', 'character');
+  };
+
+  const handlePartyCardDragStart = (
+    e: React.DragEvent<HTMLDivElement>,
+    party: Party
+  ) => {
+    e.dataTransfer.setData('party', JSON.stringify(party));
+    e.dataTransfer.setData('type', 'party');
+    e.currentTarget.classList.add('dragging');
+  };
+
+  const handlePartyCardDragEnd = (e: React.DragEvent<HTMLDivElement>) => {
+    e.currentTarget.classList.remove('dragging');
+  };
+
+  const handlePartyCardDragOver = (e: React.DragEvent) => {
+    e.preventDefault();
+    const target = e.currentTarget as HTMLDivElement;
+    const type = e.dataTransfer.types.includes('party') ? 'party' : 'character';
+
+    if (type === 'party') {
+      target.classList.add('drag-over');
+    }
+  };
+
+  const handlePartyCardDragLeave = (e: React.DragEvent) => {
+    const target = e.currentTarget as HTMLDivElement;
+    target.classList.remove('drag-over');
+  };
+
+  const handlePartyCardDrop = (e: React.DragEvent, targetParty: Party) => {
+    e.preventDefault();
+    const target = e.currentTarget as HTMLDivElement;
+    target.classList.remove('drag-over');
+
+    const type = e.dataTransfer.getData('type');
+
+    if (type === 'party') {
+      const partyData = e.dataTransfer.getData('party');
+      if (!partyData) return;
+
+      try {
+        const sourceParty = JSON.parse(partyData) as Party;
+
+        setParties((currentParties) => {
+          const newParties = [...currentParties];
+          const sourceIndex = newParties.findIndex(
+            (p) => p.id === sourceParty.id
+          );
+          const targetIndex = newParties.findIndex(
+            (p) => p.id === targetParty.id
+          );
+
+          if (sourceIndex !== -1 && targetIndex !== -1) {
+            // 파티 순서 교환
+            [newParties[sourceIndex], newParties[targetIndex]] = [
+              newParties[targetIndex],
+              newParties[sourceIndex],
+            ];
+          }
+
+          return newParties;
+        });
+      } catch (error) {
+        console.error('파티 데이터 파싱 실패:', error);
+      }
+    }
   };
 
   const handleDragOver = (e: React.DragEvent) => {
     e.preventDefault();
+    const target = e.currentTarget as HTMLDivElement;
+    target.classList.add('drag-over');
+  };
+
+  const handleDragLeave = (e: React.DragEvent) => {
+    const target = e.currentTarget as HTMLDivElement;
+    target.classList.remove('drag-over');
   };
 
   const handleDrop = (
     e: React.DragEvent,
-    partyId: string,
-    slotIndex: number
+    targetPartyId: string,
+    targetSlotIndex: number
   ) => {
     e.preventDefault();
+    const target = e.currentTarget as HTMLDivElement;
+    target.classList.remove('drag-over');
+
     const characterData = e.dataTransfer.getData('character');
+    const sourcePartyId = e.dataTransfer.getData('sourcePartyId');
+    const sourceSlotIndex = e.dataTransfer.getData('sourceSlotIndex');
+
     if (!characterData) return;
 
     try {
       const character = JSON.parse(characterData) as CharacterData;
-      setParties((parties) =>
-        parties.map((party) => {
-          if (party.id === partyId) {
-            const newSlots = [...party.slots];
-            newSlots[slotIndex] = character;
-            return { ...party, slots: newSlots };
+
+      setParties((parties) => {
+        const newParties = [...parties];
+
+        // 같은 파티 내에서의 이동인 경우
+        if (sourcePartyId && sourcePartyId === targetPartyId) {
+          const partyIndex = newParties.findIndex(
+            (p) => p.id === targetPartyId
+          );
+          if (partyIndex !== -1) {
+            const newSlots = [...newParties[partyIndex].slots];
+            // 슬롯 교환
+            const temp = newSlots[targetSlotIndex];
+            newSlots[targetSlotIndex] = character;
+            newSlots[Number(sourceSlotIndex)] = temp;
+            newParties[partyIndex] = {
+              ...newParties[partyIndex],
+              slots: newSlots,
+            };
           }
-          return party;
-        })
-      );
+        } else {
+          // 다른 파티에서 온 경우 또는 새로운 캐릭터인 경우
+          parties.forEach((party, partyIndex) => {
+            if (party.id === targetPartyId) {
+              const newSlots = [...party.slots];
+              newSlots[targetSlotIndex] = character;
+              newParties[partyIndex] = { ...party, slots: newSlots };
+            }
+            // 원래 파티에서 제거
+            if (sourcePartyId && party.id === sourcePartyId) {
+              const newSlots = [...party.slots];
+              newSlots[Number(sourceSlotIndex)] = null;
+              newParties[partyIndex] = { ...party, slots: newSlots };
+            }
+          });
+        }
+        return newParties;
+      });
     } catch (error) {
       console.error('캐릭터 데이터 파싱 실패:', error);
     }
@@ -352,21 +489,21 @@ function GroupPageContent() {
   };
 
   useEffect(() => {
-    if (!groupId) {
+    if (!groupName) {
       showBoundary(new Error('잘못된 그룹 접근입니다.'));
       return;
     }
 
-    const isAuthenticated = sessionStorage.getItem(`auth_${groupId}`);
+    const isAuthenticated = sessionStorage.getItem(`auth_${groupName}`);
     if (!isAuthenticated) {
       setShowPasswordDialog(true);
     }
-  }, [groupId, showBoundary]);
+  }, [groupName, showBoundary]);
 
   if (showPasswordDialog) {
     return (
       <PasswordDialog
-        groupId={groupId!}
+        groupName={groupName}
         onSuccess={() => setShowPasswordDialog(false)}
         onFailure={() => showBoundary(new Error('인증에 실패했습니다.'))}
       />
@@ -480,7 +617,15 @@ function GroupPageContent() {
           </div>
           <PartyContainer>
             {parties.map((party) => (
-              <PartyCard key={party.id}>
+              <PartyCard
+                key={party.id}
+                draggable
+                onDragStart={(e) => handlePartyCardDragStart(e, party)}
+                onDragEnd={handlePartyCardDragEnd}
+                onDragOver={handlePartyCardDragOver}
+                onDragLeave={handlePartyCardDragLeave}
+                onDrop={(e) => handlePartyCardDrop(e, party)}
+              >
                 <PartyHeader>
                   <input
                     type="text"
@@ -502,11 +647,24 @@ function GroupPageContent() {
                     <PartySlot
                       key={index}
                       onDragOver={handleDragOver}
+                      onDragLeave={handleDragLeave}
                       onDrop={(e) => handleDrop(e, party.id, index)}
                       className={!slot ? 'empty' : ''}
                     >
                       {slot ? (
-                        <>
+                        <div
+                          draggable
+                          onDragStart={(e) =>
+                            handlePartyDragStart(e, party.id, index, slot)
+                          }
+                          style={{
+                            width: '100%',
+                            height: '100%',
+                            display: 'flex',
+                            flexDirection: 'column',
+                            alignItems: 'center',
+                          }}
+                        >
                           <div className="character-image">
                             <img
                               src={`https://img-api.neople.co.kr/df/servers/${slot.server}/characters/${slot.key}?zoom=1`}
@@ -515,7 +673,7 @@ function GroupPageContent() {
                             />
                           </div>
                           <div className="character-info">
-                            <div className="level">Lv.{slot.level}</div>
+                            <div className="level">명성 {slot.level}</div>
                             <div className="name">{slot.name}</div>
                             <div className="adventure">
                               {slot.adventureName}
@@ -528,7 +686,7 @@ function GroupPageContent() {
                               <div className="score">랭킹 {slot.ozma}</div>
                             ) : null}
                           </div>
-                        </>
+                        </div>
                       ) : (
                         <div>빈 슬롯</div>
                       )}

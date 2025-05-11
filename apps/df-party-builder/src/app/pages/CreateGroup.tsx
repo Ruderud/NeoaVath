@@ -123,10 +123,9 @@ export function CreateGroup() {
       setCreatedGroupId(groupId);
 
       // 3초 후 그룹 페이지로 이동
-      setTimeout(() => {
-        navigate(`/group/${groupId}`);
-      }, 3000);
+      navigate(`/group/${groupName}`);
     } catch (err) {
+      console.error(err);
       setError('그룹 생성 중 오류가 발생했습니다.');
     }
   };

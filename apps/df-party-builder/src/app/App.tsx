@@ -16,7 +16,7 @@ export function App() {
           <Route path="/" element={<Intro />} />
           <Route path="/login" element={<Login />} />
           <Route path="/create" element={<CreateGroup />} />
-          <Route path="/group/:groupId" element={<GroupPage />} />
+          <Route path="/group/:groupName" element={<GroupPage />} />
         </Routes>
       </ErrorBoundary>
     </GroupAuthProvider>

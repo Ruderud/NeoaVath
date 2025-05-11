@@ -54,19 +54,19 @@ const ErrorText = styled.p`
 `;
 
 interface PasswordDialogProps {
-  groupId: string;
+  groupName: string | undefined;
   onSuccess: () => void;
   onFailure: () => void;
 }
 
 export function PasswordDialog({
-  groupId,
+  groupName,
   onSuccess,
   onFailure,
 }: PasswordDialogProps) {
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
-  const { readData } = useFirebase();
+  const { readData, findGroup } = useFirebase();
   const { addAuthenticatedGroup } = useGroupAuth();
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -74,6 +74,13 @@ export function PasswordDialog({
     setError('');
 
     try {
+      if (!groupName) {
+        setError('그룹 이름이 없습니다.');
+        onFailure();
+        return;
+      }
+
+      const { id: groupId } = await findGroup(groupName);
       const groupData = await readData(`groups/${groupId}`);
 
       if (!groupData) {
@@ -90,6 +97,7 @@ export function PasswordDialog({
       addAuthenticatedGroup(groupId);
       onSuccess();
     } catch (err) {
+      console.error(err);
       setError('오류가 발생했습니다.');
       onFailure();
     }

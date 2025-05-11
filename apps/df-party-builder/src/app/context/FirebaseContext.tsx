@@ -17,6 +17,7 @@ interface FirebaseContextType {
   database: Database;
   writeData: (path: string, data: any) => Promise<void>;
   readData: (path: string) => Promise<any>;
+  findGroup: (groupName: string) => Promise<any>;
 }
 
 const FirebaseContext = createContext<FirebaseContextType | null>(null);
@@ -46,10 +47,18 @@ export function FirebaseProvider({ children }: { children: ReactNode }) {
     }
   };
 
+  const findGroup = async (groupName: string) => {
+    const dbRef = ref(database, 'group-names');
+    const snapshot = await get(child(dbRef, groupName));
+    console.log('snapshot', snapshot.val());
+    return snapshot.val();
+  };
+
   const value = {
     database,
     writeData,
     readData,
+    findGroup,
   };
 
   return (
