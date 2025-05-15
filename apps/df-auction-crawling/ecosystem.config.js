@@ -9,7 +9,7 @@ module.exports = {
   apps: [
     {
       name: 'df-auction-crawling',
-      script: '../../dist/apps/df-auction-crawling/main.js',
+      script: 'dist/main.js',
       cwd: __dirname,
       instances: 1,
       autorestart: true,

@@ -1,0 +1,2382 @@
+<html lang="en" class="dark">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <meta name="theme-color" content="#000000" />
+    <meta
+      name="description"
+      content="던담 (DUNDAM) - 던전앤파이터 서버와 캐릭터명을 입력하여 예측 딜을 확인해보세요. "
+    />
+    <link rel="/manifest" href="/manifest.json" />
+    <link rel="apple-touch-icon" sizes="57x57" href="/apple-icon-57x57.png" />
+    <link rel="apple-touch-icon" sizes="60x60" href="/apple-icon-60x60.png" />
+    <link rel="apple-touch-icon" sizes="72x72" href="/apple-icon-72x72.png" />
+    <link rel="apple-touch-icon" sizes="76x76" href="/apple-icon-76x76.png" />
+    <link
+      rel="apple-touch-icon"
+      sizes="114x114"
+      href="/apple-icon-114x114.png"
+    />
+    <link
+      rel="apple-touch-icon"
+      sizes="120x120"
+      href="/apple-icon-120x120.png"
+    />
+    <link
+      rel="apple-touch-icon"
+      sizes="144x144"
+      href="/apple-icon-144x144.png"
+    />
+    <link
+      rel="apple-touch-icon"
+      sizes="152x152"
+      href="/apple-icon-152x152.png"
+    />
+    <link
+      rel="apple-touch-icon"
+      sizes="180x180"
+      href="/apple-icon-180x180.png"
+    />
+    <link
+      rel="icon"
+      type="image/png"
+      sizes="192x192"
+      href="/android-icon-192x192.png"
+    />
+    <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png" />
+    <link rel="icon" type="image/png" sizes="96x96" href="/favicon-96x96.png" />
+    <link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png" />
+    <link rel="manifest" href="/manifest.json" />
+    <meta name="msapplication-TileColor" content="#ffffff" />
+    <meta name="msapplication-TileImage" content="/ms-icon-144x144.png" />
+    <meta name="theme-color" content="#ffffff" />
+    <title>DUNDAM - 던전앤파이터 데미지 계산기</title>
+    <link rel="preconnect" href="https://fonts.gstatic.com" />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@100;300;400;500;700;900&amp;family=Oswald:wght@200;300;400;500;600;700&amp;display=swap"
+      rel="stylesheet"
+    />
+    <link rel="preconnect" href="https://fonts.gstatic.com" />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Barlow:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,100;1,200;1,300;1,400;1,500;1,600;1,700;1,800;1,900&amp;display=swap"
+      rel="stylesheet"
+    />
+    <link rel="preconnect" href="https://fonts.gstatic.com" />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Nanum+Gothic:wght@400;700;800&amp;display=swap"
+      rel="stylesheet"
+    />
+    <link
+      rel="stylesheet"
+      as="style"
+      crossorigin=""
+      href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable.min.css"
+    />
+    <link
+      rel="stylesheet"
+      as="style"
+      crossorigin=""
+      href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.8/dist/web/static/pretendard.css"
+    />
+    <script src="https://cdn.hadronid.net/hadron.js?url=https%3A%2F%2Fdundam.xyz%2F&amp;ref=https%3A%2F%2Fwww.google.com%2F&amp;_it=amazon&amp;partner_id=288"></script>
+    <script
+      type="text/javascript"
+      src="https://static.nid.naver.com/js/naveridlogin_js_sdk_2.0.0.js"
+      charset="utf-8"
+    ></script>
+    <meta name="google" content="notranslate" />
+    <meta name="google" value="notranslate" />
+    <script
+      src="https://hb.vntsm.com/v4/live/vms/sites/dundam.xyz/index.js"
+      async=""
+    ></script>
+    <script defer="defer" src="/static/js/main.e54b44ba.js"></script>
+    <link href="/static/css/main.f04ca81b.css" rel="stylesheet" />
+    <script
+      type="text/javascript"
+      async=""
+      importance="high"
+      fetchpriority="high"
+      src="https://hb.vntsm.com/v4/live/vms/ad-manager.js"
+    ></script>
+    <style>
+      .OckdzH2HZ35tK3y7tXRa:before,
+      .OckdzH2HZ35tK3y7tXRa:after {
+        content: unset;
+      }
+      .OckdzH2HZ35tK3y7tXRa {
+        width: 100%;
+        height: 100%;
+      }
+      .OckdzH2HZ35tK3y7tXRa,
+      .OckdzH2HZ35tK3y7tXRa:before,
+      .OckdzH2HZ35tK3y7tXRa:after,
+      .OckdzH2HZ35tK3y7tXRa * {
+        -webkit-hyphens: manual;
+        hyphens: manual;
+        font-size: 16px;
+        font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica,
+          Arial, sans-serif;
+        color: inherit;
+        background: 0 0;
+        border: 0;
+        border-radius: 0;
+        border-spacing: 0;
+        border-collapse: collapse;
+        box-sizing: content-box;
+        clear: none;
+        float: none;
+        font-variant: normal;
+        font-weight: inherit;
+        letter-spacing: normal;
+        line-height: 1.4;
+        margin: 0;
+        max-height: none;
+        max-width: none;
+        min-height: 0;
+        min-width: 0;
+        outline: 0;
+        padding: 0;
+        position: static;
+        text-align: left;
+        text-decoration: none;
+        text-indent: 0;
+        text-transform: none;
+        vertical-align: baseline;
+        visibility: inherit;
+        word-spacing: normal;
+      }
+      .OckdzH2HZ35tK3y7tXRa {
+        display: inline-block;
+      }
+      .SgWToQqFfGrcMwzkaW13 {
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        z-index: 1;
+        -webkit-user-select: none;
+        -moz-user-select: none;
+        user-select: none;
+      }
+      .XEsSILaeeM5KintRuPQD {
+        transition: opacity 250ms ease 0s, visibility 250ms ease 0s;
+        opacity: 0.01;
+        visibility: hidden;
+      }
+      .XEsSILaeeM5KintRuPQD div.plUlYp04adKwyn0qvHdQ {
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        height: 40%;
+        background: linear-gradient(
+          rgba(0, 0, 0, 0.85),
+          rgba(0, 0, 0, 0.45) 40%,
+          rgba(0, 0, 0, 0)
+        );
+        pointer-events: none;
+      }
+      .XEsSILaeeM5KintRuPQD div.nYN3g178d4YL2Vd4s6mA {
+        position: absolute;
+        bottom: 0;
+        left: 0;
+        right: 0;
+        height: 66%;
+        background: linear-gradient(
+          0deg,
+          rgba(0, 0, 0, 0.85),
+          rgba(0, 0, 0, 0.45) 40%,
+          rgba(0, 0, 0, 0)
+        );
+        pointer-events: none;
+      }
+      .Ad8QhrSE3GIISryPO9T7 {
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        margin: -25px 0 0 -25px;
+        opacity: 1;
+        text-align: left;
+        border: 4px solid hsla(0, 0%, 100%, 0.5);
+        box-sizing: border-box;
+        background-clip: padding-box;
+        width: 50px;
+        height: 50px;
+        border-radius: 25px;
+        visibility: hidden;
+        display: none;
+      }
+      .Ad8QhrSE3GIISryPO9T7:before,
+      .Ad8QhrSE3GIISryPO9T7:after {
+        content: '';
+        position: absolute;
+        margin: -4px;
+        box-sizing: inherit;
+        width: inherit;
+        height: inherit;
+        border-radius: inherit;
+        opacity: 1;
+        border: inherit;
+        border-color: rgba(0, 0, 0, 0);
+        border-top-color: #fff;
+      }
+      .wn9PyoRcUdqB4tErguAA .Ad8QhrSE3GIISryPO9T7 {
+        display: block;
+        animation: BKrYahB8a1dyv1rM5zwt 0s linear 0.3s forwards;
+      }
+      .wn9PyoRcUdqB4tErguAA .Ad8QhrSE3GIISryPO9T7:before,
+      .wn9PyoRcUdqB4tErguAA .Ad8QhrSE3GIISryPO9T7:after {
+        animation: G_FiHUCEH0pS_GOFLE7m 1.1s cubic-bezier(0.6, 0.2, 0, 0.8)
+            infinite,
+          juB6kt12QpEiyg0aiXuA 1.1s linear infinite;
+      }
+      .wn9PyoRcUdqB4tErguAA .Ad8QhrSE3GIISryPO9T7:before {
+        border-top-color: #fff;
+      }
+      .wn9PyoRcUdqB4tErguAA .Ad8QhrSE3GIISryPO9T7:after {
+        border-top-color: #fff;
+        animation-delay: 0.44s;
+      }
+      @keyframes BKrYahB8a1dyv1rM5zwt {
+        to {
+          visibility: visible;
+        }
+      }
+      @keyframes G_FiHUCEH0pS_GOFLE7m {
+        100% {
+          transform: rotate(360deg);
+        }
+      }
+      @keyframes juB6kt12QpEiyg0aiXuA {
+        0% {
+          border-top-color: #fff;
+        }
+        20% {
+          border-top-color: #fff;
+        }
+        35% {
+          border-top-color: #fff;
+        }
+        60% {
+          border-top-color: #fff;
+        }
+        100% {
+          border-top-color: #fff;
+        }
+      }
+      .REl3d1_VAR8A7b7vccdK {
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        display: flex;
+        flex-direction: column;
+        align-items: flex-start;
+        z-index: 1;
+        padding: 25px 20px;
+        color: #fff;
+        transition: opacity 250ms ease 0s, visibility 250ms ease 0s;
+        opacity: 0.01;
+        visibility: hidden;
+      }
+      .REl3d1_VAR8A7b7vccdK div.ezfjx_GIDOUc2iTNUtLj {
+        overflow: hidden;
+        white-space: nowrap;
+        text-overflow: ellipsis;
+        width: 100%;
+        font-size: 18px;
+      }
+      .REl3d1_VAR8A7b7vccdK div.F1qbAuN_fWyiu5DJ9T6P {
+        font-size: 14px;
+      }
+      .V2GUOOkiXtNjrwoqx3bi {
+        position: absolute;
+        bottom: 0;
+        left: 0;
+        right: 0;
+        height: 65px;
+      }
+      ._05mhNR8IvuDeKPShF6Q {
+        position: absolute;
+        left: 20px;
+        right: 20px;
+        bottom: 56px;
+        height: 4px;
+        cursor: pointer;
+        background: hsla(0, 0%, 100%, 0.5);
+        box-shadow: 0 0 3px 0 rgba(0, 0, 0, 0.1);
+        touch-action: none;
+        transition: opacity 250ms ease 0s, visibility 250ms ease 0s;
+        opacity: 0.01;
+        visibility: hidden;
+      }
+      ._05mhNR8IvuDeKPShF6Q div.ZEAQM3Ac3aMIz4CxD2lj {
+        position: absolute;
+        left: 0;
+        height: 100%;
+        background: #fff;
+      }
+      ._05mhNR8IvuDeKPShF6Q div.bJA13Vtw9S9Ha8leReHy {
+        position: absolute;
+        left: 0;
+        height: 100%;
+        background: red;
+      }
+      ._05mhNR8IvuDeKPShF6Q div.bJA13Vtw9S9Ha8leReHy:before {
+        transition-timing-function: cubic-bezier(0, 0, 0.2, 1);
+        transition-duration: 167ms;
+        content: '';
+        position: absolute;
+        background-color: #fff;
+        width: 10px;
+        height: 10px;
+        border-radius: 5px;
+        box-shadow: 0 1px 1px 1px rgba(0, 0, 0, 0.4);
+        top: 50%;
+        right: -5px;
+        margin-top: -5px;
+      }
+      ._05mhNR8IvuDeKPShF6Q:before {
+        content: '';
+        width: 100%;
+        position: absolute;
+        left: 0;
+        height: 100%;
+      }
+      ._05mhNR8IvuDeKPShF6Q:hover .bJA13Vtw9S9Ha8leReHy:before {
+        transform: scale(1.5);
+      }
+      .q2ybE239VmeGBKJ80hDc ._05mhNR8IvuDeKPShF6Q,
+      ._05mhNR8IvuDeKPShF6Q:hover,
+      ._05mhNR8IvuDeKPShF6Q.M95eHMAUv5CUmYBwqEl9 {
+        height: 8px;
+        bottom: 54px;
+      }
+      .SrjgM0k33V0fcCehqUDD {
+        position: absolute;
+        bottom: 0;
+        left: 0;
+        right: 0;
+        height: 45px;
+        display: flex;
+        flex-direction: row;
+        justify-content: flex-start;
+        padding: 0 20px 20px;
+        align-items: center;
+        z-index: 10;
+        pointer-events: all;
+        box-sizing: border-box;
+        color: #fff;
+        transition: opacity 250ms ease 0s, visibility 250ms ease 0s;
+        opacity: 0.01;
+        visibility: hidden;
+      }
+      .GLATa8hIWPCjcOXMbMd5 {
+        background-image: url(data:image/svg+xml;base64,PD94bWwgdmVyc2lvbj0iMS4wIiBlbmNvZGluZz0idXRmLTgiPz4NCjwhLS0gR2VuZXJhdG9yOiBBZG9iZSBJbGx1c3RyYXRvciAyMi4xLjAsIFNWRyBFeHBvcnQgUGx1Zy1JbiAuIFNWRyBWZXJzaW9uOiA2LjAwIEJ1aWxkIDApICAtLT4NCjxzdmcgdmVyc2lvbj0iMS4xIiBpZD0iTGF5ZXJfMSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIiB4bWxuczp4bGluaz0iaHR0cDovL3d3dy53My5vcmcvMTk5OS94bGluayIgeD0iMHB4IiB5PSIwcHgiDQoJIHZpZXdCb3g9IjAgMCA3NTIgMTAyNCIgc3R5bGU9ImVuYWJsZS1iYWNrZ3JvdW5kOm5ldyAwIDAgNzUyIDEwMjQ7IiB4bWw6c3BhY2U9InByZXNlcnZlIj4NCjxzdHlsZSB0eXBlPSJ0ZXh0L2NzcyI+DQoJLnN0MHtmaWxsOiNGRkZGRkY7fQ0KPC9zdHlsZT4NCjxwb2x5Z29uIGNsYXNzPSJzdDAiIHBvaW50cz0iNzUyLDUxMiAwLDAgMCwxMDI0ICIvPg0KPC9zdmc+DQo=);
+        padding: 0;
+        background-color: rgba(0, 0, 0, 0);
+        border: none;
+        background-repeat: no-repeat;
+        background-position: center center;
+        outline: none;
+        width: 24px;
+        height: 24px;
+        background-size: 15px;
+        cursor: pointer;
+      }
+      .GLATa8hIWPCjcOXMbMd5.wPBrzQAzd1hcjYMR9eWJ {
+        background-image: url(data:image/svg+xml;base64,PD94bWwgdmVyc2lvbj0iMS4wIiBlbmNvZGluZz0idXRmLTgiPz4NCjwhLS0gR2VuZXJhdG9yOiBBZG9iZSBJbGx1c3RyYXRvciAyMi4xLjAsIFNWRyBFeHBvcnQgUGx1Zy1JbiAuIFNWRyBWZXJzaW9uOiA2LjAwIEJ1aWxkIDApICAtLT4NCjxzdmcgdmVyc2lvbj0iMS4xIiBpZD0iTGF5ZXJfMSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIiB4bWxuczp4bGluaz0iaHR0cDovL3d3dy53My5vcmcvMTk5OS94bGluayIgeD0iMHB4IiB5PSIwcHgiDQoJIHZpZXdCb3g9IjAgMCA3ODQgMTAyNCIgc3R5bGU9ImVuYWJsZS1iYWNrZ3JvdW5kOm5ldyAwIDAgNzg0IDEwMjQ7IiB4bWw6c3BhY2U9InByZXNlcnZlIj4NCjxzdHlsZSB0eXBlPSJ0ZXh0L2NzcyI+DQoJLnN0MHtmaWxsOiNGRkZGRkY7fQ0KPC9zdHlsZT4NCjxwYXRoIGNsYXNzPSJzdDAiIGQ9Ik01ODIuMiwwaDkuOGMzOSwwLDY4LjMsMjkuMyw2OC4zLDY4LjN2ODg3LjVjMCwzOS0yOS4zLDY4LjMtNjguMyw2OC4zaC05LjhjLTM5LDAtNjguMy0yOS4zLTY4LjMtNjguM1Y2OC4zDQoJQzUxMy45LDI5LjMsNTQzLjIsMCw1ODIuMiwwTDU4Mi4yLDB6Ii8+DQo8cGF0aCBjbGFzcz0ic3QwIiBkPSJNMTkyLjEsMGg5LjhjMzksMCw2OC4zLDI5LjMsNjguMyw2OC4zdjg4Ny41YzAsMzktMjkuMyw2OC4zLTY4LjMsNjguM2gtOS44Yy0zOSwwLTY4LjMtMjkuMy02OC4zLTY4LjNWNjguMw0KCUMxMjMuOCwyOS4zLDE1My4xLDAsMTkyLjEsMEwxOTIuMSwweiIvPg0KPC9zdmc+DQo=);
+        background-size: 14px;
+      }
+      .iHr4_Nk75VKHQ0Iv6Bhi {
+        background-image: url(data:image/svg+xml;base64,PD94bWwgdmVyc2lvbj0iMS4wIiBlbmNvZGluZz0idXRmLTgiPz4NCjwhLS0gR2VuZXJhdG9yOiBBZG9iZSBJbGx1c3RyYXRvciAyMi4xLjAsIFNWRyBFeHBvcnQgUGx1Zy1JbiAuIFNWRyBWZXJzaW9uOiA2LjAwIEJ1aWxkIDApICAtLT4NCjxzdmcgdmVyc2lvbj0iMS4xIiBpZD0iTGF5ZXJfMSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIiB4bWxuczp4bGluaz0iaHR0cDovL3d3dy53My5vcmcvMTk5OS94bGluayIgeD0iMHB4IiB5PSIwcHgiDQoJIHZpZXdCb3g9IjAgMCA4ODAgMTAyNCIgc3R5bGU9ImVuYWJsZS1iYWNrZ3JvdW5kOm5ldyAwIDAgODgwIDEwMjQ7IiB4bWw6c3BhY2U9InByZXNlcnZlIj4NCjxzdHlsZSB0eXBlPSJ0ZXh0L2NzcyI+DQoJLnN0MHtmaWxsOiNGRkZGRkY7fQ0KPC9zdHlsZT4NCjxwYXRoIGNsYXNzPSJzdDAiIGQ9Ik04MDAuOCwwaDkuOGMzOSwwLDY4LjMsMjkuMyw2OC4zLDY4LjN2ODg3LjVjMCwzOS0yOS4zLDY4LjMtNjguMyw2OC4zaC05LjhjLTM5LDAtNjguMy0yOS4zLTY4LjMtNjguM1Y2OC4zDQoJQzczMi42LDI5LjMsNzYxLjgsMCw4MDAuOCwwTDgwMC44LDB6Ii8+DQo8cGF0aCBjbGFzcz0ic3QwIiBkPSJNMS4xLDEwMjRjMCwwLDAtMzQxLjMsMC0xMDI0YzAsMCwyNDMuOCwxNjAuOSw3MzEuNCw0ODcuNmMwLDE5LjUsMCwyNC40LDAsNDguOA0KCUM3MzIuNiw1MjEuOCw0ODguOCw2ODIuNywxLjEsMTAyNHoiLz4NCjwvc3ZnPg0K);
+        padding: 0;
+        background-color: rgba(0, 0, 0, 0);
+        border: none;
+        background-repeat: no-repeat;
+        background-position: center center;
+        outline: none;
+        width: 24px;
+        height: 24px;
+        background-size: 16px;
+        margin-left: 6px;
+        cursor: pointer;
+      }
+      .hBjbX3lq67Lm2UFGZY4i {
+        background-image: url(data:image/svg+xml;base64,PD94bWwgdmVyc2lvbj0iMS4wIiBlbmNvZGluZz0idXRmLTgiPz4NCjwhLS0gR2VuZXJhdG9yOiBBZG9iZSBJbGx1c3RyYXRvciAyMi4xLjAsIFNWRyBFeHBvcnQgUGx1Zy1JbiAuIFNWRyBWZXJzaW9uOiA2LjAwIEJ1aWxkIDApICAtLT4NCjxzdmcgdmVyc2lvbj0iMS4xIiBpZD0iTGF5ZXJfMSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIiB4bWxuczp4bGluaz0iaHR0cDovL3d3dy53My5vcmcvMTk5OS94bGluayIgeD0iMHB4IiB5PSIwcHgiDQoJIHZpZXdCb3g9IjAgMCAxMjE2IDEwMjQiIHN0eWxlPSJlbmFibGUtYmFja2dyb3VuZDpuZXcgMCAwIDEyMTYgMTAyNDsiIHhtbDpzcGFjZT0icHJlc2VydmUiPg0KPHN0eWxlIHR5cGU9InRleHQvY3NzIj4NCgkuc3Qwe2ZpbGw6I0ZGRkZGRjt9DQo8L3N0eWxlPg0KPHBhdGggY2xhc3M9InN0MCIgZD0iTTAsNzExLjloMjYzLjNMNjc3LjgsMTAyNFYwTDI2My4zLDMxMi4xSDBWNzExLjl6Ii8+DQo8cGF0aCBjbGFzcz0ic3QwIiBkPSJNODc3LjcsMzQxLjNsLTY4LjMsNjguM2M1My42LDU4LjUsNTMuNiwxNDYuMywwLDIwNC44bDY4LjMsNjguM0M5NzAuNCw1OTAsOTcwLjQsNDM0LDg3Ny43LDM0MS4zTDg3Ny43LDM0MS4zeg0KCSIvPg0KPHBhdGggY2xhc3M9InN0MCIgZD0iTTEwODcuNCwyMDQuOGwtNzMuMSw3OGM2OC4zLDczLjEsMTAyLjQsMTY1LjgsMTAyLjQsMjYzLjNjMCwxMDIuNC0zNC4xLDE5NS0xMDIuNCwyNjMuM2w3My4xLDc4DQoJYzgyLjktOTIuNiwxMzEuNy0yMTQuNiwxMzEuNy0zNDEuM1MxMTcwLjMsMjk3LjQsMTA4Ny40LDIwNC44TDEwODcuNCwyMDQuOHoiLz4NCjwvc3ZnPg0K);
+        padding: 0;
+        background-color: rgba(0, 0, 0, 0);
+        border: none;
+        background-repeat: no-repeat;
+        background-position: center center;
+        outline: none;
+        width: 24px;
+        height: 24px;
+        background-size: 24px;
+        cursor: pointer;
+        margin-left: 10px;
+      }
+      .hBjbX3lq67Lm2UFGZY4i.YRd9QsvBWJhyMoJyrkXM {
+        background-image: url(data:image/svg+xml;base64,PD94bWwgdmVyc2lvbj0iMS4wIiBlbmNvZGluZz0idXRmLTgiPz4NCjwhLS0gR2VuZXJhdG9yOiBBZG9iZSBJbGx1c3RyYXRvciAyMi4xLjAsIFNWRyBFeHBvcnQgUGx1Zy1JbiAuIFNWRyBWZXJzaW9uOiA2LjAwIEJ1aWxkIDApICAtLT4NCjxzdmcgdmVyc2lvbj0iMS4xIiBpZD0iTGF5ZXJfMSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIiB4bWxuczp4bGluaz0iaHR0cDovL3d3dy53My5vcmcvMTk5OS94bGluayIgeD0iMHB4IiB5PSIwcHgiDQoJIHZpZXdCb3g9IjAgMCAxMjE2IDEwMjQiIHN0eWxlPSJlbmFibGUtYmFja2dyb3VuZDpuZXcgMCAwIDEyMTYgMTAyNDsiIHhtbDpzcGFjZT0icHJlc2VydmUiPg0KPHN0eWxlIHR5cGU9InRleHQvY3NzIj4NCgkuc3Qwe2ZpbGw6I0ZGRkZGRjt9DQo8L3N0eWxlPg0KPHBhdGggY2xhc3M9InN0MCIgZD0iTTAsNzExLjloMjYzLjNMNjc3LjgsMTAyNFYwTDI2My4zLDMxMi4xSDBWNzExLjl6Ii8+DQo8cGF0aCBjbGFzcz0ic3QwIiBkPSJNMTE4Ny4xLDY4NC4ybC0zOC4xLDM1LjdjLTkuMyw4LjctMjMuOCw4LjItMzIuNS0xLjFMNzczLjEsMzUyLjJjLTguNy05LjMtOC4yLTIzLjgsMS4xLTMyLjVsMzguMS0zNS43DQoJYzkuMy04LjcsMjMuOC04LjIsMzIuNSwxLjFsMzQzLjUsMzY2LjZDMTE5Ni44LDY2MSwxMTk2LjMsNjc1LjYsMTE4Ny4xLDY4NC4yeiIvPg0KPHBhdGggY2xhc3M9InN0MCIgZD0iTTc3NC4xLDY4NC4ybDM4LjEsMzUuN2M5LjMsOC43LDIzLjgsOC4yLDMyLjUtMS4xbDM0My41LTM2Ni42YzguNy05LjMsOC4yLTIzLjgtMS4xLTMyLjVsLTM4LjEtMzUuNw0KCWMtOS4zLTguNy0yMy44LTguMi0zMi41LDEuMUw3NzMuMSw2NTEuOEM3NjQuNCw2NjEsNzY0LjksNjc1LjYsNzc0LjEsNjg0LjJ6Ii8+DQo8L3N2Zz4NCg==);
+      }
+      .RV38o6lRkhp98cjLXPRY {
+        margin-left: 10px;
+      }
+      .IszXaM3NrgI5TNOaiGik .XEsSILaeeM5KintRuPQD,
+      .VERvBLx1_9XMjjDomCr_ .XEsSILaeeM5KintRuPQD,
+      .IszXaM3NrgI5TNOaiGik .REl3d1_VAR8A7b7vccdK,
+      .VERvBLx1_9XMjjDomCr_ .REl3d1_VAR8A7b7vccdK,
+      .IszXaM3NrgI5TNOaiGik ._05mhNR8IvuDeKPShF6Q,
+      .VERvBLx1_9XMjjDomCr_ ._05mhNR8IvuDeKPShF6Q,
+      .IszXaM3NrgI5TNOaiGik .SrjgM0k33V0fcCehqUDD,
+      .VERvBLx1_9XMjjDomCr_ .SrjgM0k33V0fcCehqUDD {
+        opacity: 1;
+        visibility: visible;
+      }
+      .WIFsZSlRUKx6W23mOuRg .SgWToQqFfGrcMwzkaW13,
+      .WIFsZSlRUKx6W23mOuRg .XEsSILaeeM5KintRuPQD,
+      .WIFsZSlRUKx6W23mOuRg .REl3d1_VAR8A7b7vccdK,
+      .WIFsZSlRUKx6W23mOuRg ._05mhNR8IvuDeKPShF6Q,
+      .WIFsZSlRUKx6W23mOuRg .SrjgM0k33V0fcCehqUDD {
+        transition: none;
+        opacity: 0;
+        visibility: hidden;
+      }
+      .frB8hfiufxr29DmA9NSe {
+        display: none;
+      }
+    </style>
+    <script
+      type="text/javascript"
+      async=""
+      importance="high"
+      fetchpriority="high"
+      src="https://btloader.com/tag?o=5643766199222272&amp;domain=dundam.xyz&amp;upapi=true"
+    ></script>
+    <script
+      type="text/javascript"
+      async=""
+      src="https://yzqtxpscxhkg6rzje.ay.delivery/test/client-venatus.js"
+    ></script>
+    <iframe
+      frameborder="0"
+      marginwidth="0"
+      marginheight="0"
+      scrolling="no"
+      webkitallowfullscreen="true"
+      mozallowfullscreen="true"
+      border="0"
+      allowtransparency="true"
+      allow="geolocation; microphone; camera; autoplay; fullscreen; payment; accelerometer; ; display-capture; gyroscope; magnetometer; midi; ch-ua-platform-version; ch-ua-model"
+      style="border: 0px; display: none"
+    ></iframe>
+    <script
+      type="text/javascript"
+      async=""
+      src="https://btloader.com/recovery?w=5183523361652736&amp;upapi=true"
+      crossorigin="anonymous"
+    ></script>
+    <style>
+      .vm-skin,
+      .vm-skin-left-ads-container,
+      .vm-skin-right-ads-container {
+        overflow: visible !important;
+      }
+      .vm-footer {
+        display: none !important;
+      }
+
+      /*
+Some GAM ads will have max-width set to 1px and (sometimes) display set to none.
+Sometimes these styles remain unchanged by the Venatus script on successful render when we run our client/browser script.
+Overwrite these styles to ensure the affected ads are visible (appears to only happen on ad units with [vm-ab-detected="true"])
+*/
+      [vm-ab-detected='true'].up-show {
+        max-width: none !important;
+        display: block !important;
+      }
+      [vm-ab-detected='true'].up-show > div[id^='google_ads_iframe'] {
+        display: block !important;
+      }
+    </style>
+    <script
+      type="text/javascript"
+      async=""
+      src="//securepubads.g.doubleclick.net/tag/js/gpt.js?upapi=true"
+    ></script>
+    <script
+      type="text/javascript"
+      async=""
+      src="//c.amazon-adsystem.com/aax2/apstag.js?upapi=true"
+    ></script>
+    <meta
+      http-equiv="origin-trial"
+      content="AlK2UR5SkAlj8jjdEc9p3F3xuFYlF6LYjAML3EOqw1g26eCwWPjdmecULvBH5MVPoqKYrOfPhYVL71xAXI1IBQoAAAB8eyJvcmlnaW4iOiJodHRwczovL2RvdWJsZWNsaWNrLm5ldDo0NDMiLCJmZWF0dXJlIjoiV2ViVmlld1hSZXF1ZXN0ZWRXaXRoRGVwcmVjYXRpb24iLCJleHBpcnkiOjE3NTgwNjcxOTksImlzU3ViZG9tYWluIjp0cnVlfQ=="
+    />
+    <meta
+      http-equiv="origin-trial"
+      content="Amm8/NmvvQfhwCib6I7ZsmUxiSCfOxWxHayJwyU1r3gRIItzr7bNQid6O8ZYaE1GSQTa69WwhPC9flq/oYkRBwsAAACCeyJvcmlnaW4iOiJodHRwczovL2dvb2dsZXN5bmRpY2F0aW9uLmNvbTo0NDMiLCJmZWF0dXJlIjoiV2ViVmlld1hSZXF1ZXN0ZWRXaXRoRGVwcmVjYXRpb24iLCJleHBpcnkiOjE3NTgwNjcxOTksImlzU3ViZG9tYWluIjp0cnVlfQ=="
+    />
+    <meta
+      http-equiv="origin-trial"
+      content="A9wSqI5i0iwGdf6L1CERNdmsTPgVu44ewj8QxTBYgsv1LCPUVF7YmWOvTappqB1139jAymxUW/RO8zmMqo4zlAAAAACNeyJvcmlnaW4iOiJodHRwczovL2RvdWJsZWNsaWNrLm5ldDo0NDMiLCJmZWF0dXJlIjoiRmxlZGdlQmlkZGluZ0FuZEF1Y3Rpb25TZXJ2ZXIiLCJleHBpcnkiOjE3MzY4MTI4MDAsImlzU3ViZG9tYWluIjp0cnVlLCJpc1RoaXJkUGFydHkiOnRydWV9"
+    />
+    <meta
+      http-equiv="origin-trial"
+      content="A+d7vJfYtay4OUbdtRPZA3y7bKQLsxaMEPmxgfhBGqKXNrdkCQeJlUwqa6EBbSfjwFtJWTrWIioXeMW+y8bWAgQAAACTeyJvcmlnaW4iOiJodHRwczovL2dvb2dsZXN5bmRpY2F0aW9uLmNvbTo0NDMiLCJmZWF0dXJlIjoiRmxlZGdlQmlkZGluZ0FuZEF1Y3Rpb25TZXJ2ZXIiLCJleHBpcnkiOjE3MzY4MTI4MDAsImlzU3ViZG9tYWluIjp0cnVlLCJpc1RoaXJkUGFydHkiOnRydWV9"
+    />
+    <script
+      src="https://securepubads.g.doubleclick.net/pagead/managed/js/gpt/m202505060101/pubads_impl.js"
+      async=""
+    ></script>
+    <link
+      href="https://securepubads.g.doubleclick.net/pagead/managed/dict/m202505080101/gpt"
+      rel="compression-dictionary"
+    />
+    <script
+      async=""
+      src="https://fundingchoicesmessages.google.com/i/21726375739?ers=3"
+    ></script>
+    <script
+      async=""
+      src="https://fundingchoicesmessages.google.com/f/AGSKWxV3qL7AkCzq94Vv00NtBQyYfbGntiH9Lkrxq_tqjYaf9WaQqgTuHKiG5dEtpp5s_klyRhR3vhKmhe0LwAqmZ8ie36jxWYzwhTXTbPC8UDIRZmZ53eR3b9P8AA0-1E5e9PdR4dXUYQ==?fccs=W1siQUtzUm9sX0pqSzZFQU5fbnY0a0dqYkdRbVUzNXllMEdnd0ZYUDUwNHFDN3N2ZTVDLUFBMTBwY0xtWWNISFF3VHltbGpwZjFPempPUDNOQkJOYWFqcllUQ3M1MFNEREdzSUVqUjZsZEJUQkppbWtuaWFPOXl3a1dDV3RTZFZWMDdBeHozWUkxYk1oRC1WVGFOclJzZWh5SGdhc2NuZDlZTVFBPT0iXSxudWxsLG51bGwsbnVsbCxudWxsLG51bGwsWzE3NDY4Nzc2MjgsNjA5MDAwMDAwXSxudWxsLG51bGwsbnVsbCxbbnVsbCxbN11dLCJodHRwczovL2R1bmRhbS54eXovIixudWxsLFtbOCwiR0JST3BISkd3S00iXSxbOSwia28iXSxbMjMsIjE3Mzg0ODc5NDgiXSxbMTksIjIiXSxbMjQsInd3dy5nb29nbGUuY29tIl0sWzI5LCJmYWxzZSJdXV0"
+    ></script>
+    <script esp-signal="true" src="https://cdn-ima.33across.com/ob.js"></script>
+    <script
+      esp-signal="true"
+      src="https://static.criteo.net/js/ld/publishertag.ids.js"
+    ></script>
+    <script
+      esp-signal="true"
+      src="https://invstatic101.creativecdn.com/encrypted-signals/encrypted-tag-g.js"
+    ></script>
+    <script esp-signal="true" src="https://oa.openxcdn.net/esp.js"></script>
+    <script
+      src="https://config.aps.amazon-adsystem.com/configs/70247b00-ff8f-4016-b3ab-8344daf96e09"
+      type="text/javascript"
+      async="async"
+    ></script>
+    <script src="//secure.cdn.fastclick.net/js/pubcid/latest/pubcid.min.js"></script>
+    <script src="https://cdn.id5-sync.com/api/1.0/id5-api.js?upapi=true"></script>
+    <script
+      type="text/javascript"
+      async=""
+      src="https://secure.cdn.fastclick.net/js/cnvr-launcher/latest/launcher-stub.min.js"
+    ></script>
+    <script
+      async=""
+      src="https://fundingchoicesmessages.google.com/f/AGSKWxV40-sJN0YpSrJOE955S8avZu3nKW8MLgH7GgMyJejNjpNy83phX7OSxtUJdDRwCm6Zt2SmWvgbopKkW8Rl5Izy9lnIokJZRMJI8pRIZWB_iLJ8uYl5YSVjxzEDkEgc9yOmQhD0iw==?fccs=W1siQUtzUm9sX0pqSzZFQU5fbnY0a0dqYkdRbVUzNXllMEdnd0ZYUDUwNHFDN3N2ZTVDLUFBMTBwY0xtWWNISFF3VHltbGpwZjFPempPUDNOQkJOYWFqcllUQ3M1MFNEREdzSUVqUjZsZEJUQkppbWtuaWFPOXl3a1dDV3RTZFZWMDdBeHozWUkxYk1oRC1WVGFOclJzZWh5SGdhc2NuZDlZTVFBPT0iXSxudWxsLG51bGwsbnVsbCxudWxsLG51bGwsWzE3NDY4Nzc2MjgsODI2MDAwMDAwXSxudWxsLG51bGwsbnVsbCxbbnVsbCxbNyw2XSxudWxsLG51bGwsbnVsbCxudWxsLG51bGwsbnVsbCxudWxsLG51bGwsbnVsbCwyXSwiaHR0cHM6Ly9kdW5kYW0ueHl6LyIsbnVsbCxbWzgsIkdCUk9wSEpHd0tNIl0sWzksImtvIl0sWzIzLCIxNzM4NDg3OTQ4Il0sWzE5LCIyIl0sWzI0LCJ3d3cuZ29vZ2xlLmNvbSJdLFsyOSwiZmFsc2UiXV1d"
+    ></script>
+    <script
+      async=""
+      src="https://fundingchoicesmessages.google.com/f/AGSKWxX7rDKD0FcAKN7K5Ly4ljLiG6KiDJezzEkWLKDAHWqKqY-UM88YJSd7dbSzFhMcIKIcvgblqvEMqgL0M5IMzxEMQotItWuVNhcYr7o5-ava3yWug45KY-kQJEdXXUX-vk28xbqD5w==?fccs=W1siQUtzUm9sX0pqSzZFQU5fbnY0a0dqYkdRbVUzNXllMEdnd0ZYUDUwNHFDN3N2ZTVDLUFBMTBwY0xtWWNISFF3VHltbGpwZjFPempPUDNOQkJOYWFqcllUQ3M1MFNEREdzSUVqUjZsZEJUQkppbWtuaWFPOXl3a1dDV3RTZFZWMDdBeHozWUkxYk1oRC1WVGFOclJzZWh5SGdhc2NuZDlZTVFBPT0iXSxudWxsLG51bGwsbnVsbCxudWxsLG51bGwsWzE3NDY4Nzc2MjgsOTMwMDAwMDAwXSxudWxsLG51bGwsbnVsbCxbbnVsbCxbNyw2LDEwXSxudWxsLG51bGwsbnVsbCxudWxsLG51bGwsbnVsbCxudWxsLG51bGwsbnVsbCwyXSwiaHR0cHM6Ly9kdW5kYW0ueHl6LyIsbnVsbCxbWzgsIkdCUk9wSEpHd0tNIl0sWzksImtvIl0sWzIzLCIxNzM4NDg3OTQ4Il0sWzE5LCIyIl0sWzI0LCJ3d3cuZ29vZ2xlLmNvbSJdLFsyOSwiZmFsc2UiXV1d"
+    ></script>
+    <script
+      async=""
+      src="https://fundingchoicesmessages.google.com/f/AGSKWxVPFOYokcdXsIFYKUvnwxFCsOetGqb6bQCgEF4nAzGX6kjpS9N5fC6DakFaUD_ZyFBMSp1QcBRpw1b49-DH-NuM6FqdKOnEBplhqAhcyTcD8PzOWaGxU4wsATiJSnIGx_ovWXgEYg==?fccs=W1siQUtzUm9sX0pqSzZFQU5fbnY0a0dqYkdRbVUzNXllMEdnd0ZYUDUwNHFDN3N2ZTVDLUFBMTBwY0xtWWNISFF3VHltbGpwZjFPempPUDNOQkJOYWFqcllUQ3M1MFNEREdzSUVqUjZsZEJUQkppbWtuaWFPOXl3a1dDV3RTZFZWMDdBeHozWUkxYk1oRC1WVGFOclJzZWh5SGdhc2NuZDlZTVFBPT0iXSxudWxsLG51bGwsbnVsbCxudWxsLG51bGwsWzE3NDY4Nzc2MjksMjYwMDAwMDBdLG51bGwsbnVsbCxudWxsLFtudWxsLFs3LDYsMTAsOV0sbnVsbCwyLG51bGwsImVuLUdCIixudWxsLG51bGwsbnVsbCxudWxsLG51bGwsMl0sImh0dHBzOi8vZHVuZGFtLnh5ei8iLG51bGwsW1s4LCJHQlJPcEhKR3dLTSJdLFs5LCJrbyJdLFsyMywiMTczODQ4Nzk0OCJdLFsxOSwiMiJdLFsyNCwid3d3Lmdvb2dsZS5jb20iXSxbMjksImZhbHNlIl1dXQ"
+    ></script>
+  </head>
+  <body>
+    <div id="root" class="notranslate">
+      <div class="App">
+        <div>
+          <div class="app_hug">
+            <header class="App-header main-header">
+              <div class="headermenu" name="헤더 목록">
+                <a class="menu-item">캐릭터 검색</a
+                ><a class="menu-item">버프 랭킹</a
+                ><a class="menu-item">딜러 랭킹</a>
+                <div class="darkmode-button">
+                  <div class="dmb-wrap">
+                    <div class="dmb">
+                      <button class="darkmode"></button>
+                      <div class="ballon">
+                        다크모드상태입니다. 클릭시 라이트모드로 바뀝니다.
+                      </div>
+                    </div>
+                  </div>
+                </div>
+                <span class="menu-indicator"></span>
+              </div>
+            </header>
+            <section id="search_result" name="캐릭터 정보">
+              <div class="container search-result">
+                <div id="rich-media-placement"></div>
+                <div id="ad-container-1">
+                  <span
+                    ><span style="display: none"
+                      ><span
+                        style="
+                          pointer-events: auto;
+                          visibility: visible;
+                          display: none;
+                        "
+                        id="XrwkPzg39AcU_1746882227563_33355614_7"
+                        data-id="c2118_p11_0_0"
+                        data-google-query-id="CNatyrb7mI0DFSVbDwIdWRA4ig"
+                        class="up-hide"
+                        ><div
+                          id="google_ads_iframe_/21726375739,21835055677/VM_6335787995a6d454fcf66ce8/desktoptakeover_ABR_2118_2__container__"
+                          style="border: 0pt none; width: 728px; height: 0px"
+                        ></div></span></span
+                  ></span>
+                </div>
+                <div class="sr-top">
+                  <div class="search">
+                    <div class="searcbox">
+                      <div class="searchbox_hug">
+                        <div class="server" name="서버">
+                          <select id="server" name="server">
+                            <option value="all">전체</option>
+                            <option value="adven">모험단</option>
+                            <option value="cain">카인</option>
+                            <option value="diregie">디레지에</option>
+                            <option value="siroco">시로코</option>
+                            <option value="prey">프레이</option>
+                            <option value="casillas">카시야스</option>
+                            <option value="hilder">힐더</option>
+                            <option value="anton">안톤</option>
+                            <option value="bakal">바칼</option>
+                          </select>
+                        </div>
+                        <div class="searchbox" name="검색창">
+                          <input
+                            type="text"
+                            class="form-control"
+                            placeholder="캐릭터명"
+                            name="name"
+                            maxlength="20"
+                            value=""
+                          />
+                        </div>
+                        <div class="searchbutton" name="검색버튼">
+                          <button></button>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                  <div class="result-intro">
+                    <ul>
+                      <li class="re-sev"><span>모험단</span></li>
+                      <li class="re-nick"><span>바이넨스</span></li>
+                      <li class="re-comment"><span>검색 결과 입니다.</span></li>
+                      <div class="sr-setting">
+                        <div class="sr-setting-hug">
+                          <div class="sr-switch">
+                            <div class="sr_swc_but"></div>
+                            <div class="ballon">
+                              <span
+                                >모험단으로 검색 시 검색결과의 순서 변경을
+                                제공합니다.</span
+                              >
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                    </ul>
+                  </div>
+                </div>
+                <div class="sr-result">
+                  <div class="scon">
+                    <div class="seh_abata">
+                      <div class="imgt">
+                        <img
+                          src="https://img-api.neople.co.kr/df/servers/prey/characters/04046b3a072c342b065f5044bacb1131?zoom=1"
+                        />
+                      </div>
+                    </div>
+                    <div class="seh_sever"><li class="sev">프레이</li></div>
+                    <div class="seh_job"><li class="sev">眞 뮤즈</li></div>
+                    <div class="seh_bacalcount">
+                      <div class="sbccnt">
+                        <ul class="bac_cont">
+                          <li class="bacct-tit">
+                            <div class="bcimg">
+                              <div class="imgt">
+                                <img src="https://dundam.xyz/img/mumu.png" />
+                              </div>
+                            </div>
+                          </li>
+                          <li class="bacct-num">
+                            <div class="bacal-calculate">
+                              <div class="bcimg">
+                                <div class="imgt"><img src="mohum.png" /></div>
+                              </div>
+                              <div class="bcresult"><span>19</span></div>
+                            </div>
+                            <div class="bacal-calculate">
+                              <div class="bcimg">
+                                <div class="imgt">
+                                  <img src="img/job/아처.gif" />
+                                </div>
+                              </div>
+                              <div class="bcresult"><span>4</span></div>
+                            </div>
+                          </li>
+                        </ul>
+                      </div>
+                    </div>
+                    <div class="seh_addinfo">
+                      <div class="sainf-tr" name="세트포인트">
+                        <span class="saninf-setp">2360</span>
+                      </div>
+                      <div class="sainf-tr" name="마부 스증 총합">
+                        <span class="saint-sumofms">21.0</span>
+                      </div>
+                      <div class="sainf-tr" name="크리티컬 확률">
+                        <span class="saint-critical">106.3</span>
+                      </div>
+                    </div>
+                    <div class="seh_name">
+                      <span class="name"
+                        >보튜버<span class="introd server" name="서버"
+                          >바이넨스</span
+                        ></span
+                      >
+                      <div class="level">
+                        <span class="fpic"><div class="imgt"></div></span
+                        ><span class="val">65261</span>
+                      </div>
+                    </div>
+                    <div class="seh_stat">
+                      <ul class="off">
+                        <li>
+                          <div class="statc">
+                            <span class="tl tfive">랭킹</span
+                            ><span class="val"></span>
+                          </div>
+                        </li>
+                      </ul>
+                      <ul class="stat_b">
+                        <li>
+                          <div class="statc">
+                            <span class="tl">버프점수</span
+                            ><span class="val">4,471,865</span>
+                          </div>
+                        </li>
+                        <li class="off">
+                          <div class="statc">
+                            <span class="tl">3인</span><span class="val"></span>
+                          </div>
+                        </li>
+                        <li class="off">
+                          <div class="statc">
+                            <span class="tl">4인</span><span class="val"></span>
+                          </div>
+                        </li>
+                      </ul>
+                    </div>
+                  </div>
+                  <div class="scon">
+                    <div class="seh_abata">
+                      <div class="imgt">
+                        <img
+                          src="https://img-api.neople.co.kr/df/servers/prey/characters/45d6b4e054fab6b394f54536cd6b499c?zoom=1"
+                        />
+                      </div>
+                    </div>
+                    <div class="seh_sever"><li class="sev">프레이</li></div>
+                    <div class="seh_job">
+                      <li class="sev">眞 크루세이더</li>
+                    </div>
+                    <div class="seh_bacalcount">
+                      <div class="sbccnt">
+                        <ul class="bac_cont">
+                          <li class="bacct-tit">
+                            <div class="bcimg">
+                              <div class="imgt">
+                                <img src="https://dundam.xyz/img/mumu.png" />
+                              </div>
+                            </div>
+                          </li>
+                          <li class="bacct-num">
+                            <div class="bacal-calculate">
+                              <div class="bcimg">
+                                <div class="imgt"><img src="mohum.png" /></div>
+                              </div>
+                              <div class="bcresult"><span>19</span></div>
+                            </div>
+                            <div class="bacal-calculate">
+                              <div class="bcimg">
+                                <div class="imgt">
+                                  <img src="img/job/프리스트(여).gif" />
+                                </div>
+                              </div>
+                              <div class="bcresult"><span>3</span></div>
+                            </div>
+                          </li>
+                        </ul>
+                      </div>
+                    </div>
+                    <div class="seh_addinfo">
+                      <div class="sainf-tr" name="세트포인트">
+                        <span class="saninf-setp">2215</span>
+                      </div>
+                      <div class="sainf-tr" name="마부 스증 총합">
+                        <span class="saint-sumofms">18.0</span>
+                      </div>
+                      <div class="sainf-tr" name="크리티컬 확률">
+                        <span class="saint-critical">97.5</span>
+                      </div>
+                    </div>
+                    <div class="seh_name">
+                      <span class="name"
+                        >무료로해줘요<span class="introd server" name="서버"
+                          >바이넨스</span
+                        ></span
+                      >
+                      <div class="level">
+                        <span class="fpic"><div class="imgt"></div></span
+                        ><span class="val">64278</span>
+                      </div>
+                    </div>
+                    <div class="seh_stat">
+                      <ul class="off">
+                        <li>
+                          <div class="statc">
+                            <span class="tl tfive">랭킹</span
+                            ><span class="val"></span>
+                          </div>
+                        </li>
+                      </ul>
+                      <ul class="stat_b">
+                        <li>
+                          <div class="statc">
+                            <span class="tl">버프점수</span
+                            ><span class="val">4,222,702</span>
+                          </div>
+                        </li>
+                        <li class="off">
+                          <div class="statc">
+                            <span class="tl">3인</span><span class="val"></span>
+                          </div>
+                        </li>
+                        <li class="off">
+                          <div class="statc">
+                            <span class="tl">4인</span><span class="val"></span>
+                          </div>
+                        </li>
+                      </ul>
+                    </div>
+                  </div>
+                  <div class="scon">
+                    <div class="seh_abata">
+                      <div class="imgt">
+                        <img
+                          src="https://img-api.neople.co.kr/df/servers/prey/characters/e155147bad54b9c6efb25f486b06b348?zoom=1"
+                        />
+                      </div>
+                    </div>
+                    <div class="seh_sever"><li class="sev">프레이</li></div>
+                    <div class="seh_job">
+                      <li class="sev">眞 인챈트리스</li>
+                    </div>
+                    <div class="seh_bacalcount">
+                      <div class="sbccnt">
+                        <ul class="bac_cont">
+                          <li class="bacct-tit">
+                            <div class="bcimg">
+                              <div class="imgt">
+                                <img src="https://dundam.xyz/img/mumu.png" />
+                              </div>
+                            </div>
+                          </li>
+                          <li class="bacct-num">
+                            <div class="bacal-calculate">
+                              <div class="bcimg">
+                                <div class="imgt"><img src="mohum.png" /></div>
+                              </div>
+                              <div class="bcresult"><span>19</span></div>
+                            </div>
+                            <div class="bacal-calculate">
+                              <div class="bcimg">
+                                <div class="imgt">
+                                  <img src="img/job/마법사(여).gif" />
+                                </div>
+                              </div>
+                              <div class="bcresult"><span>0</span></div>
+                            </div>
+                          </li>
+                        </ul>
+                      </div>
+                    </div>
+                    <div class="seh_addinfo">
+                      <div class="sainf-tr" name="세트포인트">
+                        <span class="saninf-setp">2105</span>
+                      </div>
+                      <div class="sainf-tr" name="마부 스증 총합">
+                        <span class="saint-sumofms">18.0</span>
+                      </div>
+                      <div class="sainf-tr" name="크리티컬 확률">
+                        <span class="saint-critical">113.5</span>
+                      </div>
+                    </div>
+                    <div class="seh_name">
+                      <span class="name"
+                        >캑븜캑븜<span class="introd server" name="서버"
+                          >바이넨스</span
+                        ></span
+                      >
+                      <div class="level">
+                        <span class="fpic"><div class="imgt"></div></span
+                        ><span class="val">56408</span>
+                      </div>
+                    </div>
+                    <div class="seh_stat">
+                      <ul class="off">
+                        <li>
+                          <div class="statc">
+                            <span class="tl tfive">랭킹</span
+                            ><span class="val"></span>
+                          </div>
+                        </li>
+                      </ul>
+                      <ul class="stat_b">
+                        <li>
+                          <div class="statc">
+                            <span class="tl">2인</span
+                            ><span class="val">3,869,652</span>
+                          </div>
+                        </li>
+                        <li class="">
+                          <div class="statc">
+                            <span class="tl">3인</span
+                            ><span class="val">3,572,945</span>
+                          </div>
+                        </li>
+                        <li class="">
+                          <div class="statc">
+                            <span class="tl">4인</span
+                            ><span class="val">3,474,043</span>
+                          </div>
+                        </li>
+                      </ul>
+                    </div>
+                  </div>
+                  <div class="scon">
+                    <div class="seh_abata">
+                      <div class="imgt">
+                        <img
+                          src="https://img-api.neople.co.kr/df/servers/prey/characters/642c83f57a1692fc06a6fd3fa23dbdb8?zoom=1"
+                        />
+                      </div>
+                    </div>
+                    <div class="seh_sever"><li class="sev">프레이</li></div>
+                    <div class="seh_job">
+                      <li class="sev">眞 크루세이더</li>
+                    </div>
+                    <div class="seh_bacalcount">
+                      <div class="sbccnt">
+                        <ul class="bac_cont">
+                          <li class="bacct-tit">
+                            <div class="bcimg">
+                              <div class="imgt">
+                                <img src="https://dundam.xyz/img/mumu.png" />
+                              </div>
+                            </div>
+                          </li>
+                          <li class="bacct-num">
+                            <div class="bacal-calculate">
+                              <div class="bcimg">
+                                <div class="imgt"><img src="mohum.png" /></div>
+                              </div>
+                              <div class="bcresult"><span>19</span></div>
+                            </div>
+                            <div class="bacal-calculate">
+                              <div class="bcimg">
+                                <div class="imgt">
+                                  <img src="img/job/프리스트(여).gif" />
+                                </div>
+                              </div>
+                              <div class="bcresult"><span>0</span></div>
+                            </div>
+                          </li>
+                        </ul>
+                      </div>
+                    </div>
+                    <div class="seh_addinfo">
+                      <div class="sainf-tr" name="세트포인트">
+                        <span class="saninf-setp">11</span>
+                      </div>
+                      <div class="sainf-tr" name="마부 스증 총합">
+                        <span class="saint-sumofms">15.0</span>
+                      </div>
+                      <div class="sainf-tr" name="크리티컬 확률">
+                        <span class="saint-critical">97.5</span>
+                      </div>
+                    </div>
+                    <div class="seh_name">
+                      <span class="name"
+                        >유료로해줘요<span class="introd server" name="서버"
+                          >바이넨스</span
+                        ></span
+                      >
+                      <div class="level">
+                        <span class="fpic"><div class="imgt"></div></span
+                        ><span class="val">49693</span>
+                      </div>
+                    </div>
+                    <div class="seh_stat">
+                      <ul class="off">
+                        <li>
+                          <div class="statc">
+                            <span class="tl tfive">랭킹</span
+                            ><span class="val"></span>
+                          </div>
+                        </li>
+                      </ul>
+                      <ul class="stat_b">
+                        <li>
+                          <div class="statc">
+                            <span class="tl">버프점수</span
+                            ><span class="val">2,639,710</span>
+                          </div>
+                        </li>
+                        <li class="off">
+                          <div class="statc">
+                            <span class="tl">3인</span><span class="val"></span>
+                          </div>
+                        </li>
+                        <li class="off">
+                          <div class="statc">
+                            <span class="tl">4인</span><span class="val"></span>
+                          </div>
+                        </li>
+                      </ul>
+                    </div>
+                  </div>
+                  <div class="scon">
+                    <div class="seh_abata">
+                      <div class="imgt">
+                        <img
+                          src="https://img-api.neople.co.kr/df/servers/prey/characters/ead0225f699a23e8d838367c8b63ab57?zoom=1"
+                        />
+                      </div>
+                    </div>
+                    <div class="seh_sever"><li class="sev">프레이</li></div>
+                    <div class="seh_job">
+                      <li class="sev">眞 데몬슬레이어</li>
+                    </div>
+                    <div class="seh_bacalcount">
+                      <div class="sbccnt">
+                        <ul class="bac_cont">
+                          <li class="bacct-tit">
+                            <div class="bcimg">
+                              <div class="imgt">
+                                <img src="https://dundam.xyz/img/mumu.png" />
+                              </div>
+                            </div>
+                          </li>
+                          <li class="bacct-num">
+                            <div class="bacal-calculate">
+                              <div class="bcimg">
+                                <div class="imgt"><img src="mohum.png" /></div>
+                              </div>
+                              <div class="bcresult"><span>19</span></div>
+                            </div>
+                            <div class="bacal-calculate">
+                              <div class="bcimg">
+                                <div class="imgt">
+                                  <img src="img/job/귀검사(여).gif" />
+                                </div>
+                              </div>
+                              <div class="bcresult"><span>4</span></div>
+                            </div>
+                          </li>
+                        </ul>
+                      </div>
+                    </div>
+                    <div class="seh_addinfo">
+                      <div class="sainf-tr" name="세트포인트">
+                        <span class="saninf-setp">2550</span>
+                      </div>
+                      <div class="sainf-tr" name="마부 스증 총합">
+                        <span class="saint-sumofms">10.0</span>
+                      </div>
+                      <div class="sainf-tr" name="크리티컬 확률">
+                        <span class="saint-critical">116.5</span>
+                      </div>
+                      <div
+                        class="sainf-tr"
+                        name="스위칭 레벨 / 짙편린(스위칭 강화템) 개수"
+                      >
+                        <span class="saint-sumofswithing"> 10Lv 12</span>
+                      </div>
+                    </div>
+                    <div class="seh_name">
+                      <span class="name"
+                        >전국검마협회<span class="introd server" name="서버"
+                          >바이넨스</span
+                        ></span
+                      >
+                      <div class="level">
+                        <span class="fpic"><div class="imgt"></div></span
+                        ><span class="val">70885</span>
+                      </div>
+                    </div>
+                    <div class="seh_stat">
+                      <ul class="stat_a">
+                        <li>
+                          <div class="statc">
+                            <span class="tl tfive">랭킹</span
+                            ><span class="val">59 억 9042 만</span>
+                          </div>
+                        </li>
+                      </ul>
+                      <ul class="off">
+                        <li>
+                          <div class="statc">
+                            <span class="tl">버프점수</span
+                            ><span class="val"></span>
+                          </div>
+                        </li>
+                        <li class="off">
+                          <div class="statc">
+                            <span class="tl">3인</span><span class="val"></span>
+                          </div>
+                        </li>
+                        <li class="off">
+                          <div class="statc">
+                            <span class="tl">4인</span><span class="val"></span>
+                          </div>
+                        </li>
+                      </ul>
+                    </div>
+                  </div>
+                  <div class="scon">
+                    <div class="seh_abata">
+                      <div class="imgt">
+                        <img
+                          src="https://img-api.neople.co.kr/df/servers/prey/characters/53a61dcb401afdc624f90a7f38c78a61?zoom=1"
+                        />
+                      </div>
+                    </div>
+                    <div class="seh_sever"><li class="sev">프레이</li></div>
+                    <div class="seh_job">
+                      <li class="sev">眞 소드마스터</li>
+                    </div>
+                    <div class="seh_bacalcount">
+                      <div class="sbccnt">
+                        <ul class="bac_cont">
+                          <li class="bacct-tit">
+                            <div class="bcimg">
+                              <div class="imgt">
+                                <img src="https://dundam.xyz/img/mumu.png" />
+                              </div>
+                            </div>
+                          </li>
+                          <li class="bacct-num">
+                            <div class="bacal-calculate">
+                              <div class="bcimg">
+                                <div class="imgt"><img src="mohum.png" /></div>
+                              </div>
+                              <div class="bcresult"><span>19</span></div>
+                            </div>
+                            <div class="bacal-calculate">
+                              <div class="bcimg">
+                                <div class="imgt">
+                                  <img src="img/job/귀검사(여).gif" />
+                                </div>
+                              </div>
+                              <div class="bcresult"><span>4</span></div>
+                            </div>
+                          </li>
+                        </ul>
+                      </div>
+                    </div>
+                    <div class="seh_addinfo">
+                      <div class="sainf-tr" name="세트포인트">
+                        <span class="saninf-setp">2420</span>
+                      </div>
+                      <div class="sainf-tr" name="마부 스증 총합">
+                        <span class="saint-sumofms">8.0</span>
+                      </div>
+                      <div class="sainf-tr" name="크리티컬 확률">
+                        <span class="saint-critical">134.5</span>
+                      </div>
+                      <div
+                        class="sainf-tr"
+                        name="스위칭 레벨 / 짙편린(스위칭 강화템) 개수"
+                      >
+                        <span class="saint-sumofswithing"> 10Lv 0</span>
+                      </div>
+                    </div>
+                    <div class="seh_name">
+                      <span class="name"
+                        >전국마제협회<span class="introd server" name="서버"
+                          >바이넨스</span
+                        ></span
+                      >
+                      <div class="level">
+                        <span class="fpic"><div class="imgt"></div></span
+                        ><span class="val">66667</span>
+                      </div>
+                    </div>
+                    <div class="seh_stat">
+                      <ul class="stat_a">
+                        <li>
+                          <div class="statc">
+                            <span class="tl tfive">랭킹</span
+                            ><span class="val">37 억 9957 만</span>
+                          </div>
+                        </li>
+                      </ul>
+                      <ul class="off">
+                        <li>
+                          <div class="statc">
+                            <span class="tl">버프점수</span
+                            ><span class="val"></span>
+                          </div>
+                        </li>
+                        <li class="off">
+                          <div class="statc">
+                            <span class="tl">3인</span><span class="val"></span>
+                          </div>
+                        </li>
+                        <li class="off">
+                          <div class="statc">
+                            <span class="tl">4인</span><span class="val"></span>
+                          </div>
+                        </li>
+                      </ul>
+                    </div>
+                  </div>
+                  <div class="scon">
+                    <div class="seh_abata">
+                      <div class="imgt">
+                        <img
+                          src="https://img-api.neople.co.kr/df/servers/prey/characters/4bc6806a5d6cb415e449184ec84fec28?zoom=1"
+                        />
+                      </div>
+                    </div>
+                    <div class="seh_sever"><li class="sev">프레이</li></div>
+                    <div class="seh_job"><li class="sev">眞 소환사</li></div>
+                    <div class="seh_bacalcount">
+                      <div class="sbccnt">
+                        <ul class="bac_cont">
+                          <li class="bacct-tit">
+                            <div class="bcimg">
+                              <div class="imgt">
+                                <img src="https://dundam.xyz/img/mumu.png" />
+                              </div>
+                            </div>
+                          </li>
+                          <li class="bacct-num">
+                            <div class="bacal-calculate">
+                              <div class="bcimg">
+                                <div class="imgt"><img src="mohum.png" /></div>
+                              </div>
+                              <div class="bcresult"><span>19</span></div>
+                            </div>
+                            <div class="bacal-calculate">
+                              <div class="bcimg">
+                                <div class="imgt">
+                                  <img src="img/job/마법사(여).gif" />
+                                </div>
+                              </div>
+                              <div class="bcresult"><span>4</span></div>
+                            </div>
+                          </li>
+                        </ul>
+                      </div>
+                    </div>
+                    <div class="seh_addinfo">
+                      <div class="sainf-tr" name="세트포인트">
+                        <span class="saninf-setp">2460</span>
+                      </div>
+                      <div class="sainf-tr" name="마부 스증 총합">
+                        <span class="saint-sumofms">6.0</span>
+                      </div>
+                      <div class="sainf-tr" name="크리티컬 확률">
+                        <span class="saint-critical">118.0</span>
+                      </div>
+                      <div
+                        class="sainf-tr"
+                        name="스위칭 레벨 / 짙편린(스위칭 강화템) 개수"
+                      >
+                        <span class="saint-sumofswithing"> 7Lv 0</span>
+                      </div>
+                    </div>
+                    <div class="seh_name">
+                      <span class="name"
+                        >전국다굴협회<span class="introd server" name="서버"
+                          >바이넨스</span
+                        ></span
+                      >
+                      <div class="level">
+                        <span class="fpic"><div class="imgt"></div></span
+                        ><span class="val">67474</span>
+                      </div>
+                    </div>
+                    <div class="seh_stat">
+                      <ul class="stat_a">
+                        <li>
+                          <div class="statc">
+                            <span class="tl tfive">랭킹</span
+                            ><span class="val">36 억 733 만</span>
+                          </div>
+                        </li>
+                      </ul>
+                      <ul class="off">
+                        <li>
+                          <div class="statc">
+                            <span class="tl">버프점수</span
+                            ><span class="val"></span>
+                          </div>
+                        </li>
+                        <li class="off">
+                          <div class="statc">
+                            <span class="tl">3인</span><span class="val"></span>
+                          </div>
+                        </li>
+                        <li class="off">
+                          <div class="statc">
+                            <span class="tl">4인</span><span class="val"></span>
+                          </div>
+                        </li>
+                      </ul>
+                    </div>
+                  </div>
+                  <div class="scon">
+                    <div class="seh_abata">
+                      <div class="imgt">
+                        <img
+                          src="https://img-api.neople.co.kr/df/servers/prey/characters/64db6d50a54ad1d805721e73999f81b7?zoom=1"
+                        />
+                      </div>
+                    </div>
+                    <div class="seh_sever"><li class="sev">프레이</li></div>
+                    <div class="seh_job">
+                      <li class="sev">眞 엘븐나이트</li>
+                    </div>
+                    <div class="seh_bacalcount">
+                      <div class="sbccnt">
+                        <ul class="bac_cont">
+                          <li class="bacct-tit">
+                            <div class="bcimg">
+                              <div class="imgt">
+                                <img src="https://dundam.xyz/img/mumu.png" />
+                              </div>
+                            </div>
+                          </li>
+                          <li class="bacct-num">
+                            <div class="bacal-calculate">
+                              <div class="bcimg">
+                                <div class="imgt"><img src="mohum.png" /></div>
+                              </div>
+                              <div class="bcresult"><span>19</span></div>
+                            </div>
+                            <div class="bacal-calculate">
+                              <div class="bcimg">
+                                <div class="imgt">
+                                  <img src="img/job/나이트.gif" />
+                                </div>
+                              </div>
+                              <div class="bcresult"><span>0</span></div>
+                            </div>
+                          </li>
+                        </ul>
+                      </div>
+                    </div>
+                    <div class="seh_addinfo">
+                      <div class="sainf-tr" name="세트포인트">
+                        <span class="saninf-setp">1940</span>
+                      </div>
+                      <div class="sainf-tr" name="마부 스증 총합">
+                        <span class="saint-sumofms">3.0</span>
+                      </div>
+                      <div class="sainf-tr" name="크리티컬 확률">
+                        <span class="saint-critical">99.5</span>
+                      </div>
+                      <div
+                        class="sainf-tr"
+                        name="스위칭 레벨 / 짙편린(스위칭 강화템) 개수"
+                      >
+                        <span class="saint-sumofswithing"> 4Lv 0</span>
+                      </div>
+                    </div>
+                    <div class="seh_name">
+                      <span class="name"
+                        >출렁출렁뽀잉<span class="introd server" name="서버"
+                          >바이넨스</span
+                        ></span
+                      >
+                      <div class="level">
+                        <span class="fpic"><div class="imgt"></div></span
+                        ><span class="val">52980</span>
+                      </div>
+                    </div>
+                    <div class="seh_stat">
+                      <ul class="stat_a">
+                        <li>
+                          <div class="statc">
+                            <span class="tl tfive">랭킹</span
+                            ><span class="val">13 억 2981 만</span>
+                          </div>
+                        </li>
+                      </ul>
+                      <ul class="off">
+                        <li>
+                          <div class="statc">
+                            <span class="tl">버프점수</span
+                            ><span class="val"></span>
+                          </div>
+                        </li>
+                        <li class="off">
+                          <div class="statc">
+                            <span class="tl">3인</span><span class="val"></span>
+                          </div>
+                        </li>
+                        <li class="off">
+                          <div class="statc">
+                            <span class="tl">4인</span><span class="val"></span>
+                          </div>
+                        </li>
+                      </ul>
+                    </div>
+                  </div>
+                  <div class="scon">
+                    <div class="seh_abata">
+                      <div class="imgt">
+                        <img
+                          src="https://img-api.neople.co.kr/df/servers/prey/characters/938481676af6f32bdcf29f1f4c17beb6?zoom=1"
+                        />
+                      </div>
+                    </div>
+                    <div class="seh_sever"><li class="sev">프레이</li></div>
+                    <div class="seh_job"><li class="sev">眞 로그</li></div>
+                    <div class="seh_bacalcount">
+                      <div class="sbccnt">
+                        <ul class="bac_cont">
+                          <li class="bacct-tit">
+                            <div class="bcimg">
+                              <div class="imgt">
+                                <img src="https://dundam.xyz/img/mumu.png" />
+                              </div>
+                            </div>
+                          </li>
+                          <li class="bacct-num">
+                            <div class="bacal-calculate">
+                              <div class="bcimg">
+                                <div class="imgt"><img src="mohum.png" /></div>
+                              </div>
+                              <div class="bcresult"><span>19</span></div>
+                            </div>
+                            <div class="bacal-calculate">
+                              <div class="bcimg">
+                                <div class="imgt">
+                                  <img src="img/job/도적.gif" />
+                                </div>
+                              </div>
+                              <div class="bcresult"><span>0</span></div>
+                            </div>
+                          </li>
+                        </ul>
+                      </div>
+                    </div>
+                    <div class="seh_addinfo">
+                      <div class="sainf-tr" name="세트포인트">
+                        <span class="saninf-setp">1880</span>
+                      </div>
+                      <div class="sainf-tr" name="마부 스증 총합">
+                        <span class="saint-sumofms">2.0</span>
+                      </div>
+                      <div class="sainf-tr" name="크리티컬 확률">
+                        <span class="saint-critical">124.3</span>
+                      </div>
+                      <div
+                        class="sainf-tr"
+                        name="스위칭 레벨 / 짙편린(스위칭 강화템) 개수"
+                      >
+                        <span class="saint-sumofswithing"> 5Lv 0</span>
+                      </div>
+                    </div>
+                    <div class="seh_name">
+                      <span class="name"
+                        >날다람지썬더<span class="introd server" name="서버"
+                          >바이넨스</span
+                        ></span
+                      >
+                      <div class="level">
+                        <span class="fpic"><div class="imgt"></div></span
+                        ><span class="val">52189</span>
+                      </div>
+                    </div>
+                    <div class="seh_stat">
+                      <ul class="stat_a">
+                        <li>
+                          <div class="statc">
+                            <span class="tl tfive">랭킹</span
+                            ><span class="val">11 억 968 만</span>
+                          </div>
+                        </li>
+                      </ul>
+                      <ul class="off">
+                        <li>
+                          <div class="statc">
+                            <span class="tl">버프점수</span
+                            ><span class="val"></span>
+                          </div>
+                        </li>
+                        <li class="off">
+                          <div class="statc">
+                            <span class="tl">3인</span><span class="val"></span>
+                          </div>
+                        </li>
+                        <li class="off">
+                          <div class="statc">
+                            <span class="tl">4인</span><span class="val"></span>
+                          </div>
+                        </li>
+                      </ul>
+                    </div>
+                  </div>
+                  <div class="scon">
+                    <div class="seh_abata">
+                      <div class="imgt">
+                        <img
+                          src="https://img-api.neople.co.kr/df/servers/prey/characters/dc8e78bbe4b22d648d1cc6a935115ba1?zoom=1"
+                        />
+                      </div>
+                    </div>
+                    <div class="seh_sever"><li class="sev">프레이</li></div>
+                    <div class="seh_job"><li class="sev">眞 넨마스터</li></div>
+                    <div class="seh_bacalcount">
+                      <div class="sbccnt">
+                        <ul class="bac_cont">
+                          <li class="bacct-tit">
+                            <div class="bcimg">
+                              <div class="imgt">
+                                <img src="https://dundam.xyz/img/mumu.png" />
+                              </div>
+                            </div>
+                          </li>
+                          <li class="bacct-num">
+                            <div class="bacal-calculate">
+                              <div class="bcimg">
+                                <div class="imgt"><img src="mohum.png" /></div>
+                              </div>
+                              <div class="bcresult"><span>19</span></div>
+                            </div>
+                            <div class="bacal-calculate">
+                              <div class="bcimg">
+                                <div class="imgt">
+                                  <img src="img/job/격투가(여).gif" />
+                                </div>
+                              </div>
+                              <div class="bcresult"><span>0</span></div>
+                            </div>
+                          </li>
+                        </ul>
+                      </div>
+                    </div>
+                    <div class="seh_addinfo">
+                      <div class="sainf-tr" name="세트포인트">
+                        <span class="saninf-setp">1940</span>
+                      </div>
+                      <div class="sainf-tr" name="마부 스증 총합">
+                        <span class="saint-sumofms">2.0</span>
+                      </div>
+                      <div class="sainf-tr" name="크리티컬 확률">
+                        <span class="saint-critical">106.8</span>
+                      </div>
+                      <div
+                        class="sainf-tr"
+                        name="스위칭 레벨 / 짙편린(스위칭 강화템) 개수"
+                      >
+                        <span class="saint-sumofswithing"> 3Lv 0</span>
+                      </div>
+                    </div>
+                    <div class="seh_name">
+                      <span class="name"
+                        >간짜장<span class="introd server" name="서버"
+                          >바이넨스</span
+                        ></span
+                      >
+                      <div class="level">
+                        <span class="fpic"><div class="imgt"></div></span
+                        ><span class="val">52662</span>
+                      </div>
+                    </div>
+                    <div class="seh_stat">
+                      <ul class="stat_a">
+                        <li>
+                          <div class="statc">
+                            <span class="tl tfive">랭킹</span
+                            ><span class="val">10 억 7985 만</span>
+                          </div>
+                        </li>
+                      </ul>
+                      <ul class="off">
+                        <li>
+                          <div class="statc">
+                            <span class="tl">버프점수</span
+                            ><span class="val"></span>
+                          </div>
+                        </li>
+                        <li class="off">
+                          <div class="statc">
+                            <span class="tl">3인</span><span class="val"></span>
+                          </div>
+                        </li>
+                        <li class="off">
+                          <div class="statc">
+                            <span class="tl">4인</span><span class="val"></span>
+                          </div>
+                        </li>
+                      </ul>
+                    </div>
+                  </div>
+                  <div class="scon">
+                    <div class="seh_abata">
+                      <div class="imgt">
+                        <img
+                          src="https://img-api.neople.co.kr/df/servers/prey/characters/fbd85361b59e531c2409195f4e56d9b2?zoom=1"
+                        />
+                      </div>
+                    </div>
+                    <div class="seh_sever"><li class="sev">프레이</li></div>
+                    <div class="seh_job"><li class="sev">眞 헌터</li></div>
+                    <div class="seh_bacalcount">
+                      <div class="sbccnt">
+                        <ul class="bac_cont">
+                          <li class="bacct-tit">
+                            <div class="bcimg">
+                              <div class="imgt">
+                                <img src="https://dundam.xyz/img/mumu.png" />
+                              </div>
+                            </div>
+                          </li>
+                          <li class="bacct-num">
+                            <div class="bacal-calculate">
+                              <div class="bcimg">
+                                <div class="imgt"><img src="mohum.png" /></div>
+                              </div>
+                              <div class="bcresult"><span>19</span></div>
+                            </div>
+                            <div class="bacal-calculate">
+                              <div class="bcimg">
+                                <div class="imgt">
+                                  <img src="img/job/아처.gif" />
+                                </div>
+                              </div>
+                              <div class="bcresult"><span>0</span></div>
+                            </div>
+                          </li>
+                        </ul>
+                      </div>
+                    </div>
+                    <div class="seh_addinfo">
+                      <div class="sainf-tr" name="세트포인트">
+                        <span class="saninf-setp">1365</span>
+                      </div>
+                      <div class="sainf-tr" name="마부 스증 총합">
+                        <span class="saint-sumofms">3.0</span>
+                      </div>
+                      <div class="sainf-tr" name="크리티컬 확률">
+                        <span class="saint-critical">102.0</span>
+                      </div>
+                      <div
+                        class="sainf-tr"
+                        name="스위칭 레벨 / 짙편린(스위칭 강화템) 개수"
+                      >
+                        <span class="saint-sumofswithing"> 5Lv 0</span>
+                      </div>
+                    </div>
+                    <div class="seh_name">
+                      <span class="name"
+                        >봉크<span class="introd server" name="서버"
+                          >바이넨스</span
+                        ></span
+                      >
+                      <div class="level">
+                        <span class="fpic"><div class="imgt"></div></span
+                        ><span class="val">38551</span>
+                      </div>
+                    </div>
+                    <div class="seh_stat">
+                      <ul class="stat_a">
+                        <li>
+                          <div class="statc">
+                            <span class="tl tfive">랭킹</span
+                            ><span class="val">2 억 8600 만</span>
+                          </div>
+                        </li>
+                      </ul>
+                      <ul class="off">
+                        <li>
+                          <div class="statc">
+                            <span class="tl">버프점수</span
+                            ><span class="val"></span>
+                          </div>
+                        </li>
+                        <li class="off">
+                          <div class="statc">
+                            <span class="tl">3인</span><span class="val"></span>
+                          </div>
+                        </li>
+                        <li class="off">
+                          <div class="statc">
+                            <span class="tl">4인</span><span class="val"></span>
+                          </div>
+                        </li>
+                      </ul>
+                    </div>
+                  </div>
+                  <div class="scon">
+                    <div class="seh_abata">
+                      <div class="imgt">
+                        <img
+                          src="https://img-api.neople.co.kr/df/servers/prey/characters/a9bd9e906a173e6ab666bda83f49cb2f?zoom=1"
+                        />
+                      </div>
+                    </div>
+                    <div class="seh_sever"><li class="sev">프레이</li></div>
+                    <div class="seh_job"><li class="sev">眞 카오스</li></div>
+                    <div class="seh_bacalcount">
+                      <div class="sbccnt">
+                        <ul class="bac_cont">
+                          <li class="bacct-tit">
+                            <div class="bcimg">
+                              <div class="imgt">
+                                <img src="https://dundam.xyz/img/mumu.png" />
+                              </div>
+                            </div>
+                          </li>
+                          <li class="bacct-num">
+                            <div class="bacal-calculate">
+                              <div class="bcimg">
+                                <div class="imgt"><img src="mohum.png" /></div>
+                              </div>
+                              <div class="bcresult"><span>19</span></div>
+                            </div>
+                            <div class="bacal-calculate">
+                              <div class="bcimg">
+                                <div class="imgt">
+                                  <img src="img/job/나이트.gif" />
+                                </div>
+                              </div>
+                              <div class="bcresult"><span>0</span></div>
+                            </div>
+                          </li>
+                        </ul>
+                      </div>
+                    </div>
+                    <div class="seh_addinfo">
+                      <div class="sainf-tr" name="세트포인트">
+                        <span class="saninf-setp">1365</span>
+                      </div>
+                      <div class="sainf-tr" name="마부 스증 총합">
+                        <span class="saint-sumofms">0.0</span>
+                      </div>
+                      <div class="sainf-tr" name="크리티컬 확률">
+                        <span class="saint-critical">105.1</span>
+                      </div>
+                      <div
+                        class="sainf-tr"
+                        name="스위칭 레벨 / 짙편린(스위칭 강화템) 개수"
+                      >
+                        <span class="saint-sumofswithing"> 7Lv 0</span>
+                      </div>
+                    </div>
+                    <div class="seh_name">
+                      <span class="name"
+                        >하얀출렁이<span class="introd server" name="서버"
+                          >바이넨스</span
+                        ></span
+                      >
+                      <div class="level">
+                        <span class="fpic"><div class="imgt"></div></span
+                        ><span class="val">38328</span>
+                      </div>
+                    </div>
+                    <div class="seh_stat">
+                      <ul class="stat_a">
+                        <li>
+                          <div class="statc">
+                            <span class="tl tfive">랭킹</span
+                            ><span class="val">1 억 8614 만</span>
+                          </div>
+                        </li>
+                      </ul>
+                      <ul class="off">
+                        <li>
+                          <div class="statc">
+                            <span class="tl">버프점수</span
+                            ><span class="val"></span>
+                          </div>
+                        </li>
+                        <li class="off">
+                          <div class="statc">
+                            <span class="tl">3인</span><span class="val"></span>
+                          </div>
+                        </li>
+                        <li class="off">
+                          <div class="statc">
+                            <span class="tl">4인</span><span class="val"></span>
+                          </div>
+                        </li>
+                      </ul>
+                    </div>
+                  </div>
+                  <div class="scon">
+                    <div class="seh_abata">
+                      <div class="imgt">
+                        <img
+                          src="https://img-api.neople.co.kr/df/servers/prey/characters/ff546d8aa778f916dc275dce383ae1b6?zoom=1"
+                        />
+                      </div>
+                    </div>
+                    <div class="seh_sever"><li class="sev">프레이</li></div>
+                    <div class="seh_job"><li class="sev">眞 넨마스터</li></div>
+                    <div class="seh_bacalcount">
+                      <div class="sbccnt">
+                        <ul class="bac_cont">
+                          <li class="bacct-tit">
+                            <div class="bcimg">
+                              <div class="imgt">
+                                <img src="https://dundam.xyz/img/mumu.png" />
+                              </div>
+                            </div>
+                          </li>
+                          <li class="bacct-num">
+                            <div class="bacal-calculate">
+                              <div class="bcimg">
+                                <div class="imgt"><img src="mohum.png" /></div>
+                              </div>
+                              <div class="bcresult"><span>19</span></div>
+                            </div>
+                            <div class="bacal-calculate">
+                              <div class="bcimg">
+                                <div class="imgt">
+                                  <img src="img/job/격투가(여).gif" />
+                                </div>
+                              </div>
+                              <div class="bcresult"><span>0</span></div>
+                            </div>
+                          </li>
+                        </ul>
+                      </div>
+                    </div>
+                    <div class="seh_addinfo">
+                      <div class="sainf-tr" name="세트포인트">
+                        <span class="saninf-setp">1265</span>
+                      </div>
+                      <div class="sainf-tr" name="마부 스증 총합">
+                        <span class="saint-sumofms">0.0</span>
+                      </div>
+                      <div class="sainf-tr" name="크리티컬 확률">
+                        <span class="saint-critical">105.9</span>
+                      </div>
+                      <div
+                        class="sainf-tr"
+                        name="스위칭 레벨 / 짙편린(스위칭 강화템) 개수"
+                      >
+                        <span class="saint-sumofswithing"> 5Lv 0</span>
+                      </div>
+                    </div>
+                    <div class="seh_name">
+                      <span class="name"
+                        >롱6900원<span class="introd server" name="서버"
+                          >바이넨스</span
+                        ></span
+                      >
+                      <div class="level">
+                        <span class="fpic"><div class="imgt"></div></span
+                        ><span class="val">31830</span>
+                      </div>
+                    </div>
+                    <div class="seh_stat">
+                      <ul class="stat_a">
+                        <li>
+                          <div class="statc">
+                            <span class="tl tfive">랭킹</span
+                            ><span class="val">7340 만</span>
+                          </div>
+                        </li>
+                      </ul>
+                      <ul class="off">
+                        <li>
+                          <div class="statc">
+                            <span class="tl">버프점수</span
+                            ><span class="val"></span>
+                          </div>
+                        </li>
+                        <li class="off">
+                          <div class="statc">
+                            <span class="tl">3인</span><span class="val"></span>
+                          </div>
+                        </li>
+                        <li class="off">
+                          <div class="statc">
+                            <span class="tl">4인</span><span class="val"></span>
+                          </div>
+                        </li>
+                      </ul>
+                    </div>
+                  </div>
+                  <div class="scon">
+                    <div class="seh_abata">
+                      <div class="imgt">
+                        <img
+                          src="https://img-api.neople.co.kr/df/servers/prey/characters/a7133ee82db10c15a4c8d58ad6e90c3e?zoom=1"
+                        />
+                      </div>
+                    </div>
+                    <div class="seh_sever"><li class="sev">프레이</li></div>
+                    <div class="seh_job"><li class="sev">眞 블레이드</li></div>
+                    <div class="seh_bacalcount">
+                      <div class="sbccnt">
+                        <ul class="bac_cont">
+                          <li class="bacct-tit">
+                            <div class="bcimg">
+                              <div class="imgt">
+                                <img src="https://dundam.xyz/img/mumu.png" />
+                              </div>
+                            </div>
+                          </li>
+                          <li class="bacct-num">
+                            <div class="bacal-calculate">
+                              <div class="bcimg">
+                                <div class="imgt"><img src="mohum.png" /></div>
+                              </div>
+                              <div class="bcresult"><span>19</span></div>
+                            </div>
+                            <div class="bacal-calculate">
+                              <div class="bcimg">
+                                <div class="imgt">
+                                  <img src="img/job/귀검사(여).gif" />
+                                </div>
+                              </div>
+                              <div class="bcresult"><span>0</span></div>
+                            </div>
+                          </li>
+                        </ul>
+                      </div>
+                    </div>
+                    <div class="seh_addinfo">
+                      <div class="sainf-tr" name="세트포인트">
+                        <span class="saninf-setp">1165</span>
+                      </div>
+                      <div class="sainf-tr" name="마부 스증 총합">
+                        <span class="saint-sumofms">1.0</span>
+                      </div>
+                      <div class="sainf-tr" name="크리티컬 확률">
+                        <span class="saint-critical">94.5</span>
+                      </div>
+                      <div
+                        class="sainf-tr"
+                        name="스위칭 레벨 / 짙편린(스위칭 강화템) 개수"
+                      >
+                        <span class="saint-sumofswithing"> 4Lv 0</span>
+                      </div>
+                    </div>
+                    <div class="seh_name">
+                      <span class="name"
+                        >파썰기달인<span class="introd server" name="서버"
+                          >바이넨스</span
+                        ></span
+                      >
+                      <div class="level">
+                        <span class="fpic"><div class="imgt"></div></span
+                        ><span class="val">27649</span>
+                      </div>
+                    </div>
+                    <div class="seh_stat">
+                      <ul class="stat_a">
+                        <li>
+                          <div class="statc">
+                            <span class="tl tfive">랭킹</span
+                            ><span class="val">4096 만</span>
+                          </div>
+                        </li>
+                      </ul>
+                      <ul class="off">
+                        <li>
+                          <div class="statc">
+                            <span class="tl">버프점수</span
+                            ><span class="val"></span>
+                          </div>
+                        </li>
+                        <li class="off">
+                          <div class="statc">
+                            <span class="tl">3인</span><span class="val"></span>
+                          </div>
+                        </li>
+                        <li class="off">
+                          <div class="statc">
+                            <span class="tl">4인</span><span class="val"></span>
+                          </div>
+                        </li>
+                      </ul>
+                    </div>
+                  </div>
+                  <div class="scon">
+                    <div class="seh_abata">
+                      <div class="imgt">
+                        <img
+                          src="https://img-api.neople.co.kr/df/servers/prey/characters/006303b1a72d6073745a478e992b1bee?zoom=1"
+                        />
+                      </div>
+                    </div>
+                    <div class="seh_sever"><li class="sev">프레이</li></div>
+                    <div class="seh_job">
+                      <li class="sev">眞 미스트리스</li>
+                    </div>
+                    <div class="seh_bacalcount">
+                      <div class="sbccnt">
+                        <ul class="bac_cont">
+                          <li class="bacct-tit">
+                            <div class="bcimg">
+                              <div class="imgt">
+                                <img src="https://dundam.xyz/img/mumu.png" />
+                              </div>
+                            </div>
+                          </li>
+                          <li class="bacct-num">
+                            <div class="bacal-calculate">
+                              <div class="bcimg">
+                                <div class="imgt"><img src="mohum.png" /></div>
+                              </div>
+                              <div class="bcresult"><span>19</span></div>
+                            </div>
+                            <div class="bacal-calculate">
+                              <div class="bcimg">
+                                <div class="imgt">
+                                  <img src="img/job/프리스트(여).gif" />
+                                </div>
+                              </div>
+                              <div class="bcresult"><span>0</span></div>
+                            </div>
+                          </li>
+                        </ul>
+                      </div>
+                    </div>
+                    <div class="seh_addinfo">
+                      <div class="sainf-tr" name="세트포인트">
+                        <span class="saninf-setp">1265</span>
+                      </div>
+                      <div class="sainf-tr" name="마부 스증 총합">
+                        <span class="saint-sumofms">0.0</span>
+                      </div>
+                      <div class="sainf-tr" name="크리티컬 확률">
+                        <span class="saint-critical">87.5</span>
+                      </div>
+                      <div
+                        class="sainf-tr"
+                        name="스위칭 레벨 / 짙편린(스위칭 강화템) 개수"
+                      >
+                        <span class="saint-sumofswithing"> 6Lv 0</span>
+                      </div>
+                    </div>
+                    <div class="seh_name">
+                      <span class="name"
+                        >흑챙람지<span class="introd server" name="서버"
+                          >바이넨스</span
+                        ></span
+                      >
+                      <div class="level">
+                        <span class="fpic"><div class="imgt"></div></span
+                        ><span class="val">31024</span>
+                      </div>
+                    </div>
+                    <div class="seh_stat">
+                      <ul class="stat_a">
+                        <li>
+                          <div class="statc">
+                            <span class="tl tfive">랭킹</span
+                            ><span class="val">7375 만</span>
+                          </div>
+                        </li>
+                      </ul>
+                      <ul class="off">
+                        <li>
+                          <div class="statc">
+                            <span class="tl">버프점수</span
+                            ><span class="val"></span>
+                          </div>
+                        </li>
+                        <li class="off">
+                          <div class="statc">
+                            <span class="tl">3인</span><span class="val"></span>
+                          </div>
+                        </li>
+                        <li class="off">
+                          <div class="statc">
+                            <span class="tl">4인</span><span class="val"></span>
+                          </div>
+                        </li>
+                      </ul>
+                    </div>
+                  </div>
+                </div>
+              </div>
+              <div id="ad-container-2">
+                <span
+                  ><span style="display: none"
+                    ><span
+                      id="KxArSWgIetSy_1746882227561_620355369_6"
+                      style="
+                        pointer-events: auto;
+                        visibility: visible;
+                        display: none;
+                      "
+                      data-id="c2117_p10_0_0"
+                      data-google-query-id="CJvCyrb7mI0DFfxVDwIdGd0PtA"
+                      class="up-hide"
+                      ><div
+                        id="google_ads_iframe_/21726375739,21835055677/VM_6335787995a6d454fcf66ce8/billboard_ABR_2117_2__container__"
+                        style="border: 0pt none; width: 728px; height: 0px"
+                      ></div></span></span
+                ></span>
+              </div>
+            </section>
+            <footer id="footer">
+              <div class="main-footer">
+                <div class="foop1">
+                  <ul>
+                    <li class="fapi">
+                      <a href="https://developers.neople.co.kr" target="_blank"
+                        ><div class="imgt"></div
+                      ></a>
+                    </li>
+                    <li class="ftit">
+                      <div class="fti1"></div>
+                      <div class="fti2">
+                        <span class="pinfo"
+                          ><a href="https://dundam.xyz/policy.html"
+                            >개인정보 처리방침</a
+                          ></span
+                        ><span>Copyright© DUNDAM All rights reserved.</span>
+                      </div>
+                    </li>
+                  </ul>
+                </div>
+              </div>
+            </footer>
+          </div>
+        </div>
+      </div>
+    </div>
+    <iframe
+      marginwidth="0"
+      marginheight="0"
+      scrolling="no"
+      frameborder="0"
+      id="12b2940888c474"
+      width="0"
+      height="0"
+      src="about:blank"
+      name="__pb_locator__"
+      style="display: none; height: 0px; width: 0px; border: 0px"
+    ></iframe>
+    <script
+      type="text/javascript"
+      async=""
+      src="https://p.cpx.to/p/13058/px.js"
+    ></script>
+    <img
+      src="https://ad-delivery.net/px.gif?ch=2"
+      style="
+        display: none !important;
+        width: 1px !important;
+        height: 1px !important;
+      "
+    /><img
+      src="https://ad.doubleclick.net/favicon.ico?ad=300x250&amp;ad_box_=1&amp;adnet=1&amp;showad=1&amp;size=250x250"
+      style="
+        display: none !important;
+        width: 1px !important;
+        height: 1px !important;
+      "
+    /><img
+      src="https://ad-delivery.net/px.gif?ch=1&amp;e=0.23873668797009862"
+      style="
+        display: none !important;
+        width: 1px !important;
+        height: 1px !important;
+      "
+    />
+    <script
+      async=""
+      src="https://www.googletagmanager.com/gtag/js?id=G-T1H5LZ1RF1"
+    ></script>
+    <script src="js/notice.js" async=""></script>
+    <iframe
+      src="https://static.btloader.com/safeFrame.html?upapi=true"
+      style="width: 0px; height: 0px; display: none !important"
+    ></iframe
+    ><iframe
+      src="/robots.txt?upapi=true"
+      style="width: 0px; height: 0px; display: none"
+    ></iframe
+    ><iframe
+      name="googlefcPresent"
+      style="
+        display: none;
+        width: 0px;
+        height: 0px;
+        border: none;
+        z-index: -1000;
+        left: -1000px;
+        top: -1000px;
+      "
+    ></iframe
+    ><iframe
+      name="__tcfapiLocator"
+      src="about:blank"
+      style="
+        display: none;
+        width: 0px;
+        height: 0px;
+        border: none;
+        z-index: -1000;
+        left: -1000px;
+        top: -1000px;
+      "
+    ></iframe
+    ><iframe
+      name="__uspapiLocator"
+      src="about:blank"
+      style="
+        display: none;
+        width: 0px;
+        height: 0px;
+        border: none;
+        z-index: -1000;
+        left: -1000px;
+        top: -1000px;
+      "
+    ></iframe
+    ><iframe
+      name="__gppLocator"
+      src="about:blank"
+      style="
+        display: none;
+        width: 0px;
+        height: 0px;
+        border: none;
+        z-index: -1000;
+        left: -1000px;
+        top: -1000px;
+      "
+    ></iframe
+    ><iframe
+      name="googlefcInactive"
+      src="about:blank"
+      style="
+        display: none;
+        width: 0px;
+        height: 0px;
+        border: none;
+        z-index: -1000;
+        left: -1000px;
+        top: -1000px;
+      "
+    ></iframe
+    ><iframe
+      name="googlefcLoaded"
+      src="about:blank"
+      style="
+        display: none;
+        width: 0px;
+        height: 0px;
+        border: none;
+        z-index: -1000;
+        left: -1000px;
+        top: -1000px;
+      "
+    ></iframe
+    ><iframe
+      src='https://gum.criteo.com/syncframe?origin=publishertagids&amp;topUrl=dundam.xyz&amp;gdpr=0&amp;gdpr_consent=&amp;gpp=&amp;gpp_sid=-1#{"bundle":{"value":"Q38LD18yMmxLYVFpSlVkUVNNMlFsRGgzZEtnTFlRNWNQcUJ4R3IzbGY4UmU4b2gyS0N6Vlp5aVBHNyUyRiUyRmtNMnZDQkJMbWtiVnVYdjQ3RXplczJObiUyRjNaRzNuNWI1S2dhT1FMckF0c3NTQ3R3V1hvWmRJMTFpQzNHd25lSGluRG8yQ0dpeTRiNEloRlV0dEhEOHp6TzR0JTJCNU1uJTJGSUlwY01UemRjWUI0TjV0Mlo2QiUyRjhBY044U05MOWtxTTBRc3VWYXdOMEdkN2xOV0JObGM5JTJGR1BOYWNySW9mYWVBZHpZVnRhelFJSkdXUCUyQkRRWTdRb3hPdzQ5N0ZJMUh6V1hMYTFaS3prSA","origin":3},"optout":{"value":false,"origin":0},"tld":"dundam.xyz","topUrl":"dundam.xyz","version":160,"origin":"publishertagids","requestId":"0.9938520276930507"}'
+      width="0"
+      height="0"
+      frameborder="0"
+      sandbox="allow-scripts allow-same-origin"
+      aria-hidden="true"
+      title="Criteo GUM iframe"
+      style="border-width: 0px; margin: 0px; display: none"
+    ></iframe
+    ><iframe
+      src="https://www.google.com/recaptcha/api2/aframe"
+      width="0"
+      height="0"
+      style="display: none"
+    ></iframe>
+    <div
+      style="
+        position: fixed;
+        pointer-events: none;
+        inset: 100px 883.5px 0px 0px;
+        overflow: hidden;
+        text-align: center;
+        z-index: 997;
+        display: none;
+      "
+    >
+      <div style="position: relative; display: inline-block; top: 0px">
+        <div style="pointer-events: auto; font-size: 0px; line-height: 0"></div>
+        <div style="pointer-events: auto; font-size: 0px; line-height: 0">
+          <span></span>
+        </div>
+      </div>
+    </div>
+    <div
+      style="
+        position: fixed;
+        pointer-events: none;
+        inset: 100px 0px 0px 883.5px;
+        overflow: hidden;
+        text-align: center;
+        z-index: 997;
+        display: none;
+      "
+    >
+      <div style="position: relative; display: inline-block; top: 0px">
+        <div style="pointer-events: auto; font-size: 0px; line-height: 0"></div>
+        <div style="pointer-events: auto; font-size: 0px; line-height: 0">
+          <span></span>
+        </div>
+      </div>
+    </div>
+  </body>
+  <iframe
+    name="goog_topics_frame"
+    src="https://securepubads.g.doubleclick.net/static/topics/topics_frame.html"
+    style="display: none"
+  ></iframe
+  ><iframe
+    sandbox="allow-scripts allow-same-origin"
+    id="1712fc0ed576aa98"
+    frameborder="0"
+    allowtransparency="true"
+    marginheight="0"
+    marginwidth="0"
+    width="0"
+    hspace="0"
+    vspace="0"
+    height="0"
+    style="height: 0px; width: 0px; display: none"
+    scrolling="no"
+    src="https://acdn.adnxs.com/dmp/async_usersync.html"
+  >
+  </iframe
+  ><iframe
+    sandbox="allow-scripts allow-same-origin"
+    id="18aca8fcd1a4e0b"
+    frameborder="0"
+    allowtransparency="true"
+    marginheight="0"
+    marginwidth="0"
+    width="0"
+    hspace="0"
+    vspace="0"
+    height="0"
+    style="height: 0px; width: 0px; display: none"
+    scrolling="no"
+    src="https://onetag-sys.com/usync/?cb=1746877627877"
+  >
+  </iframe>
+</html>
