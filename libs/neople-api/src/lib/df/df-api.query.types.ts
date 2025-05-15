@@ -122,3 +122,18 @@ export type GetAuctionItemsParams = (
    */
   sort?: `${'unitPrice' | 'reinforce' | 'auctionNo'}:${'asc' | 'desc'}`;
 };
+
+export type GetItemSearchParams = {
+  /**
+   * 반환 Row 수
+   * @default 10
+   * @maximum 30
+   */
+  limit: number;
+
+  itemName: string;
+  hashtag: string;
+  wordType: 'match' | 'front' | 'full';
+
+  // q: 검색 키워드 minLevel,maxLevel,rarity
+};
