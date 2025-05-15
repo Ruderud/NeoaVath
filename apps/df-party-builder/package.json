@@ -1,0 +1,38 @@
+{
+  "name": "df-party-builder",
+  "version": "0.0.1",
+  "private": true,
+  "nx": {
+    "name": "df-party-builder",
+    "targets": {
+      "build": {
+        "executor": "@nx/vite:build",
+        "options": {
+          "outputPath": "apps/df-party-builder/dist"
+        }
+      },
+      "serve": {
+        "executor": "@nx/vite:dev-server",
+        "options": {
+          "port": 4201,
+          "host": "localhost",
+          "buildTarget": "df-party-builder:build"
+        }
+      }
+    }
+  },
+  "dependencies": {
+    "@emotion/styled": "^11.14.0",
+    "@types/uuid": "^10.0.0",
+    "es-toolkit": "^1.37.2",
+    "firebase": "^11.7.1",
+    "react": "19.0.0",
+    "react-dom": "19.0.0",
+    "react-error-boundary": "^6.0.0",
+    "react-router-dom": "6.29.0",
+    "uuid": "^11.1.0"
+  },
+  "devDependencies": {
+    "@nx/vite": "^21.0.3"
+  }
+}
