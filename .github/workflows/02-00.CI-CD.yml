@@ -8,7 +8,7 @@ on:
         type: string
 
 env:
-  CF_DEPLOY_APPS: 'neoavath'
+  CF_DEPLOY_APPS: 'neoavath df-party-builder'
   AWS_EC2_DEPLOY_APPS: 'df-auction-crawling'
 
 jobs:
