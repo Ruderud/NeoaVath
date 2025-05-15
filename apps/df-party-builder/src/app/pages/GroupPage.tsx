@@ -6,6 +6,7 @@ import { PasswordDialog } from '../components/PasswordDialog';
 import { DundamFrame, CharacterData } from '../components/DundamFrame';
 import { useFirebase } from '../context/FirebaseContext';
 import { debounce, throttle } from 'es-toolkit';
+import { get } from 'firebase/database';
 
 const PageContainer = styled.div`
   max-width: 1600px;
@@ -281,29 +282,29 @@ function ErrorFallback({
 function GroupPageContent() {
   const { groupName } = useParams<{ groupName: string }>();
   const [showPasswordDialog, setShowPasswordDialog] = useState(false);
-  const [searchTerm, setSearchTerm] = useState('');
-  const [shouldSearch, setShouldSearch] = useState(false);
   const [parties, setParties] = useState<Party[]>([]);
   const [teamMembers, setTeamMembers] = useState<TeamMember[]>([]);
-  const [draggedCharacter, setDraggedCharacter] =
-    useState<CharacterData | null>(null);
   const { showBoundary } = useErrorBoundary();
   const { writeData, readData } = useFirebase();
 
   // 파티 데이터 저장을 위한 debounce 함수 (텍스트 입력)
   const savePartyDataDebounced = useCallback(
-    debounce((groupName: string, parties: Party[]) => {
-      writeData(`groups/${groupName}/parties`, parties);
-      console.log('savePartyDataDebounced', groupName, parties);
-    }, 1000), // 1초 딜레이
+    (groupName: string, parties: Party[]) => {
+      debounce((groupName: string, parties: Party[]) => {
+        writeData(`groups/${groupName}/parties`, parties);
+        console.log('savePartyDataDebounced', groupName, parties);
+      }, 1000); // 1초 딜레이
+    },
     [writeData]
   );
 
   // 파티 데이터 저장을 위한 throttle 함수 (드래그 앤 드롭)
   const savePartyDataThrottled = useCallback(
-    throttle((groupName: string, parties: Party[]) => {
-      writeData(`groups/${groupName}/parties`, parties);
-    }, 2000), // 2초 간격
+    (groupName: string, parties: Party[]) => {
+      throttle((groupName: string, parties: Party[]) => {
+        writeData(`groups/${groupName}/parties`, parties);
+      }, 2000);
+    },
     [writeData]
   );
 
