@@ -24,7 +24,7 @@ const FirebaseContext = createContext<FirebaseContextType | null>(null);
 
 export function FirebaseProvider({ children }: { children: ReactNode }) {
   const app = initializeApp(firebaseConfig);
-  const analytics = getAnalytics(app);
+  // const analytics = getAnalytics(app);
   const database = getDatabase(app);
 
   const writeData = async (path: string, data: any) => {
