@@ -24,6 +24,7 @@
   "dependencies": {
     "@emotion/styled": "^11.14.0",
     "@types/uuid": "^10.0.0",
+    "es-toolkit": "^1.37.2",
     "firebase": "^11.7.1",
     "react": "19.0.0",
     "react-dom": "19.0.0",

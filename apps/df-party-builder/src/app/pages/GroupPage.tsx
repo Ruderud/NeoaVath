@@ -1,9 +1,11 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { ErrorBoundary, useErrorBoundary } from 'react-error-boundary';
 import styled from '@emotion/styled';
 import { PasswordDialog } from '../components/PasswordDialog';
 import { DundamFrame, CharacterData } from '../components/DundamFrame';
+import { useFirebase } from '../context/FirebaseContext';
+import { debounce, throttle } from 'es-toolkit';
 
 const PageContainer = styled.div`
   max-width: 1600px;
@@ -242,7 +244,7 @@ const TeamMemberList = styled.div`
 interface Party {
   id: string;
   title: string;
-  slots: (CharacterData | null)[];
+  slots: (CharacterData | 'empty')[];
   memo: string;
 }
 
@@ -286,12 +288,89 @@ function GroupPageContent() {
   const [draggedCharacter, setDraggedCharacter] =
     useState<CharacterData | null>(null);
   const { showBoundary } = useErrorBoundary();
+  const { writeData, readData } = useFirebase();
+
+  // 파티 데이터 저장을 위한 debounce 함수 (텍스트 입력)
+  const savePartyDataDebounced = useCallback(
+    debounce((groupName: string, parties: Party[]) => {
+      writeData(`groups/${groupName}/parties`, parties);
+      console.log('savePartyDataDebounced', groupName, parties);
+    }, 1000), // 1초 딜레이
+    [writeData]
+  );
+
+  // 파티 데이터 저장을 위한 throttle 함수 (드래그 앤 드롭)
+  const savePartyDataThrottled = useCallback(
+    throttle((groupName: string, parties: Party[]) => {
+      writeData(`groups/${groupName}/parties`, parties);
+    }, 2000), // 2초 간격
+    [writeData]
+  );
+
+  // 파티 데이터 변경 감지 및 저장
+  useEffect(() => {
+    if (!groupName || !parties.length) return;
+
+    // 파티 데이터 저장 전 slots 배열 검증 및 수정
+    const validatedParties = parties.map((party) => ({
+      ...party,
+      slots:
+        party.slots?.length === 4
+          ? party.slots.map((slot) => (slot === null ? 'empty' : slot))
+          : Array(4).fill('empty'),
+    }));
+
+    // 마지막 저장 시점과 현재 시점의 데이터 비교
+    const lastSavedData = sessionStorage.getItem(
+      `lastSavedParties_${groupName}`
+    );
+    const currentData = JSON.stringify(validatedParties);
+
+    if (lastSavedData !== currentData) {
+      sessionStorage.setItem(`lastSavedParties_${groupName}`, currentData);
+      savePartyDataDebounced(groupName, validatedParties);
+    }
+  }, [parties, groupName, savePartyDataDebounced]);
+
+  // 파티 데이터 초기 로드
+  useEffect(() => {
+    if (!groupName) return;
+
+    const loadPartyData = async () => {
+      try {
+        const data = await readData(`groups/${groupName}/parties`);
+        console.log('data', data);
+        if (data) {
+          setParties(data);
+          sessionStorage.setItem(
+            `lastSavedParties_${groupName}`,
+            JSON.stringify(data)
+          );
+        }
+      } catch (error) {
+        console.error('파티 데이터 로드 실패:', error);
+      }
+    };
+
+    loadPartyData();
+  }, [groupName, readData]);
+
+  // 드래그 앤 드롭으로 인한 파티 순서 변경 처리
+  const handlePartyOrderChange = useCallback(
+    (newParties: Party[]) => {
+      setParties(newParties);
+      if (groupName) {
+        savePartyDataThrottled(groupName, newParties);
+      }
+    },
+    [groupName, savePartyDataThrottled]
+  );
 
   const addParty = () => {
     const newParty: Party = {
       id: Date.now().toString(),
       title: '새 파티',
-      slots: [null, null, null, null],
+      slots: Array(4).fill('empty'),
       memo: '',
     };
     setParties([...parties, newParty]);
@@ -377,25 +456,21 @@ function GroupPageContent() {
       try {
         const sourceParty = JSON.parse(partyData) as Party;
 
-        setParties((currentParties) => {
-          const newParties = [...currentParties];
-          const sourceIndex = newParties.findIndex(
-            (p) => p.id === sourceParty.id
-          );
-          const targetIndex = newParties.findIndex(
-            (p) => p.id === targetParty.id
-          );
+        const newParties = [...parties];
+        const sourceIndex = newParties.findIndex(
+          (p) => p.id === sourceParty.id
+        );
+        const targetIndex = newParties.findIndex(
+          (p) => p.id === targetParty.id
+        );
 
-          if (sourceIndex !== -1 && targetIndex !== -1) {
-            // 파티 순서 교환
-            [newParties[sourceIndex], newParties[targetIndex]] = [
-              newParties[targetIndex],
-              newParties[sourceIndex],
-            ];
-          }
-
-          return newParties;
-        });
+        if (sourceIndex !== -1 && targetIndex !== -1) {
+          [newParties[sourceIndex], newParties[targetIndex]] = [
+            newParties[targetIndex],
+            newParties[sourceIndex],
+          ];
+          handlePartyOrderChange(newParties);
+        }
       } catch (error) {
         console.error('파티 데이터 파싱 실패:', error);
       }
@@ -461,7 +536,7 @@ function GroupPageContent() {
             // 원래 파티에서 제거
             if (sourcePartyId && party.id === sourcePartyId) {
               const newSlots = [...party.slots];
-              newSlots[Number(sourceSlotIndex)] = null;
+              newSlots[Number(sourceSlotIndex)] = 'empty';
               newParties[partyIndex] = { ...party, slots: newSlots };
             }
           });
@@ -486,6 +561,22 @@ function GroupPageContent() {
           : member
       )
     );
+  };
+
+  // 파티 제목 변경 처리
+  const handlePartyTitleChange = (partyId: string, newTitle: string) => {
+    const newParties = parties.map((p) =>
+      p.id === partyId ? { ...p, title: newTitle } : p
+    );
+    setParties(newParties);
+  };
+
+  // 파티 메모 변경 처리
+  const handlePartyMemoChange = (partyId: string, newMemo: string) => {
+    const newParties = parties.map((p) =>
+      p.id === partyId ? { ...p, memo: newMemo } : p
+    );
+    setParties(newParties);
   };
 
   useEffect(() => {
@@ -616,96 +707,89 @@ function GroupPageContent() {
             </Button>
           </div>
           <PartyContainer>
-            {parties.map((party) => (
-              <PartyCard
-                key={party.id}
-                draggable
-                onDragStart={(e) => handlePartyCardDragStart(e, party)}
-                onDragEnd={handlePartyCardDragEnd}
-                onDragOver={handlePartyCardDragOver}
-                onDragLeave={handlePartyCardDragLeave}
-                onDrop={(e) => handlePartyCardDrop(e, party)}
-              >
-                <PartyHeader>
-                  <input
-                    type="text"
-                    value={party.title}
-                    onChange={(e) =>
-                      setParties((parties) =>
-                        parties.map((p) =>
-                          p.id === party.id
-                            ? { ...p, title: e.target.value }
-                            : p
-                        )
-                      )
-                    }
-                    placeholder="파티 제목"
-                  />
-                </PartyHeader>
-                <PartySlots>
-                  {party.slots.map((slot, index) => (
-                    <PartySlot
-                      key={index}
-                      onDragOver={handleDragOver}
-                      onDragLeave={handleDragLeave}
-                      onDrop={(e) => handleDrop(e, party.id, index)}
-                      className={!slot ? 'empty' : ''}
-                    >
-                      {slot ? (
-                        <div
-                          draggable
-                          onDragStart={(e) =>
-                            handlePartyDragStart(e, party.id, index, slot)
-                          }
-                          style={{
-                            width: '100%',
-                            height: '100%',
-                            display: 'flex',
-                            flexDirection: 'column',
-                            alignItems: 'center',
-                          }}
-                        >
-                          <div className="character-image">
-                            <img
-                              src={`https://img-api.neople.co.kr/df/servers/${slot.server}/characters/${slot.key}?zoom=1`}
-                              alt={`${slot.name} 캐릭터 이미지`}
-                              draggable="false"
-                            />
-                          </div>
-                          <div className="character-info">
-                            <div className="level">명성 {slot.level}</div>
-                            <div className="name">{slot.name}</div>
-                            <div className="adventure">
-                              {slot.adventureName}
+            {parties.map((party) => {
+              console.log('party', party.slots);
+              return (
+                <PartyCard
+                  key={party.id}
+                  draggable
+                  onDragStart={(e) => handlePartyCardDragStart(e, party)}
+                  onDragEnd={handlePartyCardDragEnd}
+                  onDragOver={handlePartyCardDragOver}
+                  onDragLeave={handlePartyCardDragLeave}
+                  onDrop={(e) => handlePartyCardDrop(e, party)}
+                >
+                  <PartyHeader>
+                    <input
+                      type="text"
+                      value={party.title}
+                      onChange={(e) =>
+                        handlePartyTitleChange(party.id, e.target.value)
+                      }
+                      placeholder="파티 제목"
+                    />
+                  </PartyHeader>
+                  <PartySlots>
+                    {party.slots.map((slot, index) => (
+                      <PartySlot
+                        key={index}
+                        onDragOver={handleDragOver}
+                        onDragLeave={handleDragLeave}
+                        onDrop={(e) => handleDrop(e, party.id, index)}
+                        className={slot === 'empty' ? 'empty' : ''}
+                      >
+                        {slot !== 'empty' ? (
+                          <div
+                            draggable
+                            onDragStart={(e) =>
+                              handlePartyDragStart(e, party.id, index, slot)
+                            }
+                            style={{
+                              width: '100%',
+                              height: '100%',
+                              display: 'flex',
+                              flexDirection: 'column',
+                              alignItems: 'center',
+                            }}
+                          >
+                            <div className="character-image">
+                              <img
+                                src={`https://img-api.neople.co.kr/df/servers/${slot.server}/characters/${slot.key}?zoom=1`}
+                                alt={`${slot.name} 캐릭터 이미지`}
+                                draggable="false"
+                              />
                             </div>
-                            {slot.buffScore ? (
-                              <div className="score">
-                                버프력 {slot.buffScore}
+                            <div className="character-info">
+                              <div className="level">명성 {slot.level}</div>
+                              <div className="name">{slot.name}</div>
+                              <div className="adventure">
+                                {slot.adventureName}
                               </div>
-                            ) : slot.ozma ? (
-                              <div className="score">랭킹 {slot.ozma}</div>
-                            ) : null}
+                              {slot.buffScore ? (
+                                <div className="score">
+                                  버프력 {slot.buffScore}
+                                </div>
+                              ) : slot.ozma ? (
+                                <div className="score">랭킹 {slot.ozma}</div>
+                              ) : null}
+                            </div>
                           </div>
-                        </div>
-                      ) : (
-                        <div>빈 슬롯</div>
-                      )}
-                    </PartySlot>
-                  ))}
-                </PartySlots>
-                <PartyMemo
-                  value={party.memo}
-                  onChange={(e) =>
-                    setParties((parties) =>
-                      parties.map((p) =>
-                        p.id === party.id ? { ...p, memo: e.target.value } : p
-                      )
-                    )
-                  }
-                  placeholder="파티 메모"
-                />
-              </PartyCard>
-            ))}
+                        ) : (
+                          <div>빈 슬롯</div>
+                        )}
+                      </PartySlot>
+                    ))}
+                  </PartySlots>
+                  <PartyMemo
+                    value={party.memo}
+                    onChange={(e) =>
+                      handlePartyMemoChange(party.id, e.target.value)
+                    }
+                    placeholder="파티 메모"
+                  />
+                </PartyCard>
+              );
+            })}
           </PartyContainer>
         </Section>
       </MainContent>
