@@ -108,7 +108,6 @@ interface DundamFrameProps {
   searchType?: 'character' | 'adventure';
   onCharacterDataUpdate?: (data: CharacterData[]) => void;
 }
-
 export function DundamFrame({
   characterName,
   shouldSearch,

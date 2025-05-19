@@ -7,6 +7,10 @@ import { DundamFrame, CharacterData } from '../components/DundamFrame';
 import { useFirebase } from '../context/FirebaseContext';
 import { debounce, throttle } from 'es-toolkit';
 import { get } from 'firebase/database';
+import {
+  getLocalStorageItem,
+  setLocalStorageItem,
+} from '../utils/localStorage';
 
 const PageContainer = styled.div`
   max-width: 1600px;
@@ -279,13 +283,69 @@ function ErrorFallback({
   return null;
 }
 
+const isExistGroupLoginData = (groupName?: string): boolean => {
+  if (!groupName) return false;
+
+  const storedGroups =
+    getLocalStorageItem<{
+      recentGroups?: {
+        name: string;
+        id: string;
+        lastVisited: string;
+      }[];
+    }>('recentGroups')?.recentGroups || [];
+
+  console.log('storedGroups', storedGroups);
+
+  const result = Boolean(
+    storedGroups.find((group) => group.name === groupName)
+  );
+
+  console.log('result', !result);
+
+  return !result;
+};
+
 function GroupPageContent() {
   const { groupName } = useParams<{ groupName: string }>();
-  const [showPasswordDialog, setShowPasswordDialog] = useState(false);
+  const [showPasswordDialog, setShowPasswordDialog] = useState(
+    isExistGroupLoginData(groupName)
+  );
   const [parties, setParties] = useState<Party[]>([]);
   const [teamMembers, setTeamMembers] = useState<TeamMember[]>([]);
   const { showBoundary } = useErrorBoundary();
   const { writeData, readData } = useFirebase();
+
+  // 로컬스토리지에 방문 정보 저장
+  useEffect(() => {
+    if (!groupName) return;
+
+    const addToRecentGroups = () => {
+      const storedGroups = localStorage.getItem('recentGroups');
+      let recentGroups = storedGroups ? JSON.parse(storedGroups) : [];
+
+      // 이미 존재하는 그룹이면 제거
+      recentGroups = recentGroups.filter((g: any) => g.id !== groupName);
+
+      // 새로운 그룹 정보를 맨 앞에 추가
+      recentGroups.unshift({
+        id: groupName,
+        name: groupName,
+        lastVisited: new Date().toISOString(),
+      });
+
+      // 최대 5개까지만 저장
+      recentGroups = recentGroups.slice(0, 5);
+
+      localStorage.setItem('recentGroups', JSON.stringify(recentGroups));
+    };
+
+    // 인증이 완료된 경우에만 방문 정보 저장
+    const isAuthenticated = sessionStorage.getItem(`auth_${groupName}`);
+    if (isAuthenticated) {
+      addToRecentGroups();
+    }
+  }, [groupName]);
 
   // 파티 데이터 저장을 위한 debounce 함수 (텍스트 입력)
   const savePartyDataDebounced = useCallback(
@@ -580,23 +640,43 @@ function GroupPageContent() {
     setParties(newParties);
   };
 
-  useEffect(() => {
-    if (!groupName) {
-      showBoundary(new Error('잘못된 그룹 접근입니다.'));
-      return;
-    }
+  // useEffect(() => {
+  //   if (!groupName) {
+  //     showBoundary(new Error('잘못된 그룹 접근입니다.'));
+  //     return;
+  //   }
 
-    const isAuthenticated = sessionStorage.getItem(`auth_${groupName}`);
-    if (!isAuthenticated) {
-      setShowPasswordDialog(true);
-    }
-  }, [groupName, showBoundary]);
+  //   const isAuthenticated = sessionStorage.getItem(`auth_${groupName}`);
+  //   if (!isAuthenticated) {
+  //     setShowPasswordDialog(true);
+  //   }
+  // }, [groupName, showBoundary]);
 
   if (showPasswordDialog) {
     return (
       <PasswordDialog
         groupName={groupName}
-        onSuccess={() => setShowPasswordDialog(false)}
+        onSuccess={(groupId) => {
+          setShowPasswordDialog(false);
+          const currentRecentGroups =
+            getLocalStorageItem<{
+              recentGroups?: {
+                name: string;
+                id: string;
+                lastVisited: string;
+              }[];
+            }>('recentGroups')?.recentGroups || [];
+          setLocalStorageItem('recentGroups', {
+            recentGroups: [
+              ...currentRecentGroups,
+              {
+                name: groupName,
+                id: groupId,
+                lastVisited: new Date().toISOString(),
+              },
+            ],
+          });
+        }}
         onFailure={() => showBoundary(new Error('인증에 실패했습니다.'))}
       />
     );
