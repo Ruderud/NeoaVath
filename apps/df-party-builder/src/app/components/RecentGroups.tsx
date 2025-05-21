@@ -23,7 +23,7 @@ export function RecentGroups(props: RecentGroupProps) {
       <RecentGroupsTitle>최근 참여한 그룹</RecentGroupsTitle>
       <RecentGroupsList>
         {recentGroups.map((group) => (
-          <RecentGroupItem key={group.id} to={`/group/${group.id}`}>
+          <RecentGroupItem key={group.id} to={`/group/${group.name}`}>
             <span>{group.name}</span>
             <span>{new Date(group.lastVisited).toLocaleDateString()}</span>
           </RecentGroupItem>

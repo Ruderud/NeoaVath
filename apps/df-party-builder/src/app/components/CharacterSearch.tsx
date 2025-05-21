@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import styled from '@emotion/styled';
-import { fetchDundamInfo } from '../utils/dundam';
+import { fetchDundamInfo } from '../api/dundam';
 
 const SearchContainer = styled.div`
   margin: 20px 0;
@@ -97,28 +97,17 @@ export function CharacterSearch({ onCharacterSelect }: CharacterSearchProps) {
   return (
     <SearchContainer>
       <SearchForm onSubmit={handleSearch}>
-        <Input
-          type="text"
-          value={searchTerm}
-          onChange={(e) => setSearchTerm(e.target.value)}
-          placeholder="캐릭터명을 입력하세요"
-        />
+        <Input type="text" value={searchTerm} onChange={(e) => setSearchTerm(e.target.value)} placeholder="캐릭터명을 입력하세요" />
         <Button type="submit" disabled={isLoading}>
           {isLoading ? '검색 중...' : '검색'}
         </Button>
       </SearchForm>
 
-      {error && (
-        <div style={{ color: 'red', marginBottom: '16px' }}>{error}</div>
-      )}
+      {error && <div style={{ color: 'red', marginBottom: '16px' }}>{error}</div>}
 
       <CharacterList>
         {characters.map((char, index) => (
-          <CharacterCard
-            key={index}
-            onClick={() => onCharacterSelect?.(char)}
-            style={{ cursor: onCharacterSelect ? 'pointer' : 'default' }}
-          >
+          <CharacterCard key={index} onClick={() => onCharacterSelect?.(char)} style={{ cursor: onCharacterSelect ? 'pointer' : 'default' }}>
             <CharacterInfo>
               <InfoItem>
                 <span>서버</span>

@@ -4,14 +4,12 @@ import { Login } from './pages/Login';
 import { CreateGroup } from './pages/CreateGroup';
 import { GroupAuthProvider } from './context/GroupAuthContext';
 import { ErrorBoundary } from 'react-error-boundary';
-import { GroupPage } from './pages/GroupPage';
+import GroupPage from './pages/GroupPage';
 
 export function App() {
   return (
     <GroupAuthProvider>
-      <ErrorBoundary
-        fallbackRender={({ error }) => <div>Error: {error.message}</div>}
-      >
+      <ErrorBoundary fallbackRender={({ error }) => <div>Error: {error.message}</div>}>
         <Routes>
           <Route path="/" element={<Intro />} />
           <Route path="/login" element={<Login />} />

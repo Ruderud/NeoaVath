@@ -1,6 +1,5 @@
 import { createContext, useContext, ReactNode } from 'react';
 import { initializeApp } from 'firebase/app';
-import { getAnalytics } from 'firebase/analytics';
 import { getDatabase, ref, set, get, child, Database } from 'firebase/database';
 
 const firebaseConfig = {
@@ -13,12 +12,12 @@ const firebaseConfig = {
   measurementId: 'G-SMNE4YMR29',
 };
 
-interface FirebaseContextType {
+type FirebaseContextType = {
   database: Database;
-  writeData: (path: string, data: any) => Promise<void>;
-  readData: (path: string) => Promise<any>;
-  findGroup: (groupName: string) => Promise<any>;
-}
+  writeData: (path: string, data: unknown) => Promise<void>;
+  readData: (path: string) => Promise<unknown>;
+  findGroup: (groupName: string) => Promise<unknown>;
+};
 
 const FirebaseContext = createContext<FirebaseContextType | null>(null);
 
@@ -27,7 +26,7 @@ export function FirebaseProvider({ children }: { children: ReactNode }) {
   // const analytics = getAnalytics(app);
   const database = getDatabase(app);
 
-  const writeData = async (path: string, data: any) => {
+  const writeData = async (path: string, data: unknown) => {
     const dbRef = ref(database, path);
     await set(dbRef, data);
   };
@@ -61,11 +60,7 @@ export function FirebaseProvider({ children }: { children: ReactNode }) {
     findGroup,
   };
 
-  return (
-    <FirebaseContext.Provider value={value}>
-      {children}
-    </FirebaseContext.Provider>
-  );
+  return <FirebaseContext.Provider value={value}>{children}</FirebaseContext.Provider>;
 }
 
 // 커스텀 훅 생성
