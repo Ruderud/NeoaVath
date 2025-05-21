@@ -42,7 +42,7 @@ function GroupPageContent() {
       let recentGroups = storedGroups ? JSON.parse(storedGroups) : [];
 
       // 이미 존재하는 그룹이면 제거
-      recentGroups = recentGroups.filter((g: any) => g.id !== groupName);
+      recentGroups = recentGroups.filter((g: unknown) => (g as { id: string }).id !== groupName);
 
       // 새로운 그룹 정보를 맨 앞에 추가
       recentGroups.unshift({
