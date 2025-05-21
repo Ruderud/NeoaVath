@@ -1,6 +1,39 @@
 import { Link } from 'react-router-dom';
 import styled from '@emotion/styled';
 import { useEffect, useState } from 'react';
+import { getLocalStorageItem } from '../utils/localStorage';
+import { RecentGroup } from '../types/types';
+import { RecentGroups } from '../components/RecentGroups';
+
+export function Intro() {
+  const [recentGroups, setRecentGroups] = useState<RecentGroup[]>([]);
+
+  useEffect(() => {
+    const { recentGroups } = getLocalStorageItem<{ recentGroups?: RecentGroup[] }>('recentGroups') || {};
+    setRecentGroups(recentGroups || []);
+  }, []);
+
+  return (
+    <Container>
+      <Title>던파 파티 빌더</Title>
+      <Subtitle>
+        파티 구성을 쉽게 관리하고 공유하세요
+        <br />
+        드래그 앤 드롭으로 간편하게 파티를 구성할 수 있습니다
+      </Subtitle>
+      <ButtonContainer>
+        <StyledLink to="/login" className="login">
+          그룹 참여하기
+        </StyledLink>
+        <StyledLink to="/create" className="create">
+          새 그룹 만들기
+        </StyledLink>
+      </ButtonContainer>
+
+      <RecentGroups recentGroups={recentGroups} />
+    </Container>
+  );
+}
 
 const Container = styled.div`
   max-width: 800px;
@@ -51,94 +84,3 @@ const StyledLink = styled(Link)`
     }
   }
 `;
-
-const RecentGroupsContainer = styled.div`
-  margin-top: 60px;
-  padding: 20px;
-  background-color: #f5f5f5;
-  border-radius: 12px;
-`;
-
-const RecentGroupsTitle = styled.h2`
-  font-size: 1.5em;
-  color: #333;
-  margin-bottom: 20px;
-`;
-
-const RecentGroupsList = styled.div`
-  display: flex;
-  flex-direction: column;
-  gap: 10px;
-`;
-
-const RecentGroupItem = styled(Link)`
-  padding: 12px 20px;
-  background-color: white;
-  border-radius: 6px;
-  text-decoration: none;
-  color: #333;
-  transition: all 0.2s ease;
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-
-  &:hover {
-    background-color: #e9e9e9;
-  }
-`;
-
-const NoRecentGroups = styled.p`
-  color: #666;
-  font-style: italic;
-`;
-
-interface RecentGroup {
-  id: string;
-  name: string;
-  lastVisited: string;
-}
-
-export function Intro() {
-  const [recentGroups, setRecentGroups] = useState<RecentGroup[]>([]);
-
-  useEffect(() => {
-    const storedGroups = localStorage.getItem('recentGroups');
-    console.log('storedGroups', storedGroups);
-    if (storedGroups) {
-      setRecentGroups(JSON.parse(storedGroups));
-    }
-  }, []);
-
-  return (
-    <Container>
-      <Title>던파 파티 빌더</Title>
-      <Subtitle>
-        파티 구성을 쉽게 관리하고 공유하세요
-        <br />
-        드래그 앤 드롭으로 간편하게 파티를 구성할 수 있습니다
-      </Subtitle>
-      <ButtonContainer>
-        <StyledLink to="/login" className="login">
-          그룹 참여하기
-        </StyledLink>
-        <StyledLink to="/create" className="create">
-          새 그룹 만들기
-        </StyledLink>
-      </ButtonContainer>
-
-      {recentGroups.length > 0 && (
-        <RecentGroupsContainer>
-          <RecentGroupsTitle>최근 참여한 그룹</RecentGroupsTitle>
-          <RecentGroupsList>
-            {recentGroups.map((group) => (
-              <RecentGroupItem key={group.id} to={`/group/${group.id}`}>
-                <span>{group.name}</span>
-                <span>{new Date(group.lastVisited).toLocaleDateString()}</span>
-              </RecentGroupItem>
-            ))}
-          </RecentGroupsList>
-        </RecentGroupsContainer>
-      )}
-    </Container>
-  );
-}

@@ -640,18 +640,6 @@ function GroupPageContent() {
     setParties(newParties);
   };
 
-  // useEffect(() => {
-  //   if (!groupName) {
-  //     showBoundary(new Error('잘못된 그룹 접근입니다.'));
-  //     return;
-  //   }
-
-  //   const isAuthenticated = sessionStorage.getItem(`auth_${groupName}`);
-  //   if (!isAuthenticated) {
-  //     setShowPasswordDialog(true);
-  //   }
-  // }, [groupName, showBoundary]);
-
   if (showPasswordDialog) {
     return (
       <PasswordDialog
