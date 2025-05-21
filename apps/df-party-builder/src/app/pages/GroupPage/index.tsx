@@ -269,13 +269,13 @@ function GroupPageContent() {
             if (party.id === targetPartyId) {
               const newSlots = [...party.slots];
               newSlots[targetSlotIndex] = character as unknown as PartySlot;
-              newParties[partyIndex] = { ...party, slots: newSlots };
+              newParties[partyIndex] = { ...party, slots: newSlots as [PartySlot, PartySlot, PartySlot, PartySlot] };
             }
             // 원래 파티에서 제거
             if (sourcePartyId && party.id === sourcePartyId) {
               const newSlots = [...party.slots];
               newSlots[Number(sourceSlotIndex)] = 'empty';
-              newParties[partyIndex] = { ...party, slots: newSlots };
+              newParties[partyIndex] = { ...party, slots: newSlots as [PartySlot, PartySlot, PartySlot, PartySlot] };
             }
           });
         }
