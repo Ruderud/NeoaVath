@@ -4,29 +4,21 @@ addEventListener('fetch', (event) => {
 
 const DUNDAM_BASE_URL = 'https://dundam.xyz';
 
-async function searchCharacter(name) {
+async function searchCharacter(name, userAgent, rawData = false) {
   try {
     console.log('Searching for character:', name);
 
-    const searchResponse = await fetch(
-      `${DUNDAM_BASE_URL}/dat/searchData.jsp?name=${encodeURIComponent(
-        name
-      )}&server=adven`,
-      {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          Accept: 'application/json, text/plain, */*',
-          'User-Agent':
-            'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/135.0.0.0 Safari/537.36',
-          Origin: DUNDAM_BASE_URL,
-          Referer: `${DUNDAM_BASE_URL}/search?server=adven&name=${encodeURIComponent(
-            name
-          )}`,
-        },
-        body: '{}',
-      }
-    );
+    const searchResponse = await fetch(`${DUNDAM_BASE_URL}/dat/searchData.jsp?name=${encodeURIComponent(name)}&server=adven`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        Accept: 'application/json, text/plain, */*',
+        'User-Agent': userAgent,
+        Origin: DUNDAM_BASE_URL,
+        Referer: `${DUNDAM_BASE_URL}/search?server=adven&name=${encodeURIComponent(name)}`,
+      },
+      body: '{}',
+    });
 
     console.log('API Response status:', searchResponse.status);
 
@@ -41,15 +33,37 @@ async function searchCharacter(name) {
     const jsonStr = responseText.replace('Raw HTML response: ', '').trim();
     const data = JSON.parse(jsonStr);
 
+    if (rawData) {
+      return {
+        rawData: data,
+        characters: data.characters.map((char) => ({
+          name: char.name,
+          jobName: char.job,
+          baseJob: char.baseJob,
+          server: char.server,
+          level: char.fame,
+          adventureName: char.adventrueName,
+          setPoint: char.setPoint,
+          skillDamage: char.skillDamage,
+          critical: char.cri,
+          buffScore: char.buffScore,
+          switching: char.switching || '',
+          ozma: char.ozma || '',
+          bakal: char.bakal || 0,
+          key: char.key,
+        })),
+        total: data.characters.length,
+      };
+    }
+
     // 필요한 데이터만 추출하여 변환
     const characters = data.characters.map((char) => ({
       name: char.name,
       jobName: char.job,
       baseJob: char.baseJob,
       server: char.server,
-      level: char.fame, // 명성치를 레벨로 사용
+      level: char.fame,
       adventureName: char.adventrueName,
-      // 추가 정보
       setPoint: char.setPoint,
       skillDamage: char.skillDamage,
       critical: char.cri,
@@ -57,7 +71,7 @@ async function searchCharacter(name) {
       switching: char.switching || '',
       ozma: char.ozma || '',
       bakal: char.bakal || 0,
-      key: char.key, // 캐릭터 이미지 URL용 key 추가
+      key: char.key,
     }));
 
     return {
@@ -74,8 +88,7 @@ async function handleRequest(request) {
   const corsHeaders = {
     'Access-Control-Allow-Origin': '*',
     'Access-Control-Allow-Methods': 'GET, HEAD, POST, OPTIONS',
-    'Access-Control-Allow-Headers':
-      'Content-Type, Accept, Origin, Referer, User-Agent',
+    'Access-Control-Allow-Headers': 'Content-Type, Accept, Origin, Referer, User-Agent',
   };
 
   if (request.method === 'OPTIONS') {
@@ -86,6 +99,10 @@ async function handleRequest(request) {
 
   const url = new URL(request.url);
   const characterName = url.searchParams.get('name');
+  const rawData = url.searchParams.get('rawData') === 'true';
+  const userAgent =
+    request.headers.get('User-Agent') ||
+    'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/135.0.0.0 Safari/537.36';
 
   if (!characterName) {
     return new Response('Character name is required', {
@@ -97,7 +114,7 @@ async function handleRequest(request) {
   try {
     console.log('Processing request for character:', characterName);
 
-    const searchResult = await searchCharacter(characterName);
+    const searchResult = await searchCharacter(characterName, userAgent, rawData);
     console.log('Search completed successfully');
 
     return new Response(JSON.stringify(searchResult), {
@@ -120,7 +137,7 @@ async function handleRequest(request) {
           ...corsHeaders,
           'Content-Type': 'application/json',
         },
-      }
+      },
     );
   }
 }

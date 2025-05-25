@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import styled from '@emotion/styled';
 import { useFirebase } from '../context/FirebaseContext';
 import { v4 as uuidv4 } from 'uuid';
-import { fetchDundamInfo } from '../utils/dundam';
+import { fetchDundamInfo } from '../api/dundam';
 
 const Container = styled.div`
   max-width: 400px;
@@ -74,9 +74,7 @@ export function CreateGroup() {
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
   const [error, setError] = useState('');
-  const [characterInfo, setCharacterInfo] = useState<CharacterInfo[] | null>(
-    null
-  );
+  const [characterInfo, setCharacterInfo] = useState<CharacterInfo[] | null>(null);
   const [createdGroupId, setCreatedGroupId] = useState<string | null>(null);
   const [finalGroupName, setFinalGroupName] = useState<string | null>(null);
   const { writeData, readData } = useFirebase();
@@ -151,13 +149,7 @@ export function CreateGroup() {
     <Container>
       <h2>새 그룹 만들기</h2>
       <Form onSubmit={handleCreateGroup}>
-        <Input
-          type="text"
-          placeholder="그룹명"
-          value={groupName}
-          onChange={(e) => setGroupName(e.target.value)}
-          required
-        />
+        <Input type="text" placeholder="그룹명" value={groupName} onChange={(e) => setGroupName(e.target.value)} required />
         <Button type="button" onClick={handleDundamSearch}>
           던담 검색
         </Button>
@@ -176,20 +168,8 @@ export function CreateGroup() {
             ))}
           </div>
         )}
-        <Input
-          type="password"
-          placeholder="비밀번호"
-          value={password}
-          onChange={(e) => setPassword(e.target.value)}
-          required
-        />
-        <Input
-          type="password"
-          placeholder="비밀번호 확인"
-          value={confirmPassword}
-          onChange={(e) => setConfirmPassword(e.target.value)}
-          required
-        />
+        <Input type="password" placeholder="비밀번호" value={password} onChange={(e) => setPassword(e.target.value)} required />
+        <Input type="password" placeholder="비밀번호 확인" value={confirmPassword} onChange={(e) => setConfirmPassword(e.target.value)} required />
         {error && <ErrorMessage>{error}</ErrorMessage>}
         <Button type="submit">그룹 만들기</Button>
         {createdGroupId && finalGroupName && (

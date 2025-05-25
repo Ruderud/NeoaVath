@@ -1,5 +1,39 @@
 import { Link } from 'react-router-dom';
 import styled from '@emotion/styled';
+import { useEffect, useState } from 'react';
+import { getLocalStorageItem } from '../utils/localStorage';
+import { RecentGroup } from '../types/types';
+import { RecentGroups } from '../components/RecentGroups';
+
+export function Intro() {
+  const [recentGroups, setRecentGroups] = useState<RecentGroup[]>([]);
+
+  useEffect(() => {
+    const { recentGroups } = getLocalStorageItem<{ recentGroups?: RecentGroup[] }>('recentGroups') || {};
+    setRecentGroups(recentGroups || []);
+  }, []);
+
+  return (
+    <Container>
+      <Title>던파 파티 빌더</Title>
+      <Subtitle>
+        파티 구성을 쉽게 관리하고 공유하세요
+        <br />
+        드래그 앤 드롭으로 간편하게 파티를 구성할 수 있습니다
+      </Subtitle>
+      <ButtonContainer>
+        <StyledLink to="/login" className="login">
+          그룹 참여하기
+        </StyledLink>
+        <StyledLink to="/create" className="create">
+          새 그룹 만들기
+        </StyledLink>
+      </ButtonContainer>
+
+      <RecentGroups recentGroups={recentGroups} />
+    </Container>
+  );
+}
 
 const Container = styled.div`
   max-width: 800px;
@@ -50,24 +84,3 @@ const StyledLink = styled(Link)`
     }
   }
 `;
-
-export function Intro() {
-  return (
-    <Container>
-      <Title>던파 파티 빌더</Title>
-      <Subtitle>
-        파티 구성을 쉽게 관리하고 공유하세요
-        <br />
-        드래그 앤 드롭으로 간편하게 파티를 구성할 수 있습니다
-      </Subtitle>
-      <ButtonContainer>
-        <StyledLink to="/login" className="login">
-          그룹 참여하기
-        </StyledLink>
-        <StyledLink to="/create" className="create">
-          새 그룹 만들기
-        </StyledLink>
-      </ButtonContainer>
-    </Container>
-  );
-}

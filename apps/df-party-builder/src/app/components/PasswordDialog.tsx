@@ -55,7 +55,7 @@ const ErrorText = styled.p`
 
 interface PasswordDialogProps {
   groupName: string | undefined;
-  onSuccess: () => void;
+  onSuccess: (groupId: string) => void;
   onFailure: () => void;
 }
 
@@ -95,7 +95,7 @@ export function PasswordDialog({
       }
 
       addAuthenticatedGroup(groupId);
-      onSuccess();
+      onSuccess(groupId);
     } catch (err) {
       console.error(err);
       setError('오류가 발생했습니다.');
