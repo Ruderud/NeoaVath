@@ -446,6 +446,10 @@ export function GroupPage() {
     return () => window.removeEventListener('resize', handleResize);
   }, []);
 
+  if (isMobile) {
+    console.log('isMobile', isMobile);
+  }
+
   return (
     <PageContainer isMobile={isMobile}>
       <PageTitle title="그룹 페이지" />
