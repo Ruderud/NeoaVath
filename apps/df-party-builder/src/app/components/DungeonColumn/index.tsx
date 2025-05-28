@@ -23,7 +23,7 @@ export type DungeonColumnProps = {
   onCharacterDragStart: (e: React.DragEvent<HTMLDivElement>, partyId: string, slotIndex: number, character: CharacterData) => void;
   onCharacterDragOver: (e: React.DragEvent) => void;
   onCharacterDragLeave: (e: React.DragEvent) => void;
-  onCharacterDrop: (e: React.DragEvent, targetPartyId: string, targetSlotIndex: number) => void;
+  onCharacterDrop: (e: React.DragEvent, targetDungeonId: string, targetPartyId: string, targetSlotIndex: number) => void;
   onCharacterSelect: (character: CharacterData) => void;
 };
 
@@ -66,6 +66,7 @@ export function DungeonColumn({
             <PartyCard
               key={party.id}
               party={party}
+              isMobile={isMobile}
               isExpanded={expandedPartyId === party.id}
               onToggleExpand={() => onTogglePartyExpand(party.id)}
               onTitleChange={(newTitle) => onPartyTitleChange(party.id, newTitle)}
@@ -78,7 +79,7 @@ export function DungeonColumn({
               onCharacterDragStart={onCharacterDragStart}
               onCharacterDragOver={onCharacterDragOver}
               onCharacterDragLeave={onCharacterDragLeave}
-              onCharacterDrop={onCharacterDrop}
+              onCharacterDrop={(e, targetPartyId, targetSlotIndex) => onCharacterDrop(e, id, targetPartyId, targetSlotIndex)}
               onCharacterSelect={onCharacterSelect}
             />
           ))}
@@ -95,9 +96,7 @@ const Column = styled.div`
   background: #f5f5f5;
   border-radius: 8px;
   padding: 16px;
-  min-width: 300px;
-  max-width: 300px;
-  height: fit-content;
+  width: 450px;
   max-height: calc(100vh - 200px);
   overflow-y: auto;
 `;

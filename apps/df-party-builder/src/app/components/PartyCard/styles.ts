@@ -91,14 +91,15 @@ export const PartyCardDetails = styled.div`
 `;
 
 export const PartySlots = styled.div<{ isMobile: boolean }>`
-  display: grid;
-  grid-template-columns: repeat(2, 1fr);
+  display: flex;
+  flex-direction: row;
   gap: 12px;
 `;
 
 export const PartySlot = styled.div<{ isMobile: boolean }>`
-  aspect-ratio: 1;
   background: #f8f9fa;
+  width: 150px;
+  height: 180px;
   border: 2px dashed #e0e0e0;
   border-radius: 8px;
   display: flex;
@@ -107,6 +108,7 @@ export const PartySlot = styled.div<{ isMobile: boolean }>`
   color: #666;
   font-size: 0.9em;
   transition: all 0.2s ease;
+  overflow: hidden;
 
   &.empty {
     &:hover {
@@ -118,6 +120,14 @@ export const PartySlot = styled.div<{ isMobile: boolean }>`
   &.drag-over {
     border: 2px dashed #2196f3;
     background: #e3f2fd;
+  }
+
+  > div {
+    width: 100%;
+    height: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
   }
 `;
 

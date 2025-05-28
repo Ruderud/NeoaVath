@@ -10,8 +10,10 @@ import { Plus } from 'lucide-react';
 import { Drawer } from '../../components/Drawer';
 import { DungeonColumn } from '../../components/DungeonColumn';
 import { PartyModal } from '../../components/PartyModal';
+import { CharacterDetailModal } from '../../components/CharacterDetailModal';
 import { ActionSheet } from '../../components/ActionSheet';
 import { CharacterSearch } from '../../components/CharacterSearch';
+import { v4 as uuidv4 } from 'uuid';
 import {
   PageContainer,
   MainContent,
@@ -54,11 +56,7 @@ type Dungeon = {
 export function GroupPage() {
   const { groupName } = useParams<{ groupName: string }>();
   const [showPasswordDialog, setShowPasswordDialog] = useState(isExistGroupLoginData(groupName));
-  const [dungeons, setDungeons] = useState<Dungeon[]>([
-    { id: '1', name: '발할라', parties: [] },
-    { id: '2', name: '오즈마', parties: [] },
-    { id: '3', name: '이스핀즈', parties: [] },
-  ]);
+  const [dungeons, setDungeons] = useState<Dungeon[]>([]);
   const [isMobile, setIsMobile] = useState(window.innerWidth <= 768);
   const [isDrawerOpen, setIsDrawerOpen] = useState(true);
   const [expandedPartyId, setExpandedPartyId] = useState<string | null>(null);
@@ -68,6 +66,7 @@ export function GroupPage() {
   const { showBoundary } = useErrorBoundary();
   const { writeData, readData } = useFirebase();
   const [showActionSheet, setShowActionSheet] = useState(false);
+  const [showCharacterDetail, setShowCharacterDetail] = useState(false);
   const [selectedCharacter, setSelectedCharacter] = useState<CharacterData | null>(null);
   const [showCharacterSearch, setShowCharacterSearch] = useState(false);
 
@@ -210,7 +209,7 @@ export function GroupPage() {
 
   const addPartyToDungeon = (dungeonId: string) => {
     const newParty: Party = {
-      id: Date.now().toString(),
+      id: uuidv4(),
       title: '새 파티',
       slots: ['empty', 'empty', 'empty', 'empty'] as [PartySlot, PartySlot, PartySlot, PartySlot],
       memo: '',
@@ -219,12 +218,20 @@ export function GroupPage() {
     setDungeons((prev) => prev.map((dungeon) => (dungeon.id === dungeonId ? { ...dungeon, parties: [...dungeon.parties, newParty] } : dungeon)));
   };
 
-  const handlePartyDragStart = (e: React.DragEvent<HTMLDivElement>, partyId: string, slotIndex: number, character: CharacterData) => {
+  const handleCharacterDragStart = (e: React.DragEvent<HTMLDivElement>, character: CharacterData) => {
+    e.stopPropagation();
+    e.dataTransfer.setData('character', JSON.stringify(character));
+    e.dataTransfer.setData('type', 'character');
+    e.currentTarget.classList.add('dragging');
+  };
+
+  const handlePartySlotDragStart = (e: React.DragEvent<HTMLDivElement>, partyId: string, slotIndex: number, character: CharacterData) => {
     e.stopPropagation();
     e.dataTransfer.setData('character', JSON.stringify(character));
     e.dataTransfer.setData('sourcePartyId', partyId);
     e.dataTransfer.setData('sourceSlotIndex', String(slotIndex));
     e.dataTransfer.setData('type', 'character');
+    e.currentTarget.classList.add('dragging');
   };
 
   const handlePartyCardDragStart = (e: React.DragEvent<HTMLDivElement>, party: Party) => {
@@ -291,7 +298,7 @@ export function GroupPage() {
     target.classList.remove('drag-over');
   };
 
-  const handleDrop = (e: React.DragEvent, targetPartyId: string, targetSlotIndex: number) => {
+  const handleDrop = (e: React.DragEvent, targetDungeonId: string, targetPartyId: string, targetSlotIndex: number) => {
     e.preventDefault();
     const target = e.currentTarget as HTMLDivElement;
     target.classList.remove('drag-over');
@@ -309,39 +316,55 @@ export function GroupPage() {
       const character = JSON.parse(characterData) as CharacterData;
 
       setDungeons((prev) => {
-        const newParties = [...(prev.find((dungeon) => dungeon.id === groupName)?.parties || [])];
+        console.log('prev dungeons:', prev);
+        console.log('targetDungeonId:', targetDungeonId);
+        console.log('targetPartyId:', targetPartyId);
+
+        const newDungeons = [...prev];
+        // 던전 ID를 문자열로 변환하여 비교
+        const targetDungeon = newDungeons.find((dungeon) => String(dungeon.id) === String(targetDungeonId));
+        const sourceDungeon = sourcePartyId ? newDungeons.find((dungeon) => dungeon.parties.some((party) => party.id === sourcePartyId)) : null;
+
+        console.log('targetDungeon:', targetDungeon);
+        console.log('sourceDungeon:', sourceDungeon);
+
+        if (!targetDungeon) {
+          console.error('Target dungeon not found:', targetDungeonId);
+          return prev;
+        }
+
+        const targetParty = targetDungeon.parties.find((party) => party.id === targetPartyId);
+        if (!targetParty) {
+          console.error('Target party not found:', targetPartyId);
+          return prev;
+        }
 
         // 같은 파티 내에서의 이동인 경우
         if (sourcePartyId && sourcePartyId === targetPartyId) {
-          const partyIndex = newParties.findIndex((p) => p.id === targetPartyId);
-          if (partyIndex !== -1) {
-            const newSlots = [...newParties[partyIndex].slots];
-            // 슬롯 교환
-            const temp = newSlots[targetSlotIndex];
-            newSlots[targetSlotIndex] = character as unknown as PartySlot;
-            newSlots[Number(sourceSlotIndex)] = temp;
-            newParties[partyIndex] = {
-              ...newParties[partyIndex],
-              slots: newSlots as [PartySlot, PartySlot, PartySlot, PartySlot],
-            };
-          }
+          const newSlots = [...targetParty.slots];
+          const temp = newSlots[targetSlotIndex];
+          newSlots[targetSlotIndex] = character as unknown as PartySlot;
+          newSlots[Number(sourceSlotIndex)] = temp;
+
+          targetParty.slots = newSlots as [PartySlot, PartySlot, PartySlot, PartySlot];
         } else {
-          // 다른 파티에서 온 경우 또는 새로운 캐릭터인 경우
-          newParties.forEach((party, partyIndex) => {
-            if (party.id === targetPartyId) {
-              const newSlots = [...party.slots];
-              newSlots[targetSlotIndex] = character as unknown as PartySlot;
-              newParties[partyIndex] = { ...party, slots: newSlots as [PartySlot, PartySlot, PartySlot, PartySlot] };
+          // 다른 파티로 이동하는 경우
+          const newSlots = [...targetParty.slots];
+          newSlots[targetSlotIndex] = character as unknown as PartySlot;
+          targetParty.slots = newSlots as [PartySlot, PartySlot, PartySlot, PartySlot];
+
+          // 원래 파티에서 제거
+          if (sourcePartyId && sourceDungeon) {
+            const sourceParty = sourceDungeon.parties.find((party) => party.id === sourcePartyId);
+            if (sourceParty) {
+              const sourceSlots = [...sourceParty.slots];
+              sourceSlots[Number(sourceSlotIndex)] = 'empty';
+              sourceParty.slots = sourceSlots as [PartySlot, PartySlot, PartySlot, PartySlot];
             }
-            // 원래 파티에서 제거
-            if (sourcePartyId && party.id === sourcePartyId) {
-              const newSlots = [...party.slots];
-              newSlots[Number(sourceSlotIndex)] = 'empty';
-              newParties[partyIndex] = { ...party, slots: newSlots as [PartySlot, PartySlot, PartySlot, PartySlot] };
-            }
-          });
+          }
         }
-        return prev.map((dungeon) => (dungeon.id === groupName ? { ...dungeon, parties: newParties } : dungeon));
+
+        return newDungeons;
       });
     } catch (error) {
       console.error('캐릭터 데이터 파싱 실패:', error);
@@ -387,7 +410,7 @@ export function GroupPage() {
     setDungeons((prev) => [
       ...prev,
       {
-        id: Date.now().toString(),
+        id: uuidv4(),
         name: newDungeonName.trim(),
         parties: [],
       },
@@ -404,11 +427,11 @@ export function GroupPage() {
 
   const handleCharacterSelect = (character: CharacterData) => {
     setSelectedCharacter(character);
-    setShowActionSheet(true);
+    setShowCharacterDetail(true);
   };
 
-  const handleActionSheetClose = () => {
-    setShowActionSheet(false);
+  const handleCharacterDetailClose = () => {
+    setShowCharacterDetail(false);
     setSelectedCharacter(null);
   };
 
@@ -477,7 +500,7 @@ export function GroupPage() {
                   onPartyDragOver={handlePartyCardDragOver}
                   onPartyDragLeave={handlePartyCardDragLeave}
                   onPartyDrop={handlePartyCardDrop}
-                  onCharacterDragStart={handlePartyDragStart}
+                  onCharacterDragStart={handlePartySlotDragStart}
                   onCharacterDragOver={handleDragOver}
                   onCharacterDragLeave={handleDragLeave}
                   onCharacterDrop={handleDrop}
@@ -512,7 +535,7 @@ export function GroupPage() {
           </Section>
 
           <Section style={{ marginTop: '20px' }}>
-            <CharacterSearch onCharacterSelect={handleCharacterSelect} onCharacterDragStart={handlePartyDragStart} />
+            <CharacterSearch isOpen={true} onClose={() => {}} onCharacterSelect={handleCharacterSelect} onCharacterDragStart={handleCharacterDragStart} />
           </Section>
 
           {selectedPartyId && selectedParty && (
@@ -531,26 +554,7 @@ export function GroupPage() {
               }}
             />
           )}
-          {selectedCharacter && (
-            <ActionSheet
-              isOpen={showActionSheet}
-              title="캐릭터 추가"
-              actions={[
-                {
-                  label: '파티에 추가',
-                  onClick: () => {
-                    // 파티에 캐릭터 추가 로직
-                    handleActionSheetClose();
-                  },
-                },
-                {
-                  label: '취소',
-                  onClick: handleActionSheetClose,
-                },
-              ]}
-              onClose={handleActionSheetClose}
-            />
-          )}
+          <CharacterDetailModal isOpen={showCharacterDetail} character={selectedCharacter} onClose={handleCharacterDetailClose} />
         </MainContent>
       </PageContainer>
     </>

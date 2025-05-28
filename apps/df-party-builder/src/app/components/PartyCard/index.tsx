@@ -50,6 +50,7 @@ export function PartyCard({
   onCharacterDrop,
   onCharacterSelect,
 }: PartyCardProps) {
+  console.log('party', party);
   return (
     <PartyCardContainer
       isMobile={isMobile}

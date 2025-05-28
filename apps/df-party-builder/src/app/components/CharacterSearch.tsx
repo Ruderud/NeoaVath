@@ -105,7 +105,7 @@ interface CharacterSearchProps {
   isOpen: boolean;
   onClose: () => void;
   onCharacterSelect?: (characterInfo: CharacterData) => void;
-  onCharacterDragStart?: (e: React.DragEvent<HTMLDivElement>, partyId: string, slotIndex: number, character: CharacterData) => void;
+  onCharacterDragStart?: (e: React.DragEvent<HTMLDivElement>, character: CharacterData) => void;
 }
 
 export function CharacterSearch({ isOpen, onClose, onCharacterSelect, onCharacterDragStart }: CharacterSearchProps) {
@@ -134,7 +134,7 @@ export function CharacterSearch({ isOpen, onClose, onCharacterSelect, onCharacte
     e.dataTransfer.setData('character', JSON.stringify(character));
     e.dataTransfer.setData('type', 'character');
     e.currentTarget.classList.add('dragging');
-    onCharacterDragStart?.(e, '', -1, character);
+    onCharacterDragStart?.(e, character);
   };
 
   const handleDragEnd = (e: React.DragEvent<HTMLDivElement>) => {
