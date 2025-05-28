@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Plus, ChevronDown, ChevronUp } from 'lucide-react';
+import { Plus, ChevronDown, ChevronUp, Pencil } from 'lucide-react';
 import styled from '@emotion/styled';
 import type { Party, PartySlot, CharacterData } from '../../types/types';
 import { CharacterCard } from '../CharacterCard';
@@ -14,6 +14,7 @@ export type DungeonColumnProps = {
   onTogglePartyExpand: (partyId: string) => void;
   onPartyTitleChange: (partyId: string, newTitle: string) => void;
   onPartyMemoChange: (partyId: string, newMemo: string) => void;
+  onPartyCompletedChange: (partyId: string, isCompleted: boolean) => void;
   onAddParty: (dungeonId: string) => void;
   onPartyDragStart: (e: React.DragEvent<HTMLDivElement>, party: Party) => void;
   onPartyDragEnd: (e: React.DragEvent<HTMLDivElement>) => void;
@@ -25,6 +26,9 @@ export type DungeonColumnProps = {
   onCharacterDragLeave: (e: React.DragEvent) => void;
   onCharacterDrop: (e: React.DragEvent, targetDungeonId: string, targetPartyId: string, targetSlotIndex: number) => void;
   onCharacterSelect: (character: CharacterData) => void;
+  onDungeonNameChange: (dungeonId: string, newName: string) => void;
+  onCharacterDelete: (partyId: string, slotIndex: number) => void;
+  onPartyDelete: (partyId: string) => void;
 };
 
 export function DungeonColumn({
@@ -36,6 +40,7 @@ export function DungeonColumn({
   onTogglePartyExpand,
   onPartyTitleChange,
   onPartyMemoChange,
+  onPartyCompletedChange,
   onAddParty,
   onPartyDragStart,
   onPartyDragEnd,
@@ -47,18 +52,44 @@ export function DungeonColumn({
   onCharacterDragLeave,
   onCharacterDrop,
   onCharacterSelect,
+  onDungeonNameChange,
+  onCharacterDelete,
+  onPartyDelete,
 }: DungeonColumnProps) {
   const [isExpanded, setIsExpanded] = useState(true);
+  const [isEditing, setIsEditing] = useState(false);
+  const [editedName, setEditedName] = useState(name);
 
   const toggleExpand = () => {
     setIsExpanded(!isExpanded);
   };
 
+  const handleNameSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (editedName.trim() && editedName !== name) {
+      onDungeonNameChange(id, editedName.trim());
+    }
+    setIsEditing(false);
+  };
+
   return (
     <Column>
       <ColumnHeader>
-        <ColumnTitle>{name}</ColumnTitle>
-        <ExpandButton onClick={toggleExpand}>{isExpanded ? <ChevronUp size={20} /> : <ChevronDown size={20} />}</ExpandButton>
+        {isEditing ? (
+          <NameEditForm onSubmit={handleNameSubmit}>
+            <NameInput type="text" value={editedName} onChange={(e) => setEditedName(e.target.value)} onBlur={handleNameSubmit} autoFocus />
+          </NameEditForm>
+        ) : (
+          <>
+            <ColumnTitle>{name}</ColumnTitle>
+            <EditButton onClick={() => setIsEditing(true)}>
+              <Pencil size={16} />
+            </EditButton>
+          </>
+        )}
+        <AddPartyButton onClick={() => onAddParty(id)}>
+          <Plus size={20} />
+        </AddPartyButton>
       </ColumnHeader>
       {isExpanded && (
         <ColumnContent>
@@ -71,21 +102,21 @@ export function DungeonColumn({
               onToggleExpand={() => onTogglePartyExpand(party.id)}
               onTitleChange={(newTitle) => onPartyTitleChange(party.id, newTitle)}
               onMemoChange={(newMemo) => onPartyMemoChange(party.id, newMemo)}
+              onCompletedChange={(isCompleted) => onPartyCompletedChange(party.id, isCompleted)}
               onDragStart={(e) => onPartyDragStart(e, party)}
               onDragEnd={onPartyDragEnd}
               onDragOver={onPartyDragOver}
               onDragLeave={onPartyDragLeave}
               onDrop={(e) => onPartyDrop(e, party)}
-              onCharacterDragStart={onCharacterDragStart}
+              onCharacterDragStart={(e, slotIndex, character) => onCharacterDragStart(e, party.id, slotIndex, character)}
               onCharacterDragOver={onCharacterDragOver}
               onCharacterDragLeave={onCharacterDragLeave}
               onCharacterDrop={(e, targetPartyId, targetSlotIndex) => onCharacterDrop(e, id, targetPartyId, targetSlotIndex)}
               onCharacterSelect={onCharacterSelect}
+              onCharacterDelete={onCharacterDelete}
+              onPartyDelete={onPartyDelete}
             />
           ))}
-          <AddPartyButton onClick={() => onAddParty(id)}>
-            <Plus size={20} /> 파티 추가
-          </AddPartyButton>
         </ColumnContent>
       )}
     </Column>
@@ -114,18 +145,39 @@ const ColumnTitle = styled.h3`
   font-weight: 600;
 `;
 
-const ExpandButton = styled.button`
+const EditButton = styled.button`
   background: none;
   border: none;
+  color: #666;
   cursor: pointer;
   padding: 4px;
-  color: #666;
   display: flex;
   align-items: center;
   justify-content: center;
+  transition: color 0.2s ease;
 
   &:hover {
-    color: #000;
+    color: #333;
+  }
+`;
+
+const NameEditForm = styled.form`
+  display: flex;
+  flex: 1;
+`;
+
+const NameInput = styled.input`
+  width: 100%;
+  padding: 4px 8px;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  font-size: 1.2rem;
+  font-weight: 600;
+  color: #333;
+
+  &:focus {
+    outline: none;
+    border-color: #2196f3;
   }
 `;
 

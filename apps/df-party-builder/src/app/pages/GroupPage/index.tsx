@@ -29,6 +29,7 @@ import {
   AddDungeonButton,
   Button,
 } from './styles';
+import { Toast } from '../../components/Toast';
 
 const isExistGroupLoginData = (groupName?: string): boolean => {
   if (!groupName) return false;
@@ -64,11 +65,13 @@ export function GroupPage() {
   const [showAddGroupInput, setShowAddGroupInput] = useState(false);
   const [newDungeonName, setNewDungeonName] = useState('');
   const { showBoundary } = useErrorBoundary();
-  const { writeData, readData } = useFirebase();
+  const { writeData, readData, subscribeToData } = useFirebase();
   const [showActionSheet, setShowActionSheet] = useState(false);
   const [showCharacterDetail, setShowCharacterDetail] = useState(false);
   const [selectedCharacter, setSelectedCharacter] = useState<CharacterData | null>(null);
   const [showCharacterSearch, setShowCharacterSearch] = useState(false);
+  const [toastMessage, setToastMessage] = useState('');
+  const [isToastVisible, setIsToastVisible] = useState(false);
 
   // Drawer 토글 함수
   const handleToggleDrawer = useCallback(() => {
@@ -118,21 +121,27 @@ export function GroupPage() {
 
   // 파티 데이터 저장을 위한 debounce 함수 (텍스트 입력)
   const savePartyDataDebounced = useCallback(
-    async (groupName: string, parties: Party[]) => {
-      await writeData(`groups/${groupName}/parties`, parties);
-      console.log('savePartyDataDebounced', groupName, parties);
+    async (groupName: string, dungeons: Dungeon[]) => {
+      try {
+        await writeData(`groups/${groupName}/dungeons`, dungeons);
+        console.log('savePartyDataDebounced', groupName, dungeons);
+      } catch (error) {
+        console.error('던전 데이터 저장 실패:', error);
+      }
     },
     [writeData],
   );
 
   // 파티 데이터 저장을 위한 throttle 함수 (드래그 앤 드롭)
   const savePartyDataThrottled = useCallback(
-    (groupName: string, parties: Party[]) => {
-      throttle(async (groupName: string, parties: Party[]) => {
-        await writeData(`groups/${groupName}/parties`, parties);
-        console.log('savePartyDataThrottled', groupName, parties);
-      }, 2000);
-    },
+    throttle(async (groupName: string, dungeons: Dungeon[]) => {
+      try {
+        await writeData(`groups/${groupName}/dungeons`, dungeons);
+        console.log('savePartyDataThrottled', groupName, dungeons);
+      } catch (error) {
+        console.error('던전 데이터 저장 실패:', error);
+      }
+    }, 2000),
     [writeData],
   );
 
@@ -153,56 +162,92 @@ export function GroupPage() {
     }));
 
     // 마지막 저장 시점과 현재 시점의 데이터 비교
-    const lastSavedData = sessionStorage.getItem(`lastSavedParties_${groupName}`);
+    const lastSavedData = sessionStorage.getItem(`lastSavedDungeons_${groupName}`);
     const currentData = JSON.stringify(validatedDungeons);
 
     if (lastSavedData !== currentData) {
-      sessionStorage.setItem(`lastSavedParties_${groupName}`, currentData);
-      savePartyDataDebounced(
-        groupName,
-        validatedDungeons.flatMap((dungeon) => dungeon.parties),
-      );
-    }
-  }, [dungeons, groupName, savePartyDataDebounced]);
+      sessionStorage.setItem(`lastSavedDungeons_${groupName}`, currentData);
 
-  // 파티 데이터 초기 로드
+      // 드래그 앤 드롭으로 인한 변경인 경우 throttle 사용
+      if (document.querySelector('.dragging')) {
+        savePartyDataThrottled(groupName, validatedDungeons);
+      } else {
+        // 일반적인 변경(텍스트 입력 등)의 경우 debounce 사용
+        savePartyDataDebounced(groupName, validatedDungeons);
+      }
+    }
+  }, [dungeons, groupName, savePartyDataDebounced, savePartyDataThrottled]);
+
+  // 파티 데이터 초기 로드 및 리얼타임 구독
   useEffect(() => {
     if (!groupName) return;
 
-    const loadPartyData = async () => {
+    const loadDungeonData = async () => {
       try {
-        const data = await readData(`groups/${groupName}/parties`);
+        const data = await readData(`groups/${groupName}/dungeons`);
         if (data) {
-          // slots 배열 검증 및 수정
-          const validatedParties = (data as unknown as Party[]).map((party) => ({
+          const validatedDungeons = (data as unknown as Dungeon[]).map((dungeon) => ({
+            ...dungeon,
+            parties: (dungeon.parties || []).map((party) => ({
+              ...party,
+              slots:
+                Array.isArray(party.slots) && party.slots.length === 4
+                  ? party.slots.map((slot: PartySlot) => (slot === null ? 'empty' : slot))
+                  : (Array(4).fill('empty') as [PartySlot, PartySlot, PartySlot, PartySlot]),
+            })),
+          })) as Dungeon[];
+
+          setDungeons(validatedDungeons);
+          sessionStorage.setItem(`lastSavedDungeons_${groupName}`, JSON.stringify(validatedDungeons));
+        } else {
+          setDungeons([]);
+        }
+      } catch (error) {
+        console.error('던전 데이터 로드 실패:', error);
+        setDungeons([]);
+      }
+    };
+
+    // 초기 데이터 로드
+    loadDungeonData();
+
+    // 리얼타임 구독 설정
+    const unsubscribe = subscribeToData(`groups/${groupName}/dungeons`, (data) => {
+      if (data) {
+        const validatedDungeons = (data as unknown as Dungeon[]).map((dungeon) => ({
+          ...dungeon,
+          parties: (dungeon.parties || []).map((party) => ({
             ...party,
             slots:
               Array.isArray(party.slots) && party.slots.length === 4
                 ? party.slots.map((slot: PartySlot) => (slot === null ? 'empty' : slot))
                 : (Array(4).fill('empty') as [PartySlot, PartySlot, PartySlot, PartySlot]),
-          })) as Party[];
+          })),
+        })) as Dungeon[];
 
-          setDungeons((prev) => prev.map((dungeon) => (dungeon.id === groupName ? { ...dungeon, parties: validatedParties } : dungeon)));
-          sessionStorage.setItem(`lastSavedParties_${groupName}`, JSON.stringify(validatedParties));
-        } else {
-          setDungeons((prev) => prev.map((dungeon) => (dungeon.id === groupName ? { ...dungeon, parties: [] } : dungeon)));
-        }
-      } catch (error) {
-        console.error('파티 데이터 로드 실패:', error);
-        setDungeons((prev) => prev.map((dungeon) => (dungeon.id === groupName ? { ...dungeon, parties: [] } : dungeon)));
+        setDungeons(validatedDungeons);
+        sessionStorage.setItem(`lastSavedDungeons_${groupName}`, JSON.stringify(validatedDungeons));
       }
-    };
+    });
 
-    loadPartyData();
-  }, [groupName, readData]);
+    // 컴포넌트 언마운트 시 구독 해제
+    return () => {
+      unsubscribe();
+    };
+  }, [groupName, readData, subscribeToData]);
 
   // 드래그 앤 드롭으로 인한 파티 순서 변경 처리
   const handlePartyOrderChange = useCallback(
     (newParties: Party[]) => {
-      setDungeons((prev) => prev.map((dungeon) => (dungeon.id === groupName ? { ...dungeon, parties: newParties } : dungeon)));
-      if (groupName) {
-        savePartyDataThrottled(groupName, newParties);
-      }
+      setDungeons((prev) => {
+        const newDungeons = prev.map((dungeon) => (dungeon.id === groupName ? { ...dungeon, parties: newParties } : dungeon));
+
+        if (groupName) {
+          savePartyDataThrottled(groupName, newDungeons);
+        }
+
+        return newDungeons;
+      });
     },
     [groupName, savePartyDataThrottled],
   );
@@ -225,8 +270,10 @@ export function GroupPage() {
     e.currentTarget.classList.add('dragging');
   };
 
-  const handlePartySlotDragStart = (e: React.DragEvent<HTMLDivElement>, partyId: string, slotIndex: number, character: CharacterData) => {
+  const handlePartySlotDragStart = (e: React.DragEvent<HTMLDivElement>, partyId: string, slotIndex: number, character: PartySlot) => {
     e.stopPropagation();
+    if (character === 'empty') return;
+
     e.dataTransfer.setData('character', JSON.stringify(character));
     e.dataTransfer.setData('sourcePartyId', partyId);
     e.dataTransfer.setData('sourceSlotIndex', String(slotIndex));
@@ -298,6 +345,14 @@ export function GroupPage() {
     target.classList.remove('drag-over');
   };
 
+  const showToast = useCallback((message: string) => {
+    setToastMessage(message);
+    setIsToastVisible(true);
+    setTimeout(() => {
+      setIsToastVisible(false);
+    }, 3000);
+  }, []);
+
   const handleDrop = (e: React.DragEvent, targetDungeonId: string, targetPartyId: string, targetSlotIndex: number) => {
     e.preventDefault();
     const target = e.currentTarget as HTMLDivElement;
@@ -316,17 +371,9 @@ export function GroupPage() {
       const character = JSON.parse(characterData) as CharacterData;
 
       setDungeons((prev) => {
-        console.log('prev dungeons:', prev);
-        console.log('targetDungeonId:', targetDungeonId);
-        console.log('targetPartyId:', targetPartyId);
-
         const newDungeons = [...prev];
-        // 던전 ID를 문자열로 변환하여 비교
         const targetDungeon = newDungeons.find((dungeon) => String(dungeon.id) === String(targetDungeonId));
         const sourceDungeon = sourcePartyId ? newDungeons.find((dungeon) => dungeon.parties.some((party) => party.id === sourcePartyId)) : null;
-
-        console.log('targetDungeon:', targetDungeon);
-        console.log('sourceDungeon:', sourceDungeon);
 
         if (!targetDungeon) {
           console.error('Target dungeon not found:', targetDungeonId);
@@ -342,15 +389,30 @@ export function GroupPage() {
         // 같은 파티 내에서의 이동인 경우
         if (sourcePartyId && sourcePartyId === targetPartyId) {
           const newSlots = [...targetParty.slots];
-          const temp = newSlots[targetSlotIndex];
-          newSlots[targetSlotIndex] = character as unknown as PartySlot;
-          newSlots[Number(sourceSlotIndex)] = temp;
+          const sourceCharacter = newSlots[Number(sourceSlotIndex)];
+          const targetCharacter = newSlots[targetSlotIndex];
+
+          // 인덱스로 캐릭터를 찾아 교환
+          newSlots[targetSlotIndex] = sourceCharacter;
+          newSlots[Number(sourceSlotIndex)] = targetCharacter;
 
           targetParty.slots = newSlots as [PartySlot, PartySlot, PartySlot, PartySlot];
         } else {
+          // 다른 파티로 이동하는 경우에만 모험단 체크
+          const hasSameAdventure = targetParty.slots.some((slot) => {
+            if (slot === 'empty' || typeof slot === 'string') return false;
+            const slotCharacter = slot as CharacterData;
+            return slotCharacter.adventure === character.adventure;
+          });
+
+          if (hasSameAdventure) {
+            showToast('같은 모험단의 캐릭터는 같은 파티에 추가할 수 없습니다.');
+            return prev;
+          }
+
           // 다른 파티로 이동하는 경우
           const newSlots = [...targetParty.slots];
-          newSlots[targetSlotIndex] = character as unknown as PartySlot;
+          newSlots[targetSlotIndex] = character;
           targetParty.slots = newSlots as [PartySlot, PartySlot, PartySlot, PartySlot];
 
           // 원래 파티에서 제거
@@ -393,10 +455,6 @@ export function GroupPage() {
     setExpandedPartyId(expandedPartyId === partyId ? null : partyId);
   };
 
-  const openPartyModal = (partyId: string) => {
-    setSelectedPartyId(partyId);
-  };
-
   const closePartyModal = () => {
     setSelectedPartyId(null);
   };
@@ -434,6 +492,46 @@ export function GroupPage() {
     setShowCharacterDetail(false);
     setSelectedCharacter(null);
   };
+
+  const handleDungeonNameChange = (dungeonId: string, newName: string) => {
+    setDungeons((prev) => prev.map((dungeon) => (dungeon.id === dungeonId ? { ...dungeon, name: newName } : dungeon)));
+  };
+
+  const handlePartyCompletedChange = (partyId: string, isCompleted: boolean) => {
+    setDungeons((prev) =>
+      prev.map((dungeon) => ({
+        ...dungeon,
+        parties: dungeon.parties.map((party) => (party.id === partyId ? { ...party, isCompleted } : party)),
+      })),
+    );
+  };
+
+  const handleCharacterDelete = useCallback((partyId: string, slotIndex: number) => {
+    setDungeons((prev) => {
+      const newDungeons = prev.map((dungeon) => ({
+        ...dungeon,
+        parties: dungeon.parties.map((party) => {
+          if (party.id === partyId) {
+            const newSlots = [...party.slots];
+            newSlots[slotIndex] = 'empty';
+            return { ...party, slots: newSlots as [PartySlot, PartySlot, PartySlot, PartySlot] };
+          }
+          return party;
+        }),
+      }));
+      return newDungeons;
+    });
+  }, []);
+
+  const handlePartyDelete = useCallback((partyId: string) => {
+    setDungeons((prev) => {
+      const newDungeons = prev.map((dungeon) => ({
+        ...dungeon,
+        parties: dungeon.parties.filter((party) => party.id !== partyId),
+      }));
+      return newDungeons;
+    });
+  }, []);
 
   if (showPasswordDialog) {
     return (
@@ -494,6 +592,7 @@ export function GroupPage() {
                   onTogglePartyExpand={togglePartyExpand}
                   onPartyTitleChange={handlePartyTitleChange}
                   onPartyMemoChange={handlePartyMemoChange}
+                  onPartyCompletedChange={handlePartyCompletedChange}
                   onAddParty={addPartyToDungeon}
                   onPartyDragStart={handlePartyCardDragStart}
                   onPartyDragEnd={handlePartyCardDragEnd}
@@ -505,6 +604,9 @@ export function GroupPage() {
                   onCharacterDragLeave={handleDragLeave}
                   onCharacterDrop={handleDrop}
                   onCharacterSelect={handleCharacterSelect}
+                  onDungeonNameChange={handleDungeonNameChange}
+                  onCharacterDelete={handleCharacterDelete}
+                  onPartyDelete={handlePartyDelete}
                 />
               ))}
               <AddDungeonColumn>
@@ -557,6 +659,7 @@ export function GroupPage() {
           <CharacterDetailModal isOpen={showCharacterDetail} character={selectedCharacter} onClose={handleCharacterDetailClose} />
         </MainContent>
       </PageContainer>
+      <Toast message={toastMessage} isVisible={isToastVisible} />
     </>
   );
 }

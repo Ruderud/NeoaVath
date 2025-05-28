@@ -1,6 +1,6 @@
-import { createContext, useContext, ReactNode } from 'react';
+import { createContext, useContext, useEffect, useState } from 'react';
 import { initializeApp } from 'firebase/app';
-import { getDatabase, ref, set, get, child, Database } from 'firebase/database';
+import { getDatabase, ref, onValue, off, set, get, child, Database } from 'firebase/database';
 
 const firebaseConfig = {
   apiKey: 'AIzaSyASapJ_v8qy-HqDXqmWLLAle7Sn_MqQltw',
@@ -17,11 +17,12 @@ type FirebaseContextType = {
   writeData: (path: string, data: unknown) => Promise<void>;
   readData: (path: string) => Promise<unknown>;
   findGroup: (groupName: string) => Promise<unknown>;
+  subscribeToData: (path: string, callback: (data: unknown) => void) => () => void;
 };
 
 const FirebaseContext = createContext<FirebaseContextType | null>(null);
 
-export function FirebaseProvider({ children }: { children: ReactNode }) {
+export function FirebaseProvider({ children }: { children: React.ReactNode }) {
   const app = initializeApp(firebaseConfig);
   // const analytics = getAnalytics(app);
   const database = getDatabase(app);
@@ -53,11 +54,23 @@ export function FirebaseProvider({ children }: { children: ReactNode }) {
     return snapshot.val();
   };
 
+  const subscribeToData = (path: string, callback: (data: unknown) => void) => {
+    const dataRef = ref(database, path);
+    onValue(dataRef, (snapshot) => {
+      callback(snapshot.val());
+    });
+
+    return () => {
+      off(dataRef);
+    };
+  };
+
   const value = {
     database,
     writeData,
     readData,
     findGroup,
+    subscribeToData,
   };
 
   return <FirebaseContext.Provider value={value}>{children}</FirebaseContext.Provider>;

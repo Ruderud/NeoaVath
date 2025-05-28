@@ -1,5 +1,7 @@
-import { ChevronDown } from 'lucide-react';
-import type { Party, CharacterData } from '../../types/types';
+import { useState } from 'react';
+import styled from '@emotion/styled';
+import { ChevronDown, Pencil, Check, X } from 'lucide-react';
+import type { Party, CharacterData, PartySlot } from '../../types/types';
 import { CharacterCard } from '../CharacterCard';
 import {
   PartyCardContainer,
@@ -8,9 +10,12 @@ import {
   PartyCharacterPreview,
   ExpandButton,
   PartyCardDetails,
-  PartySlots,
+  PartySlots as PartySlotsContainer,
   PartySlot as PartySlotCard,
   PartyMemo,
+  PartyTitle,
+  CheckboxButton,
+  DeletePartyButton,
 } from './styles';
 
 type PartyCardProps = {
@@ -20,16 +25,19 @@ type PartyCardProps = {
   onToggleExpand: () => void;
   onTitleChange: (newTitle: string) => void;
   onMemoChange: (newMemo: string) => void;
+  onCompletedChange: (isCompleted: boolean) => void;
   onDragStart?: (e: React.DragEvent<HTMLDivElement>, party: Party) => void;
   onDragEnd?: (e: React.DragEvent<HTMLDivElement>) => void;
   onDragOver?: (e: React.DragEvent) => void;
   onDragLeave?: (e: React.DragEvent) => void;
   onDrop?: (e: React.DragEvent, party: Party) => void;
-  onCharacterDragStart?: (e: React.DragEvent<HTMLDivElement>, partyId: string, slotIndex: number, character: CharacterData) => void;
-  onCharacterDragOver?: (e: React.DragEvent) => void;
-  onCharacterDragLeave?: (e: React.DragEvent) => void;
-  onCharacterDrop?: (e: React.DragEvent, partyId: string, slotIndex: number) => void;
-  onCharacterSelect: (character: CharacterData) => void;
+  onCharacterDragStart: (e: React.DragEvent<HTMLDivElement>, partyId: string, slotIndex: number, character: PartySlot) => void;
+  onCharacterDragOver: (e: React.DragEvent) => void;
+  onCharacterDragLeave: (e: React.DragEvent) => void;
+  onCharacterDrop: (e: React.DragEvent, partyId: string, slotIndex: number) => void;
+  onCharacterSelect: (character: PartySlot) => void;
+  onCharacterDelete: (partyId: string, slotIndex: number) => void;
+  onPartyDelete: (partyId: string) => void;
 };
 
 export function PartyCard({
@@ -39,6 +47,7 @@ export function PartyCard({
   onToggleExpand,
   onTitleChange,
   onMemoChange,
+  onCompletedChange,
   onDragStart,
   onDragEnd,
   onDragOver,
@@ -49,8 +58,42 @@ export function PartyCard({
   onCharacterDragLeave,
   onCharacterDrop,
   onCharacterSelect,
+  onCharacterDelete,
+  onPartyDelete,
 }: PartyCardProps) {
-  console.log('party', party);
+  const [isEditing, setIsEditing] = useState(false);
+  const [editedTitle, setEditedTitle] = useState(party.title);
+  const [isHovered, setIsHovered] = useState(false);
+
+  const handleTitleSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (editedTitle.trim() && editedTitle !== party.title) {
+      onTitleChange(editedTitle.trim());
+    }
+    setIsEditing(false);
+  };
+
+  const handleCheckboxClick = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    onCompletedChange(!party.isCompleted);
+  };
+
+  const handleCharacterClick = (character: PartySlot) => {
+    if (character !== 'empty') {
+      onCharacterSelect(character);
+    }
+  };
+
+  const handleDeleteClick = (e: React.MouseEvent, slotIndex: number) => {
+    e.stopPropagation();
+    onCharacterDelete(party.id, slotIndex);
+  };
+
+  const handlePartyDelete = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    onPartyDelete(party.id);
+  };
+
   return (
     <PartyCardContainer
       isMobile={isMobile}
@@ -61,14 +104,31 @@ export function PartyCard({
       onDragOver={!isMobile ? onDragOver : undefined}
       onDragLeave={!isMobile ? onDragLeave : undefined}
       onDrop={!isMobile ? (e) => onDrop?.(e, party) : undefined}
+      onMouseEnter={() => setIsHovered(true)}
+      onMouseLeave={() => setIsHovered(false)}
+      isCompleted={party.isCompleted}
     >
+      <DeletePartyButton className="delete-party-button" onClick={handlePartyDelete}>
+        <X size={16} />
+      </DeletePartyButton>
       <PartyCardHeader>
-        <input type="text" value={party.title} onChange={(e) => onTitleChange(e.target.value)} placeholder="파티 제목" />
+        {isEditing ? (
+          <TitleEditForm onSubmit={handleTitleSubmit}>
+            <TitleInput type="text" value={editedTitle} onChange={(e) => setEditedTitle(e.target.value)} onBlur={handleTitleSubmit} autoFocus />
+          </TitleEditForm>
+        ) : (
+          <>
+            <PartyTitle value={party.title} onChange={(e) => onTitleChange(e.target.value)} placeholder="파티 이름" />
+            <Pencil size={16} />
+          </>
+        )}
       </PartyCardHeader>
       <PartyCardContent>
         {party.slots.map((slot, index) => {
           if (slot === 'empty') return null;
           const character = slot as CharacterData;
+          if (!character?.name) return null;
+
           return (
             <PartyCharacterPreview key={index}>
               <span className="name">{character.name}</span>
@@ -85,40 +145,68 @@ export function PartyCard({
 
       {isExpanded && (
         <PartyCardDetails>
-          <PartySlots isMobile={isMobile}>
+          <PartySlotsContainer isMobile={isMobile}>
             {party.slots.map((slot, index) => (
               <PartySlotCard
                 key={index}
                 isMobile={isMobile}
                 onDragOver={!isMobile ? onCharacterDragOver : undefined}
                 onDragLeave={!isMobile ? onCharacterDragLeave : undefined}
-                onDrop={!isMobile ? (e) => onCharacterDrop?.(e, party.id, index) : undefined}
+                onDrop={!isMobile ? (e) => onCharacterDrop(e, party.id, index) : undefined}
                 className={slot === 'empty' ? 'empty' : ''}
               >
                 {slot !== 'empty' ? (
                   <div
                     draggable={!isMobile}
-                    onDragStart={!isMobile ? (e) => onCharacterDragStart?.(e, party.id, index, slot as CharacterData) : undefined}
+                    onDragStart={!isMobile ? (e) => onCharacterDragStart(e, party.id, index, slot) : undefined}
                     style={{ width: '100%', height: '100%' }}
                   >
                     <CharacterCard
                       character={slot as CharacterData}
-                      onDragStart={!isMobile ? (e, char) => onCharacterDragStart?.(e, party.id, index, char) : undefined}
-                      onClick={() => onCharacterSelect(slot as CharacterData)}
+                      onDragStart={!isMobile ? (e) => onCharacterDragStart(e, party.id, index, slot) : undefined}
+                      onClick={() => handleCharacterClick(slot)}
                     />
+                    <button className="delete-button" onClick={(e) => handleDeleteClick(e, index)}>
+                      <X size={14} />
+                    </button>
                   </div>
                 ) : (
                   <div>빈 슬롯</div>
                 )}
               </PartySlotCard>
             ))}
-          </PartySlots>
+          </PartySlotsContainer>
           <PartyMemo isMobile={isMobile} value={party.memo} onChange={(e) => onMemoChange(e.target.value)} placeholder="파티 메모" />
         </PartyCardDetails>
       )}
-      <ExpandButton onClick={onToggleExpand}>
-        <ChevronDown />
-      </ExpandButton>
+      <ExpandButton onClick={onToggleExpand}>{isExpanded ? '접기' : '펼치기'}</ExpandButton>
+      {(isHovered || party.isCompleted) && (
+        <CheckboxButton
+          type="checkbox"
+          checked={party.isCompleted}
+          onChange={(e: React.ChangeEvent<HTMLInputElement>) => onCompletedChange(e.target.checked)}
+        />
+      )}
     </PartyCardContainer>
   );
 }
+
+const TitleEditForm = styled.form`
+  display: flex;
+  flex: 1;
+`;
+
+const TitleInput = styled.input`
+  width: 100%;
+  padding: 4px 8px;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  font-size: 1.1rem;
+  font-weight: 600;
+  color: #333;
+
+  &:focus {
+    outline: none;
+    border-color: #2196f3;
+  }
+`;

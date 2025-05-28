@@ -34,8 +34,9 @@ export type AdventureGuild = {
 export type Party = {
   id: string;
   title: string;
-  memo: string;
   slots: [PartySlot, PartySlot, PartySlot, PartySlot];
+  memo: string;
+  isCompleted?: boolean;
 };
 
 export type PartySlot = CharacterData | 'empty';
@@ -55,4 +56,5 @@ export type CharacterData = {
   ozma: string;
   bakal: number;
   key: string;
+  adventure: string;
 };

@@ -1,23 +1,33 @@
 import styled from '@emotion/styled';
 
-type PartyCardContainerProps = {
+export type PartyCardContainerProps = {
   isMobile: boolean;
   isExpanded: boolean;
+  isCompleted?: boolean;
+};
+
+export type PartySlotProps = {
+  isMobile: boolean;
 };
 
 export const PartyCardContainer = styled.div<PartyCardContainerProps>`
+  position: relative;
   background: white;
-  border: 1px solid #e0e0e0;
   border-radius: 8px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
   padding: 16px;
   display: flex;
   flex-direction: column;
-  gap: 12px;
+  gap: 16px;
   transition: all 0.2s ease;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+  opacity: ${({ isCompleted }) => (isCompleted ? 0.7 : 1)};
 
   &:hover {
-    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
+  }
+
+  &:hover .delete-party-button {
+    opacity: 1;
   }
 
   &.dragging {
@@ -33,22 +43,6 @@ export const PartyCardHeader = styled.div`
   display: flex;
   align-items: center;
   gap: 8px;
-
-  input {
-    flex: 1;
-    border: none;
-    font-size: 1.1em;
-    font-weight: 600;
-    color: #333;
-    background: transparent;
-    padding: 4px 8px;
-    border-radius: 4px;
-
-    &:focus {
-      outline: none;
-      background: #f5f5f5;
-    }
-  }
 `;
 
 export const PartyCardContent = styled.div`
@@ -59,12 +53,11 @@ export const PartyCardContent = styled.div`
 
 export const PartyCharacterPreview = styled.div`
   display: flex;
-  align-items: center;
-  gap: 8px;
+  flex-direction: column;
+  gap: 4px;
   padding: 8px;
-  background: #f8f9fa;
+  background: #f5f5f5;
   border-radius: 4px;
-  font-size: 0.9em;
 
   .name {
     font-weight: 500;
@@ -72,84 +65,13 @@ export const PartyCharacterPreview = styled.div`
   }
 
   .level {
+    font-size: 0.9em;
     color: #666;
   }
 
   .score {
-    margin-left: auto;
+    font-size: 0.9em;
     color: #2196f3;
-    font-weight: 500;
-  }
-`;
-
-export const PartyCardDetails = styled.div`
-  display: flex;
-  flex-direction: column;
-  gap: 16px;
-  padding-top: 12px;
-  border-top: 1px solid #e0e0e0;
-`;
-
-export const PartySlots = styled.div<{ isMobile: boolean }>`
-  display: flex;
-  flex-direction: row;
-  gap: 12px;
-`;
-
-export const PartySlot = styled.div<{ isMobile: boolean }>`
-  background: #f8f9fa;
-  width: 150px;
-  height: 180px;
-  border: 2px dashed #e0e0e0;
-  border-radius: 8px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  color: #666;
-  font-size: 0.9em;
-  transition: all 0.2s ease;
-  overflow: hidden;
-
-  &.empty {
-    &:hover {
-      border-color: #2196f3;
-      color: #2196f3;
-    }
-  }
-
-  &.drag-over {
-    border: 2px dashed #2196f3;
-    background: #e3f2fd;
-  }
-
-  > div {
-    width: 100%;
-    height: 100%;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-  }
-`;
-
-export const PartyMemo = styled.textarea<{ isMobile: boolean }>`
-  width: 100%;
-  min-height: 80px;
-  padding: 12px;
-  border: 1px solid #e0e0e0;
-  border-radius: 8px;
-  resize: vertical;
-  font-size: 0.9em;
-  color: #333;
-  background: #f8f9fa;
-
-  &:focus {
-    outline: none;
-    border-color: #2196f3;
-    background: white;
-  }
-
-  &::placeholder {
-    color: #999;
   }
 `;
 
@@ -158,15 +80,136 @@ export const ExpandButton = styled.button`
   border: none;
   color: #666;
   cursor: pointer;
+  padding: 8px;
   display: flex;
   align-items: center;
   justify-content: center;
-  padding: 8px;
-  transition: transform 0.2s ease;
+  transition: color 0.2s ease;
+  width: 100%;
   border-top: 1px solid #e0e0e0;
-  margin-top: 12px;
+  margin-top: 8px;
 
   &:hover {
     color: #333;
+  }
+`;
+
+export const PartyCardDetails = styled.div`
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+`;
+
+export const PartySlots = styled.div<{ isMobile: boolean }>`
+  display: flex;
+  flex-direction: row;
+  gap: 8px;
+  width: 100%;
+`;
+
+export const PartyTitle = styled.input`
+  width: 100%;
+  padding: 4px 8px;
+  border: 1px solid transparent;
+  border-radius: 4px;
+  font-size: 1.1rem;
+  font-weight: 600;
+  color: #333;
+  background: transparent;
+
+  &:focus {
+    outline: none;
+    border-color: #2196f3;
+    background: white;
+  }
+`;
+
+export const CheckboxButton = styled.input`
+  position: absolute;
+  top: 8px;
+  right: 8px;
+  width: 20px;
+  height: 20px;
+  cursor: pointer;
+  z-index: 2;
+`;
+
+export const PartySlot = styled.div<PartySlotProps>`
+  position: relative;
+  height: 80px;
+  background: #f5f5f5;
+  border-radius: 4px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 0;
+  flex: 1;
+
+  &:hover .delete-button {
+    opacity: 1;
+  }
+
+  .delete-button {
+    position: absolute;
+    top: 4px;
+    right: 4px;
+    width: 20px;
+    height: 20px;
+    border-radius: 50%;
+    background: #ff4d4f;
+    color: white;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    opacity: 0;
+    transition: opacity 0.2s ease;
+    z-index: 2;
+    border: none;
+    padding: 0;
+
+    &:hover {
+      background: #ff7875;
+    }
+  }
+`;
+
+export const PartyMemo = styled.textarea<{ isMobile: boolean }>`
+  width: 100%;
+  min-height: 60px;
+  padding: 8px;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  resize: vertical;
+  font-size: 0.9rem;
+  color: #333;
+
+  &:focus {
+    outline: none;
+    border-color: #2196f3;
+  }
+`;
+
+export const DeletePartyButton = styled.button`
+  position: absolute;
+  top: 8px;
+  right: 8px;
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  background: #ff4d4f;
+  color: white;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  opacity: 0;
+  transition: opacity 0.2s ease;
+  z-index: 2;
+  border: none;
+  padding: 0;
+
+  &:hover {
+    background: #ff7875;
   }
 `;
