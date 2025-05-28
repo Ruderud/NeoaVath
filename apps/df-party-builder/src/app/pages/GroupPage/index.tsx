@@ -1,14 +1,32 @@
 import { useState, useEffect, useCallback } from 'react';
 import { useParams } from 'react-router-dom';
 import { useErrorBoundary } from 'react-error-boundary';
-import styled from '@emotion/styled';
 import { PasswordDialog } from '../../components/PasswordDialog';
 import { useFirebase } from '../../context/FirebaseContext';
 import { throttle } from 'es-toolkit';
 import { getLocalStorageItem, setLocalStorageItem } from '../../utils/localStorage';
-import { SideMenu } from './components/SideMenu';
-import { CharacterCard } from '../../components/CharacterCard';
 import type { Party, PartySlot, CharacterData } from '../../types/types';
+import { Plus } from 'lucide-react';
+import { Drawer } from '../../components/Drawer';
+import { DungeonColumn } from '../../components/DungeonColumn';
+import { PartyModal } from '../../components/PartyModal';
+import { ActionSheet } from '../../components/ActionSheet';
+import { CharacterSearch } from '../../components/CharacterSearch';
+import {
+  PageContainer,
+  MainContent,
+  Section,
+  SectionTitle,
+  KanbanBoard,
+  AddDungeonColumn,
+  AddDungeonForm,
+  AddDungeonInput,
+  AddGroupButton,
+  AddGroupButtonRow,
+  CancelButton,
+  AddDungeonButton,
+  Button,
+} from './styles';
 
 const isExistGroupLoginData = (groupName?: string): boolean => {
   if (!groupName) return false;
@@ -27,13 +45,36 @@ const isExistGroupLoginData = (groupName?: string): boolean => {
   return !result;
 };
 
-function GroupPageContent() {
+type Dungeon = {
+  id: string;
+  name: string;
+  parties: Party[];
+};
+
+export function GroupPage() {
   const { groupName } = useParams<{ groupName: string }>();
   const [showPasswordDialog, setShowPasswordDialog] = useState(isExistGroupLoginData(groupName));
-  const [parties, setParties] = useState<Party[]>([]);
+  const [dungeons, setDungeons] = useState<Dungeon[]>([
+    { id: '1', name: '발할라', parties: [] },
+    { id: '2', name: '오즈마', parties: [] },
+    { id: '3', name: '이스핀즈', parties: [] },
+  ]);
   const [isMobile, setIsMobile] = useState(window.innerWidth <= 768);
+  const [isDrawerOpen, setIsDrawerOpen] = useState(true);
+  const [expandedPartyId, setExpandedPartyId] = useState<string | null>(null);
+  const [selectedPartyId, setSelectedPartyId] = useState<string | null>(null);
+  const [showAddGroupInput, setShowAddGroupInput] = useState(false);
+  const [newDungeonName, setNewDungeonName] = useState('');
   const { showBoundary } = useErrorBoundary();
   const { writeData, readData } = useFirebase();
+  const [showActionSheet, setShowActionSheet] = useState(false);
+  const [selectedCharacter, setSelectedCharacter] = useState<CharacterData | null>(null);
+  const [showCharacterSearch, setShowCharacterSearch] = useState(false);
+
+  // Drawer 토글 함수
+  const handleToggleDrawer = useCallback(() => {
+    setIsDrawerOpen((prev) => !prev);
+  }, []);
 
   // 모바일 여부 감지
   useEffect(() => {
@@ -98,26 +139,32 @@ function GroupPageContent() {
 
   // 파티 데이터 변경 감지 및 저장
   useEffect(() => {
-    if (!groupName || !parties.length) return;
+    if (!groupName || !dungeons.length) return;
 
     // 파티 데이터 저장 전 slots 배열 검증 및 수정
-    const validatedParties = parties.map((party) => ({
-      ...party,
-      slots:
-        party.slots?.length === 4
-          ? party.slots.map((slot) => (slot === null ? 'empty' : slot))
-          : (Array(4).fill('empty') as [PartySlot, PartySlot, PartySlot, PartySlot]),
-    })) as Party[];
+    const validatedDungeons = dungeons.map((dungeon) => ({
+      ...dungeon,
+      parties: dungeon.parties.map((party) => ({
+        ...party,
+        slots:
+          party.slots?.length === 4
+            ? (party.slots.map((slot) => (slot === null ? 'empty' : slot)) as [PartySlot, PartySlot, PartySlot, PartySlot])
+            : (Array(4).fill('empty') as [PartySlot, PartySlot, PartySlot, PartySlot]),
+      })),
+    }));
 
     // 마지막 저장 시점과 현재 시점의 데이터 비교
     const lastSavedData = sessionStorage.getItem(`lastSavedParties_${groupName}`);
-    const currentData = JSON.stringify(validatedParties);
+    const currentData = JSON.stringify(validatedDungeons);
 
     if (lastSavedData !== currentData) {
       sessionStorage.setItem(`lastSavedParties_${groupName}`, currentData);
-      savePartyDataDebounced(groupName, validatedParties);
+      savePartyDataDebounced(
+        groupName,
+        validatedDungeons.flatMap((dungeon) => dungeon.parties),
+      );
     }
-  }, [parties, groupName, savePartyDataDebounced]);
+  }, [dungeons, groupName, savePartyDataDebounced]);
 
   // 파티 데이터 초기 로드
   useEffect(() => {
@@ -136,14 +183,14 @@ function GroupPageContent() {
                 : (Array(4).fill('empty') as [PartySlot, PartySlot, PartySlot, PartySlot]),
           })) as Party[];
 
-          setParties(validatedParties);
+          setDungeons((prev) => prev.map((dungeon) => (dungeon.id === groupName ? { ...dungeon, parties: validatedParties } : dungeon)));
           sessionStorage.setItem(`lastSavedParties_${groupName}`, JSON.stringify(validatedParties));
         } else {
-          setParties([]);
+          setDungeons((prev) => prev.map((dungeon) => (dungeon.id === groupName ? { ...dungeon, parties: [] } : dungeon)));
         }
       } catch (error) {
         console.error('파티 데이터 로드 실패:', error);
-        setParties([]);
+        setDungeons((prev) => prev.map((dungeon) => (dungeon.id === groupName ? { ...dungeon, parties: [] } : dungeon)));
       }
     };
 
@@ -153,7 +200,7 @@ function GroupPageContent() {
   // 드래그 앤 드롭으로 인한 파티 순서 변경 처리
   const handlePartyOrderChange = useCallback(
     (newParties: Party[]) => {
-      setParties(newParties);
+      setDungeons((prev) => prev.map((dungeon) => (dungeon.id === groupName ? { ...dungeon, parties: newParties } : dungeon)));
       if (groupName) {
         savePartyDataThrottled(groupName, newParties);
       }
@@ -161,14 +208,15 @@ function GroupPageContent() {
     [groupName, savePartyDataThrottled],
   );
 
-  const addParty = () => {
+  const addPartyToDungeon = (dungeonId: string) => {
     const newParty: Party = {
       id: Date.now().toString(),
       title: '새 파티',
-      slots: Array(4).fill('empty') as [PartySlot, PartySlot, PartySlot, PartySlot],
+      slots: ['empty', 'empty', 'empty', 'empty'] as [PartySlot, PartySlot, PartySlot, PartySlot],
       memo: '',
     };
-    setParties([...parties, newParty]);
+
+    setDungeons((prev) => prev.map((dungeon) => (dungeon.id === dungeonId ? { ...dungeon, parties: [...dungeon.parties, newParty] } : dungeon)));
   };
 
   const handlePartyDragStart = (e: React.DragEvent<HTMLDivElement>, partyId: string, slotIndex: number, character: CharacterData) => {
@@ -218,7 +266,7 @@ function GroupPageContent() {
       try {
         const sourceParty = JSON.parse(partyData) as Party;
 
-        const newParties = [...parties];
+        const newParties = [...(dungeons.find((dungeon) => dungeon.id === groupName)?.parties || [])];
         const sourceIndex = newParties.findIndex((p) => p.id === sourceParty.id);
         const targetIndex = newParties.findIndex((p) => p.id === targetParty.id);
 
@@ -248,6 +296,9 @@ function GroupPageContent() {
     const target = e.currentTarget as HTMLDivElement;
     target.classList.remove('drag-over');
 
+    const type = e.dataTransfer.getData('type');
+    if (type !== 'character') return;
+
     const characterData = e.dataTransfer.getData('character');
     const sourcePartyId = e.dataTransfer.getData('sourcePartyId');
     const sourceSlotIndex = e.dataTransfer.getData('sourceSlotIndex');
@@ -257,8 +308,8 @@ function GroupPageContent() {
     try {
       const character = JSON.parse(characterData) as CharacterData;
 
-      setParties((parties) => {
-        const newParties = [...parties];
+      setDungeons((prev) => {
+        const newParties = [...(prev.find((dungeon) => dungeon.id === groupName)?.parties || [])];
 
         // 같은 파티 내에서의 이동인 경우
         if (sourcePartyId && sourcePartyId === targetPartyId) {
@@ -276,7 +327,7 @@ function GroupPageContent() {
           }
         } else {
           // 다른 파티에서 온 경우 또는 새로운 캐릭터인 경우
-          parties.forEach((party, partyIndex) => {
+          newParties.forEach((party, partyIndex) => {
             if (party.id === targetPartyId) {
               const newSlots = [...party.slots];
               newSlots[targetSlotIndex] = character as unknown as PartySlot;
@@ -290,7 +341,7 @@ function GroupPageContent() {
             }
           });
         }
-        return newParties;
+        return prev.map((dungeon) => (dungeon.id === groupName ? { ...dungeon, parties: newParties } : dungeon));
       });
     } catch (error) {
       console.error('캐릭터 데이터 파싱 실패:', error);
@@ -299,14 +350,66 @@ function GroupPageContent() {
 
   // 파티 제목 변경 처리
   const handlePartyTitleChange = (partyId: string, newTitle: string) => {
-    const newParties = parties.map((p) => (p.id === partyId ? { ...p, title: newTitle } : p));
-    setParties(newParties);
+    const newParties = dungeons.map((dungeon) => ({
+      ...dungeon,
+      parties: dungeon.parties.map((party) => (party.id === partyId ? { ...party, title: newTitle } : party)),
+    }));
+    setDungeons(newParties);
   };
 
   // 파티 메모 변경 처리
   const handlePartyMemoChange = (partyId: string, newMemo: string) => {
-    const newParties = parties.map((p) => (p.id === partyId ? { ...p, memo: newMemo } : p));
-    setParties(newParties);
+    const newParties = dungeons.map((dungeon) => ({
+      ...dungeon,
+      parties: dungeon.parties.map((party) => (party.id === partyId ? { ...party, memo: newMemo } : party)),
+    }));
+    setDungeons(newParties);
+  };
+
+  const togglePartyExpand = (partyId: string) => {
+    setExpandedPartyId(expandedPartyId === partyId ? null : partyId);
+  };
+
+  const openPartyModal = (partyId: string) => {
+    setSelectedPartyId(partyId);
+  };
+
+  const closePartyModal = () => {
+    setSelectedPartyId(null);
+  };
+
+  const selectedParty = dungeons.find((dungeon) => dungeon.id === groupName)?.parties.find((p) => p.id === selectedPartyId);
+
+  // 파티그룹(던전) 추가 핸들러
+  const handleAddDungeon = (e?: React.FormEvent<HTMLFormElement>) => {
+    if (e) e.preventDefault();
+    if (!newDungeonName.trim()) return;
+    setDungeons((prev) => [
+      ...prev,
+      {
+        id: Date.now().toString(),
+        name: newDungeonName.trim(),
+        parties: [],
+      },
+    ]);
+    setNewDungeonName('');
+    setShowAddGroupInput(false);
+  };
+
+  // 취소 핸들러
+  const handleCancelAddDungeon = () => {
+    setNewDungeonName('');
+    setShowAddGroupInput(false);
+  };
+
+  const handleCharacterSelect = (character: CharacterData) => {
+    setSelectedCharacter(character);
+    setShowActionSheet(true);
+  };
+
+  const handleActionSheetClose = () => {
+    setShowActionSheet(false);
+    setSelectedCharacter(null);
   };
 
   if (showPasswordDialog) {
@@ -340,330 +443,118 @@ function GroupPageContent() {
   }
 
   return (
-    <MainContent isMobile={isMobile}>
-      <Section isMobile={isMobile}>
-        <div
-          style={{
-            display: 'flex',
-            justifyContent: 'space-between',
-            alignItems: 'center',
-            marginBottom: isMobile ? '12px' : '20px',
-            width: '100%',
-          }}
-        >
-          <SectionTitle>파티 구성</SectionTitle>
-          <Button onClick={addParty} style={{ width: 'auto' }}>
-            파티 추가
-          </Button>
-        </div>
-        <PartyContainer isMobile={isMobile}>
-          {parties.map((party) => (
-            <PartyCard
-              key={party.id}
-              isMobile={isMobile}
-              draggable={!isMobile}
-              onDragStart={!isMobile ? (e) => handlePartyCardDragStart(e, party) : undefined}
-              onDragEnd={!isMobile ? handlePartyCardDragEnd : undefined}
-              onDragOver={!isMobile ? handlePartyCardDragOver : undefined}
-              onDragLeave={!isMobile ? handlePartyCardDragLeave : undefined}
-              onDrop={!isMobile ? (e) => handlePartyCardDrop(e, party) : undefined}
+    <>
+      <Drawer open={isDrawerOpen} groupName={groupName} onToggle={handleToggleDrawer} />
+      <PageContainer drawerOpen={isDrawerOpen}>
+        <MainContent>
+          <Section>
+            <div
+              style={{
+                display: 'flex',
+                justifyContent: 'space-between',
+                alignItems: 'center',
+                marginBottom: isMobile ? '12px' : '20px',
+                width: '100%',
+              }}
             >
-              <PartyHeader isMobile={isMobile}>
-                <input type="text" value={party.title} onChange={(e) => handlePartyTitleChange(party.id, e.target.value)} placeholder="파티 제목" />
-              </PartyHeader>
-              <PartySlots isMobile={isMobile}>
-                {party.slots.map((slot, index) => (
-                  <PartySlot
-                    key={index}
-                    isMobile={isMobile}
-                    onDragOver={!isMobile ? handleDragOver : undefined}
-                    onDragLeave={!isMobile ? handleDragLeave : undefined}
-                    onDrop={!isMobile ? (e) => handleDrop(e, party.id, index) : undefined}
-                    className={slot === 'empty' ? 'empty' : ''}
-                  >
-                    {slot !== 'empty' ? (
-                      <div
-                        draggable={!isMobile}
-                        onDragStart={!isMobile ? (e) => handlePartyDragStart(e, party.id, index, slot as CharacterData) : undefined}
-                        style={{
-                          width: '100%',
-                          height: '100%',
-                        }}
-                      >
-                        {isMobile ? (
-                          <MobileCharacterCard>
-                            <MobileCharacterImage>
-                              <img
-                                src={`https://img-api.neople.co.kr/df/servers/${(slot as CharacterData).server}/characters/${
-                                  (slot as CharacterData).key
-                                }?zoom=1`}
-                                alt={`${(slot as CharacterData).name} 캐릭터 이미지`}
-                                draggable="false"
-                              />
-                            </MobileCharacterImage>
-                            <MobileCharacterInfo>
-                              <div className="level">명성 {(slot as CharacterData).level}</div>
-                              <div className="name">{(slot as CharacterData).name}</div>
-                              <div className="adventure">{(slot as CharacterData).adventureName}</div>
-                              {(slot as CharacterData).buffScore ? (
-                                <div className="score">버프력 {(slot as CharacterData).buffScore}</div>
-                              ) : (slot as CharacterData).ozma ? (
-                                <div className="score">랭킹 {(slot as CharacterData).ozma}</div>
-                              ) : null}
-                            </MobileCharacterInfo>
-                          </MobileCharacterCard>
-                        ) : (
-                          <CharacterCard
-                            character={slot as CharacterData}
-                            onDragStart={!isMobile ? (e, char) => handlePartyDragStart(e, party.id, index, char) : undefined}
-                          />
-                        )}
-                      </div>
-                    ) : (
-                      <div>빈 슬롯</div>
-                    )}
-                  </PartySlot>
-                ))}
-              </PartySlots>
-              <PartyMemo isMobile={isMobile} value={party.memo} onChange={(e) => handlePartyMemoChange(party.id, e.target.value)} placeholder="파티 메모" />
-            </PartyCard>
-          ))}
-        </PartyContainer>
-      </Section>
-    </MainContent>
+              <SectionTitle>파티 구성</SectionTitle>
+            </div>
+            <KanbanBoard>
+              {dungeons.map((dungeon) => (
+                <DungeonColumn
+                  key={dungeon.id}
+                  id={dungeon.id}
+                  name={dungeon.name}
+                  parties={dungeon.parties}
+                  isMobile={isMobile}
+                  expandedPartyId={expandedPartyId}
+                  onTogglePartyExpand={togglePartyExpand}
+                  onPartyTitleChange={handlePartyTitleChange}
+                  onPartyMemoChange={handlePartyMemoChange}
+                  onAddParty={addPartyToDungeon}
+                  onPartyDragStart={handlePartyCardDragStart}
+                  onPartyDragEnd={handlePartyCardDragEnd}
+                  onPartyDragOver={handlePartyCardDragOver}
+                  onPartyDragLeave={handlePartyCardDragLeave}
+                  onPartyDrop={handlePartyCardDrop}
+                  onCharacterDragStart={handlePartyDragStart}
+                  onCharacterDragOver={handleDragOver}
+                  onCharacterDragLeave={handleDragLeave}
+                  onCharacterDrop={handleDrop}
+                  onCharacterSelect={handleCharacterSelect}
+                />
+              ))}
+              <AddDungeonColumn>
+                {!showAddGroupInput ? (
+                  <AddGroupButton onClick={() => setShowAddGroupInput(true)}>
+                    <Plus size={20} /> 파티그룹 추가
+                  </AddGroupButton>
+                ) : (
+                  <AddDungeonForm onSubmit={handleAddDungeon}>
+                    <AddDungeonInput
+                      type="text"
+                      placeholder="파티그룹이름"
+                      value={newDungeonName}
+                      onChange={(e: React.ChangeEvent<HTMLInputElement>) => setNewDungeonName(e.target.value)}
+                      maxLength={16}
+                      autoFocus
+                    />
+                    <AddGroupButtonRow>
+                      <AddDungeonButton type="submit">추가</AddDungeonButton>
+                      <CancelButton type="button" onClick={handleCancelAddDungeon}>
+                        취소
+                      </CancelButton>
+                    </AddGroupButtonRow>
+                  </AddDungeonForm>
+                )}
+              </AddDungeonColumn>
+            </KanbanBoard>
+          </Section>
+
+          <Section style={{ marginTop: '20px' }}>
+            <CharacterSearch onCharacterSelect={handleCharacterSelect} onCharacterDragStart={handlePartyDragStart} />
+          </Section>
+
+          {selectedPartyId && selectedParty && (
+            <PartyModal
+              isOpen={true}
+              party={selectedParty}
+              onClose={closePartyModal}
+              onSave={(updatedParty) => {
+                setDungeons((prev) =>
+                  prev.map((dungeon) => ({
+                    ...dungeon,
+                    parties: dungeon.parties.map((party) => (party.id === updatedParty.id ? updatedParty : party)),
+                  })),
+                );
+                closePartyModal();
+              }}
+            />
+          )}
+          {selectedCharacter && (
+            <ActionSheet
+              isOpen={showActionSheet}
+              title="캐릭터 추가"
+              actions={[
+                {
+                  label: '파티에 추가',
+                  onClick: () => {
+                    // 파티에 캐릭터 추가 로직
+                    handleActionSheetClose();
+                  },
+                },
+                {
+                  label: '취소',
+                  onClick: handleActionSheetClose,
+                },
+              ]}
+              onClose={handleActionSheetClose}
+            />
+          )}
+        </MainContent>
+      </PageContainer>
+    </>
   );
 }
-
-export function GroupPage() {
-  const [isMobile, setIsMobile] = useState(window.innerWidth <= 768);
-
-  useEffect(() => {
-    const handleResize = () => {
-      setIsMobile(window.innerWidth <= 768);
-    };
-
-    window.addEventListener('resize', handleResize);
-    return () => window.removeEventListener('resize', handleResize);
-  }, []);
-
-  if (isMobile) {
-    console.log('isMobile', isMobile);
-  }
-
-  return (
-    <PageContainer isMobile={isMobile}>
-      <PageTitle title="그룹 페이지" />
-      {!isMobile && <SideMenu />}
-      <GroupPageContent />
-    </PageContainer>
-  );
-}
-
-const PageContainer = styled.div<{ isMobile: boolean }>`
-  max-width: ${({ isMobile }) => (isMobile ? '100%' : '1600px')};
-  margin: 0 auto;
-  padding: ${({ isMobile }) => (isMobile ? '0' : '20px')};
-  display: grid;
-  grid-template-columns: ${({ isMobile }) => (isMobile ? '1fr' : '300px 1fr')};
-  gap: ${({ isMobile }) => (isMobile ? '0' : '24px')};
-  width: 100%;
-`;
-
-const MainContent = styled.div<{ isMobile: boolean }>`
-  background: white;
-  border-radius: ${({ isMobile }) => (isMobile ? '0' : '8px')};
-  padding: ${({ isMobile }) => (isMobile ? '12px' : '24px')};
-  border: ${({ isMobile }) => (isMobile ? 'none' : '1px solid #ddd')};
-  width: 100%;
-  box-sizing: border-box;
-`;
-
-const PageTitle = styled.h1`
-  margin-bottom: 24px;
-  padding-bottom: 16px;
-  border-bottom: 1px solid #eee;
-  grid-column: 1 / -1;
-`;
-
-const PartyContainer = styled.div<{ isMobile: boolean }>`
-  display: flex;
-  flex-direction: column;
-  gap: ${({ isMobile }) => (isMobile ? '12px' : '20px')};
-  width: 100%;
-`;
-
-const PartyCard = styled.div<{ isMobile: boolean }>`
-  border: 1px solid #ddd;
-  border-radius: 8px;
-  padding: ${({ isMobile }) => (isMobile ? '8px' : '16px')};
-  background: #f9f9f9;
-  cursor: move;
-  transition: all 0.2s;
-  width: 100%;
-  box-sizing: border-box;
-
-  &:hover {
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
-  }
-
-  &.dragging {
-    opacity: 0.5;
-  }
-
-  &.drag-over {
-    border-color: #2196f3;
-    background: #e3f2fd;
-  }
-`;
-
-const PartyHeader = styled.div<{ isMobile: boolean }>`
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-bottom: 16px;
-  width: 100%;
-
-  input {
-    padding: 4px 8px;
-    border: 1px solid #ddd;
-    border-radius: 4px;
-    font-size: 1.1em;
-    width: ${({ isMobile }) => (isMobile ? '100%' : '200px')};
-    box-sizing: border-box;
-  }
-`;
-
-const PartySlots = styled.div<{ isMobile: boolean }>`
-  display: flex;
-  flex-direction: ${({ isMobile }) => (isMobile ? 'column' : 'row')};
-  gap: ${({ isMobile }) => (isMobile ? '8px' : '12px')};
-  margin-bottom: ${({ isMobile }) => (isMobile ? '8px' : '12px')};
-  justify-content: center;
-  width: 100%;
-  flex-wrap: ${({ isMobile }) => (isMobile ? 'nowrap' : 'nowrap')};
-`;
-
-const PartySlot = styled.div<{ isMobile: boolean }>`
-  border: 2px dashed #ddd;
-  border-radius: 8px;
-  padding: 4px 6px;
-  width: ${({ isMobile }) => (isMobile ? '100%' : 'calc((100% - 36px) / 4)')};
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  background: white;
-  cursor: pointer;
-  transition: all 0.2s;
-
-  &:hover {
-    border-color: #2196f3;
-    background: #f5f5f5;
-  }
-
-  &.empty {
-    font-size: 0.95em;
-    color: #666;
-    padding: ${({ isMobile }) => (isMobile ? '8px' : '12px')};
-    aspect-ratio: ${({ isMobile }) => (isMobile ? 'auto' : '3/4')};
-    min-height: ${({ isMobile }) => (isMobile ? '80px' : 'auto')};
-  }
-
-  &.drag-over {
-    border-color: #2196f3;
-    background: #e3f2fd;
-  }
-`;
-
-const PartyMemo = styled.textarea<{ isMobile: boolean }>`
-  width: 100%;
-  padding: 8px;
-  border: 1px solid #ddd;
-  border-radius: 4px;
-  min-height: 60px;
-  resize: vertical;
-  box-sizing: border-box;
-  margin-top: ${({ isMobile }) => (isMobile ? '8px' : '0')};
-`;
-
-const Button = styled.button`
-  padding: 8px 16px;
-  border: 1px solid #ddd;
-  border-radius: 4px;
-  cursor: pointer;
-`;
-
-const Section = styled.div<{ isMobile: boolean }>`
-  display: flex;
-  flex-direction: column;
-  gap: ${({ isMobile }) => (isMobile ? '12px' : '16px')};
-  width: 100%;
-`;
-
-const SectionTitle = styled.h2`
-  font-size: 1.2em;
-  font-weight: 600;
-`;
-
-const MobileCharacterCard = styled.div`
-  display: flex;
-  width: 100%;
-  padding: 8px;
-  border: 1px solid #ddd;
-  border-radius: 8px;
-  background: white;
-  gap: 12px;
-  align-items: center;
-`;
-
-const MobileCharacterImage = styled.div`
-  width: 60px;
-  height: 60px;
-  border-radius: 4px;
-  overflow: hidden;
-  flex-shrink: 0;
-
-  img {
-    width: 100%;
-    height: 100%;
-    object-fit: cover;
-  }
-`;
-
-const MobileCharacterInfo = styled.div`
-  flex: 1;
-  display: flex;
-  flex-direction: column;
-  gap: 4px;
-  min-width: 0;
-
-  .level {
-    font-size: 0.9em;
-    font-weight: 600;
-    color: #2196f3;
-  }
-
-  .name {
-    font-size: 1em;
-    font-weight: 600;
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
-  }
-
-  .adventure {
-    color: #666;
-    font-size: 0.85em;
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
-  }
-
-  .score {
-    font-weight: 500;
-    color: #e91e63;
-    font-size: 0.9em;
-  }
-`;
 
 export default GroupPage;

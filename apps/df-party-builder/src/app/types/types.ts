@@ -34,8 +34,8 @@ export type AdventureGuild = {
 export type Party = {
   id: string;
   title: string;
-  slots: [PartySlot, PartySlot, PartySlot, PartySlot];
   memo: string;
+  slots: [PartySlot, PartySlot, PartySlot, PartySlot];
 };
 
 export type PartySlot = CharacterData | 'empty';
