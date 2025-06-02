@@ -11,7 +11,6 @@ import { Drawer } from '../../components/Drawer';
 import { DungeonColumn } from '../../components/DungeonColumn';
 import { PartyModal } from '../../components/PartyModal';
 import { CharacterDetailModal } from '../../components/CharacterDetailModal';
-import { ActionSheet } from '../../components/ActionSheet';
 import { CharacterSearch } from '../../components/CharacterSearch';
 import { v4 as uuidv4 } from 'uuid';
 import {
@@ -27,7 +26,6 @@ import {
   AddGroupButtonRow,
   CancelButton,
   AddDungeonButton,
-  Button,
 } from './styles';
 import { Toast } from '../../components/Toast';
 
@@ -66,10 +64,8 @@ export function GroupPage() {
   const [newDungeonName, setNewDungeonName] = useState('');
   const { showBoundary } = useErrorBoundary();
   const { writeData, readData, subscribeToData } = useFirebase();
-  const [showActionSheet, setShowActionSheet] = useState(false);
   const [showCharacterDetail, setShowCharacterDetail] = useState(false);
   const [selectedCharacter, setSelectedCharacter] = useState<CharacterData | null>(null);
-  const [showCharacterSearch, setShowCharacterSearch] = useState(false);
   const [toastMessage, setToastMessage] = useState('');
   const [isToastVisible, setIsToastVisible] = useState(false);
 
@@ -567,19 +563,10 @@ export function GroupPage() {
     <>
       <Drawer open={isDrawerOpen} groupName={groupName} onToggle={handleToggleDrawer} />
       <PageContainer drawerOpen={isDrawerOpen}>
-        <MainContent>
+        <MainContent style={{ backgroundColor: '#f5f5f5' }}>
           <Section>
-            <div
-              style={{
-                display: 'flex',
-                justifyContent: 'space-between',
-                alignItems: 'center',
-                marginBottom: isMobile ? '12px' : '20px',
-                width: '100%',
-              }}
-            >
-              <SectionTitle>파티 구성</SectionTitle>
-            </div>
+            <SectionTitle>파티 구성</SectionTitle>
+
             <KanbanBoard>
               {dungeons.map((dungeon) => (
                 <DungeonColumn
@@ -636,8 +623,8 @@ export function GroupPage() {
             </KanbanBoard>
           </Section>
 
-          <Section style={{ marginTop: '20px' }}>
-            <CharacterSearch isOpen={true} onClose={() => {}} onCharacterSelect={handleCharacterSelect} onCharacterDragStart={handleCharacterDragStart} />
+          <Section>
+            <CharacterSearch isOpen={true} onCharacterSelect={handleCharacterSelect} onCharacterDragStart={handleCharacterDragStart} />
           </Section>
 
           {selectedPartyId && selectedParty && (

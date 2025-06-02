@@ -14,6 +14,7 @@ import {
 
 type DrawerProps = {
   open: boolean;
+  groupName?: string;
   onToggle: () => void;
 };
 
