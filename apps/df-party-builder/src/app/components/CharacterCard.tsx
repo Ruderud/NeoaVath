@@ -14,10 +14,33 @@ const Card = styled.div`
   cursor: move;
   width: auto;
   aspect-ratio: 3/4;
+  position: relative;
 
   &:hover {
     transform: translateY(-2px);
     box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  }
+
+  &[title] {
+    position: relative;
+  }
+
+  &[title]:hover::after {
+    content: attr(helperText);
+    position: fixed;
+    bottom: auto;
+    left: 50%;
+    transform: translateX(-50%)
+    padding: 8px 12px;
+    background: rgba(0, 0, 0, 0.8);
+    color: white;
+    border-radius: 4px;
+    font-size: 0.9em;
+    white-space: pre-line;
+    z-index: 9999;
+    pointer-events: none;
+    margin-bottom: 8px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
   }
 `;
 
@@ -75,26 +98,52 @@ const MainInfo = styled.div`
   }
 `;
 
+const Tooltip = styled.div`
+  position: fixed;
+  bottom: auto;
+  left: 50%;
+  transform: translateX(-50%);
+  padding: 8px 12px;
+  background: rgba(0, 0, 0, 0.8);
+  color: white;
+  border-radius: 4px;
+  font-size: 0.9em;
+  white-space: pre-line;
+  z-index: 9999;
+  pointer-events: none;
+  margin-bottom: 8px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+`;
+
 type CharacterCardProps = {
   cardProps?: React.HTMLAttributes<HTMLDivElement>;
   character: CharacterData;
-  onDragStart?: (e: React.DragEvent<HTMLDivElement>, character: CharacterData) => void;
-  onClick?: (character: CharacterData) => void;
+  onDragStart?: (e: React.DragEvent<HTMLDivElement>) => void;
+  onClick?: () => void;
+  helperText?: string;
+  onMouseEnter?: () => void;
+  onMouseLeave?: () => void;
 };
 
-export function CharacterCard({ character, onDragStart, onClick, cardProps }: CharacterCardProps) {
+export function CharacterCard({ character, onDragStart, onClick, cardProps, helperText, onMouseEnter, onMouseLeave }: CharacterCardProps) {
   const handleDragStart = (e: React.DragEvent<HTMLDivElement>) => {
-    e.dataTransfer.setData('character', JSON.stringify(character));
-    e.dataTransfer.setData('type', 'character');
-    onDragStart?.(e, character);
+    onDragStart?.(e);
   };
 
   const handleClick = () => {
-    onClick?.(character);
+    onClick?.();
   };
 
   return (
-    <Card {...cardProps} draggable onDragStart={handleDragStart} onClick={handleClick}>
+    <Card
+      {...cardProps}
+      draggable
+      onDragStart={handleDragStart}
+      onClick={handleClick}
+      onMouseEnter={onMouseEnter}
+      onMouseLeave={onMouseLeave}
+      title={helperText}
+    >
       <Image>
         <img
           src={`https://img-api.neople.co.kr/df/servers/${character.server}/characters/${character.key}?zoom=1`}
@@ -107,13 +156,14 @@ export function CharacterCard({ character, onDragStart, onClick, cardProps }: Ch
           <div className="level">명성 {character.level}</div>
           <div className="name">{character.name}</div>
           <div className="adventure">{character.adventureName}</div>
-          {character.buffScore ? (
-            <div className="score">버프력 {character.buffScore}</div>
-          ) : character.ozma ? (
-            <div className="score">랭킹 {character.ozma}</div>
-          ) : null}
         </MainInfo>
+        {character.buffScore ? (
+          <div className="score">버프력 {character.buffScore}</div>
+        ) : character.ozma ? (
+          <div className="score">랭킹 {character.ozma}</div>
+        ) : null}
       </Info>
+      {helperText && <Tooltip>{helperText}</Tooltip>}
     </Card>
   );
 }

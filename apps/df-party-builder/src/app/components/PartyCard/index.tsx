@@ -32,7 +32,7 @@ type PartyCardProps = {
   onCharacterDragOver: (e: React.DragEvent) => void;
   onCharacterDragLeave: (e: React.DragEvent) => void;
   onCharacterDrop: (e: React.DragEvent, partyId: string, slotIndex: number) => void;
-  onCharacterSelect: (character: PartySlot) => void;
+  onCharacterSelect: (character: CharacterData) => void;
   onCharacterDelete: (partyId: string, slotIndex: number) => void;
   onPartyDelete: (partyId: string) => void;
 };
@@ -70,7 +70,7 @@ export function PartyCard({
 
   const handleCharacterClick = (character: PartySlot) => {
     if (character !== 'empty') {
-      onCharacterSelect(character);
+      onCharacterSelect(character as CharacterData);
     }
   };
 

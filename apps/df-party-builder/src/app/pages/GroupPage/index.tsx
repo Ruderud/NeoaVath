@@ -468,9 +468,8 @@ export function GroupPage() {
     setShowAddGroupInput(false);
   };
 
-  const handleCharacterSelect = (character: PartySlot) => {
-    if (character === 'empty') return;
-    setSelectedCharacter(character as CharacterData);
+  const handleCharacterSelect = (character: CharacterData) => {
+    setSelectedCharacter(character);
     setShowCharacterDetail(true);
   };
 
@@ -670,7 +669,7 @@ export function GroupPage() {
           </Section>
 
           <Section>
-            <CharacterSearch isOpen={true} onCharacterSelect={handleCharacterSelect} onCharacterDragStart={handleCharacterDragStart} />
+            <CharacterSearch isOpen={true} onCharacterSelect={handleCharacterSelect} onCharacterDragStart={handleCharacterDragStart} dungeons={dungeons} />
           </Section>
 
           {selectedPartyId && selectedParty && (

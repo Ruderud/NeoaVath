@@ -80,6 +80,7 @@ const CharacterList = styled.div`
   overflow-x: auto;
   overflow-y: hidden;
   flex: 1;
+  position: relative;
 
   &::-webkit-scrollbar {
     height: 8px;
@@ -104,12 +105,55 @@ interface CharacterSearchProps {
   isOpen: boolean;
   onCharacterSelect?: (characterInfo: CharacterData) => void;
   onCharacterDragStart?: (e: React.DragEvent<HTMLDivElement>, character: CharacterData) => void;
+  dungeons: Array<{
+    id: string;
+    name: string;
+    parties: Array<{
+      id: string;
+      title: string;
+      slots: Array<CharacterData | 'empty'>;
+    }>;
+  }>;
 }
 
-export function CharacterSearch({ isOpen, onCharacterSelect, onCharacterDragStart }: CharacterSearchProps) {
+export function CharacterSearch({ isOpen, onCharacterSelect, onCharacterDragStart, dungeons }: CharacterSearchProps) {
   const [searchTerm, setSearchTerm] = useState('');
   const [debouncedSearchTerm, setDebouncedSearchTerm] = useState('');
   const { data, isLoading, error } = useDundamQuery(debouncedSearchTerm, 'character');
+  const [hoveredCharacter, setHoveredCharacter] = useState<CharacterData | null>(null);
+  const [helperText, setHelperText] = useState('');
+
+  const findCharacterParties = useCallback(
+    (character: CharacterData) => {
+      const characterParties = dungeons.flatMap((dungeon) =>
+        dungeon.parties
+          .filter((party) => party.slots.some((slot) => slot !== 'empty' && slot.key === character.key))
+          .map((party) => ({
+            dungeonName: dungeon.name,
+            partyTitle: party.title,
+          })),
+      );
+
+      if (characterParties.length === 0) return '';
+
+      return characterParties.map(({ dungeonName, partyTitle }) => `${dungeonName} - ${partyTitle}`).join('\n');
+    },
+    [dungeons],
+  );
+
+  const handleMouseEnter = useCallback(
+    (character: CharacterData) => {
+      setHoveredCharacter(character);
+      const parties = findCharacterParties(character);
+      setHelperText(parties);
+    },
+    [findCharacterParties],
+  );
+
+  const handleMouseLeave = useCallback(() => {
+    setHoveredCharacter(null);
+    setHelperText('');
+  }, []);
 
   const debouncedSetSearchTerm = useCallback(
     debounce((value: string) => {
@@ -129,7 +173,7 @@ export function CharacterSearch({ isOpen, onCharacterSelect, onCharacterDragStar
   };
 
   const handleDragStart = (e: React.DragEvent<HTMLDivElement>, character: CharacterData) => {
-    e.dataTransfer.setData('character', JSON.stringify(character));
+    e.dataTransfer.setData('data', JSON.stringify(character));
     e.dataTransfer.setData('type', 'character');
     e.currentTarget.classList.add('dragging');
     onCharacterDragStart?.(e, character);
@@ -149,9 +193,21 @@ export function CharacterSearch({ isOpen, onCharacterSelect, onCharacterDragStar
       {error && <div style={{ color: 'red', marginBottom: '16px' }}>캐릭터 정보를 가져오는데 실패했습니다.</div>}
 
       <CharacterList>
-        {data?.characters.map((char) => (
-          <CharacterCard key={char.key} character={char} onClick={() => onCharacterSelect?.(char)} onDragStart={(e) => handleDragStart(e, char)} />
-        ))}
+        {data ? (
+          data.characters.map((character) => (
+            <CharacterCard
+              key={character.key}
+              character={character}
+              onClick={() => onCharacterSelect?.(character)}
+              onDragStart={(e) => handleDragStart(e, character)}
+              helperText={hoveredCharacter?.key === character.key ? helperText : ''}
+              onMouseEnter={() => handleMouseEnter(character)}
+              onMouseLeave={handleMouseLeave}
+            />
+          ))
+        ) : (
+          <div>검색 결과가 없습니다.</div>
+        )}
       </CharacterList>
     </SearchContainer>
   );
