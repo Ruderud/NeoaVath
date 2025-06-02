@@ -519,6 +519,57 @@ export function GroupPage() {
     });
   }, []);
 
+  const handleDungeonDragStart = (e: React.DragEvent<HTMLDivElement>, dungeon: Dungeon) => {
+    e.dataTransfer.setData('dungeon', JSON.stringify(dungeon));
+    e.dataTransfer.setData('type', 'dungeon');
+    e.currentTarget.classList.add('dragging');
+  };
+
+  const handleDungeonDragEnd = (e: React.DragEvent<HTMLDivElement>) => {
+    e.currentTarget.classList.remove('dragging');
+  };
+
+  const handleDungeonDragOver = (e: React.DragEvent) => {
+    e.preventDefault();
+    const target = e.currentTarget as HTMLDivElement;
+    const type = e.dataTransfer.types.includes('dungeon') ? 'dungeon' : 'character';
+
+    if (type === 'dungeon') {
+      target.classList.add('drag-over');
+    }
+  };
+
+  const handleDungeonDragLeave = (e: React.DragEvent) => {
+    const target = e.currentTarget as HTMLDivElement;
+    target.classList.remove('drag-over');
+  };
+
+  const handleDungeonDrop = (e: React.DragEvent, targetDungeon: Dungeon) => {
+    e.preventDefault();
+    const target = e.currentTarget as HTMLDivElement;
+    target.classList.remove('drag-over');
+
+    const type = e.dataTransfer.getData('type');
+    if (type !== 'dungeon') return;
+
+    const dungeonData = e.dataTransfer.getData('dungeon');
+    if (!dungeonData) return;
+
+    try {
+      const sourceDungeon = JSON.parse(dungeonData) as Dungeon;
+      const sourceIndex = dungeons.findIndex((d) => d.id === sourceDungeon.id);
+      const targetIndex = dungeons.findIndex((d) => d.id === targetDungeon.id);
+
+      if (sourceIndex !== -1 && targetIndex !== -1) {
+        const newDungeons = [...dungeons];
+        [newDungeons[sourceIndex], newDungeons[targetIndex]] = [newDungeons[targetIndex], newDungeons[sourceIndex]];
+        setDungeons(newDungeons);
+      }
+    } catch (error) {
+      console.error('던전 데이터 파싱 실패:', error);
+    }
+  };
+
   if (showPasswordDialog) {
     return (
       <PasswordDialog
@@ -584,6 +635,11 @@ export function GroupPage() {
                   onDungeonNameChange={handleDungeonNameChange}
                   onCharacterDelete={handleCharacterDelete}
                   onPartyDelete={handlePartyDelete}
+                  onDragStart={(e) => handleDungeonDragStart(e, dungeon)}
+                  onDragEnd={handleDungeonDragEnd}
+                  onDragOver={handleDungeonDragOver}
+                  onDragLeave={handleDungeonDragLeave}
+                  onDrop={(e) => handleDungeonDrop(e, dungeon)}
                 />
               ))}
               <AddDungeonColumn>

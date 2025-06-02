@@ -150,7 +150,7 @@ export function PartyCard({
                     </button>
                   </>
                 ) : (
-                  <div>빈 슬롯</div>
+                  <div className="empty-slot">빈 슬롯</div>
                 )}
               </PartySlotCard>
             ))}

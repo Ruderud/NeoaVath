@@ -142,6 +142,16 @@ export const PartySlot = styled.div<PartySlotProps>`
     right: 4px;
     z-index: 2;
   }
+
+  .empty-slot {
+    min-height: 120px;
+    width: 100%;
+    height: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #666;
+  }
 `;
 
 export const PartyMemo = styled.textarea<{ isMobile: boolean }>`

@@ -28,6 +28,11 @@ export type DungeonColumnProps = {
   onDungeonNameChange: (dungeonId: string, newName: string) => void;
   onCharacterDelete: (partyId: string, slotIndex: number) => void;
   onPartyDelete: (partyId: string) => void;
+  onDragStart: (e: React.DragEvent<HTMLDivElement>) => void;
+  onDragEnd: (e: React.DragEvent<HTMLDivElement>) => void;
+  onDragOver: (e: React.DragEvent) => void;
+  onDragLeave: (e: React.DragEvent) => void;
+  onDrop: (e: React.DragEvent) => void;
 };
 
 export function DungeonColumn({
@@ -54,6 +59,11 @@ export function DungeonColumn({
   onDungeonNameChange,
   onCharacterDelete,
   onPartyDelete,
+  onDragStart,
+  onDragEnd,
+  onDragOver,
+  onDragLeave,
+  onDrop,
 }: DungeonColumnProps) {
   const [isEditing, setIsEditing] = useState(false);
   const [editedName, setEditedName] = useState(name);
@@ -67,7 +77,7 @@ export function DungeonColumn({
   };
 
   return (
-    <Column>
+    <Column draggable onDragStart={onDragStart} onDragEnd={onDragEnd} onDragOver={onDragOver} onDragLeave={onDragLeave} onDrop={onDrop}>
       <ColumnHeader>
         <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
           {isEditing ? (
@@ -125,10 +135,23 @@ const Column = styled.div`
   width: 450px;
   min-width: 450px;
   overflow-y: auto;
-
   display: flex;
   flex-direction: column;
   gap: 16px;
+  cursor: move;
+  transition: all 0.2s ease;
+
+  &.dragging {
+    opacity: 0.5;
+  }
+
+  &.drag-over {
+    border: 2px dashed #2196f3;
+  }
+
+  &:hover {
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
+  }
 `;
 
 const ColumnHeader = styled.div`
