@@ -2,7 +2,6 @@ import { useState, useCallback } from 'react';
 import styled from '@emotion/styled';
 import { useDundamQuery } from '../hooks/remote/useDundamQuery';
 import type { CharacterData } from '../types/types';
-import { X } from 'lucide-react';
 import { CharacterCard } from './CharacterCard';
 import { debounce } from 'es-toolkit';
 
@@ -103,12 +102,11 @@ const CharacterList = styled.div`
 
 interface CharacterSearchProps {
   isOpen: boolean;
-  onClose: () => void;
   onCharacterSelect?: (characterInfo: CharacterData) => void;
   onCharacterDragStart?: (e: React.DragEvent<HTMLDivElement>, character: CharacterData) => void;
 }
 
-export function CharacterSearch({ isOpen, onClose, onCharacterSelect, onCharacterDragStart }: CharacterSearchProps) {
+export function CharacterSearch({ isOpen, onCharacterSelect, onCharacterDragStart }: CharacterSearchProps) {
   const [searchTerm, setSearchTerm] = useState('');
   const [debouncedSearchTerm, setDebouncedSearchTerm] = useState('');
   const { data, isLoading, error } = useDundamQuery(debouncedSearchTerm, 'character');
@@ -135,10 +133,6 @@ export function CharacterSearch({ isOpen, onClose, onCharacterSelect, onCharacte
     e.dataTransfer.setData('type', 'character');
     e.currentTarget.classList.add('dragging');
     onCharacterDragStart?.(e, character);
-  };
-
-  const handleDragEnd = (e: React.DragEvent<HTMLDivElement>) => {
-    e.currentTarget.classList.remove('dragging');
   };
 
   return (

@@ -26,10 +26,6 @@ export const PartyCardContainer = styled.div<PartyCardContainerProps>`
     box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
   }
 
-  &:hover .delete-party-button {
-    opacity: 1;
-  }
-
   &.dragging {
     opacity: 0.5;
   }
@@ -107,21 +103,10 @@ export const PartySlots = styled.div<{ isMobile: boolean }>`
   width: 100%;
 `;
 
-export const PartyTitle = styled.input`
-  width: 100%;
-  padding: 4px 8px;
-  border: 1px solid transparent;
-  border-radius: 4px;
-  font-size: 1.1rem;
+export const PartyTitle = styled.h4`
+  margin: 0;
+  font-size: 1.2em;
   font-weight: 600;
-  color: #333;
-  background: transparent;
-
-  &:focus {
-    outline: none;
-    border-color: #2196f3;
-    background: white;
-  }
 `;
 
 export const CheckboxButton = styled.input`
@@ -191,9 +176,6 @@ export const PartyMemo = styled.textarea<{ isMobile: boolean }>`
 `;
 
 export const DeletePartyButton = styled.button`
-  position: absolute;
-  top: 8px;
-  right: 8px;
   width: 24px;
   height: 24px;
   border-radius: 50%;
@@ -203,9 +185,6 @@ export const DeletePartyButton = styled.button`
   align-items: center;
   justify-content: center;
   cursor: pointer;
-  opacity: 0;
-  transition: opacity 0.2s ease;
-  z-index: 2;
   border: none;
   padding: 0;
 

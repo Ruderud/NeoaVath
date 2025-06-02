@@ -11,7 +11,6 @@ import { Drawer } from '../../components/Drawer';
 import { DungeonColumn } from '../../components/DungeonColumn';
 import { PartyModal } from '../../components/PartyModal';
 import { CharacterDetailModal } from '../../components/CharacterDetailModal';
-import { ActionSheet } from '../../components/ActionSheet';
 import { CharacterSearch } from '../../components/CharacterSearch';
 import { v4 as uuidv4 } from 'uuid';
 import {
@@ -27,9 +26,9 @@ import {
   AddGroupButtonRow,
   CancelButton,
   AddDungeonButton,
-  Button,
 } from './styles';
 import { Toast } from '../../components/Toast';
+import { getCharacterDataFromDragEvent, setCharacterDragData } from './utils';
 
 const isExistGroupLoginData = (groupName?: string): boolean => {
   if (!groupName) return false;
@@ -66,10 +65,8 @@ export function GroupPage() {
   const [newDungeonName, setNewDungeonName] = useState('');
   const { showBoundary } = useErrorBoundary();
   const { writeData, readData, subscribeToData } = useFirebase();
-  const [showActionSheet, setShowActionSheet] = useState(false);
   const [showCharacterDetail, setShowCharacterDetail] = useState(false);
   const [selectedCharacter, setSelectedCharacter] = useState<CharacterData | null>(null);
-  const [showCharacterSearch, setShowCharacterSearch] = useState(false);
   const [toastMessage, setToastMessage] = useState('');
   const [isToastVisible, setIsToastVisible] = useState(false);
 
@@ -274,10 +271,10 @@ export function GroupPage() {
     e.stopPropagation();
     if (character === 'empty') return;
 
-    e.dataTransfer.setData('character', JSON.stringify(character));
-    e.dataTransfer.setData('sourcePartyId', partyId);
-    e.dataTransfer.setData('sourceSlotIndex', String(slotIndex));
-    e.dataTransfer.setData('type', 'character');
+    const characterData = typeof character === 'string' ? null : character;
+    if (!characterData) return;
+
+    setCharacterDragData(e, characterData, partyId, slotIndex);
     e.currentTarget.classList.add('dragging');
   };
 
@@ -355,20 +352,16 @@ export function GroupPage() {
 
   const handleDrop = (e: React.DragEvent, targetDungeonId: string, targetPartyId: string, targetSlotIndex: number) => {
     e.preventDefault();
-    const target = e.currentTarget as HTMLDivElement;
-    target.classList.remove('drag-over');
-
-    const type = e.dataTransfer.getData('type');
-    if (type !== 'character') return;
-
-    const characterData = e.dataTransfer.getData('character');
-    const sourcePartyId = e.dataTransfer.getData('sourcePartyId');
-    const sourceSlotIndex = e.dataTransfer.getData('sourceSlotIndex');
-
-    if (!characterData) return;
 
     try {
-      const character = JSON.parse(characterData) as CharacterData;
+      const target = e.currentTarget as HTMLDivElement;
+      target.classList.remove('drag-over');
+
+      const type = e.dataTransfer.getData('type');
+      if (type !== 'character') return;
+      const character = getCharacterDataFromDragEvent(e);
+      const sourcePartyId = e.dataTransfer.getData('sourcePartyId');
+      const sourceSlotIndex = e.dataTransfer.getData('sourceSlotIndex');
 
       setDungeons((prev) => {
         const newDungeons = [...prev];
@@ -388,6 +381,8 @@ export function GroupPage() {
 
         // 같은 파티 내에서의 이동인 경우
         if (sourcePartyId && sourcePartyId === targetPartyId) {
+          console.log('targetParty', targetParty);
+          console.log('moving character', character);
           const newSlots = [...targetParty.slots];
           const sourceCharacter = newSlots[Number(sourceSlotIndex)];
           const targetCharacter = newSlots[targetSlotIndex];
@@ -396,20 +391,10 @@ export function GroupPage() {
           newSlots[targetSlotIndex] = sourceCharacter;
           newSlots[Number(sourceSlotIndex)] = targetCharacter;
 
+          console.log('newSlots', newSlots);
+
           targetParty.slots = newSlots as [PartySlot, PartySlot, PartySlot, PartySlot];
         } else {
-          // 다른 파티로 이동하는 경우에만 모험단 체크
-          const hasSameAdventure = targetParty.slots.some((slot) => {
-            if (slot === 'empty' || typeof slot === 'string') return false;
-            const slotCharacter = slot as CharacterData;
-            return slotCharacter.adventure === character.adventure;
-          });
-
-          if (hasSameAdventure) {
-            showToast('같은 모험단의 캐릭터는 같은 파티에 추가할 수 없습니다.');
-            return prev;
-          }
-
           // 다른 파티로 이동하는 경우
           const newSlots = [...targetParty.slots];
           newSlots[targetSlotIndex] = character;
@@ -483,8 +468,9 @@ export function GroupPage() {
     setShowAddGroupInput(false);
   };
 
-  const handleCharacterSelect = (character: CharacterData) => {
-    setSelectedCharacter(character);
+  const handleCharacterSelect = (character: PartySlot) => {
+    if (character === 'empty') return;
+    setSelectedCharacter(character as CharacterData);
     setShowCharacterDetail(true);
   };
 
@@ -567,19 +553,10 @@ export function GroupPage() {
     <>
       <Drawer open={isDrawerOpen} groupName={groupName} onToggle={handleToggleDrawer} />
       <PageContainer drawerOpen={isDrawerOpen}>
-        <MainContent>
+        <MainContent style={{ backgroundColor: '#f5f5f5' }}>
           <Section>
-            <div
-              style={{
-                display: 'flex',
-                justifyContent: 'space-between',
-                alignItems: 'center',
-                marginBottom: isMobile ? '12px' : '20px',
-                width: '100%',
-              }}
-            >
-              <SectionTitle>파티 구성</SectionTitle>
-            </div>
+            <SectionTitle>파티 구성</SectionTitle>
+
             <KanbanBoard>
               {dungeons.map((dungeon) => (
                 <DungeonColumn
@@ -636,8 +613,8 @@ export function GroupPage() {
             </KanbanBoard>
           </Section>
 
-          <Section style={{ marginTop: '20px' }}>
-            <CharacterSearch isOpen={true} onClose={() => {}} onCharacterSelect={handleCharacterSelect} onCharacterDragStart={handleCharacterDragStart} />
+          <Section>
+            <CharacterSearch isOpen={true} onCharacterSelect={handleCharacterSelect} onCharacterDragStart={handleCharacterDragStart} />
           </Section>
 
           {selectedPartyId && selectedParty && (

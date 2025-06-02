@@ -1,4 +1,3 @@
-// @ts-nocheck
 import styled from '@emotion/styled';
 
 type PageContainerProps = {

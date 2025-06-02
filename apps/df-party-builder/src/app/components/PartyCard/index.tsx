@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import styled from '@emotion/styled';
-import { ChevronDown, Pencil, Check, X } from 'lucide-react';
+import { Pencil, X } from 'lucide-react';
 import type { Party, CharacterData, PartySlot } from '../../types/types';
 import { CharacterCard } from '../CharacterCard';
 import {
@@ -21,17 +21,14 @@ import {
 type PartyCardProps = {
   party: Party;
   isMobile: boolean;
-  isExpanded: boolean;
-  onToggleExpand: () => void;
   onTitleChange: (newTitle: string) => void;
   onMemoChange: (newMemo: string) => void;
-  onCompletedChange: (isCompleted: boolean) => void;
   onDragStart?: (e: React.DragEvent<HTMLDivElement>, party: Party) => void;
   onDragEnd?: (e: React.DragEvent<HTMLDivElement>) => void;
   onDragOver?: (e: React.DragEvent) => void;
   onDragLeave?: (e: React.DragEvent) => void;
   onDrop?: (e: React.DragEvent, party: Party) => void;
-  onCharacterDragStart: (e: React.DragEvent<HTMLDivElement>, partyId: string, slotIndex: number, character: PartySlot) => void;
+  onCharacterDragStart: (e: React.DragEvent<HTMLDivElement>, slotIndex: number, character: PartySlot) => void;
   onCharacterDragOver: (e: React.DragEvent) => void;
   onCharacterDragLeave: (e: React.DragEvent) => void;
   onCharacterDrop: (e: React.DragEvent, partyId: string, slotIndex: number) => void;
@@ -43,11 +40,8 @@ type PartyCardProps = {
 export function PartyCard({
   party,
   isMobile,
-  isExpanded,
-  onToggleExpand,
   onTitleChange,
   onMemoChange,
-  onCompletedChange,
   onDragStart,
   onDragEnd,
   onDragOver,
@@ -64,6 +58,7 @@ export function PartyCard({
   const [isEditing, setIsEditing] = useState(false);
   const [editedTitle, setEditedTitle] = useState(party.title);
   const [isHovered, setIsHovered] = useState(false);
+  const [isExpanded, setIsExpanded] = useState(false);
 
   const handleTitleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -71,11 +66,6 @@ export function PartyCard({
       onTitleChange(editedTitle.trim());
     }
     setIsEditing(false);
-  };
-
-  const handleCheckboxClick = (e: React.MouseEvent) => {
-    e.stopPropagation();
-    onCompletedChange(!party.isCompleted);
   };
 
   const handleCharacterClick = (character: PartySlot) => {
@@ -94,6 +84,10 @@ export function PartyCard({
     onPartyDelete(party.id);
   };
 
+  const handleToggleExpand = () => {
+    setIsExpanded(!isExpanded);
+  };
+
   return (
     <PartyCardContainer
       isMobile={isMobile}
@@ -108,20 +102,27 @@ export function PartyCard({
       onMouseLeave={() => setIsHovered(false)}
       isCompleted={party.isCompleted}
     >
-      <DeletePartyButton className="delete-party-button" onClick={handlePartyDelete}>
-        <X size={16} />
-      </DeletePartyButton>
       <PartyCardHeader>
-        {isEditing ? (
-          <TitleEditForm onSubmit={handleTitleSubmit}>
-            <TitleInput type="text" value={editedTitle} onChange={(e) => setEditedTitle(e.target.value)} onBlur={handleTitleSubmit} autoFocus />
-          </TitleEditForm>
-        ) : (
-          <>
-            <PartyTitle value={party.title} onChange={(e) => onTitleChange(e.target.value)} placeholder="파티 이름" />
-            <Pencil size={16} />
-          </>
-        )}
+        <div style={{ display: 'flex', alignItems: 'center', gap: '8px', width: '100%' }}>
+          {isEditing ? (
+            <TitleEditForm onSubmit={handleTitleSubmit}>
+              <TitleInput type="text" value={editedTitle} onChange={(e) => setEditedTitle(e.target.value)} onBlur={handleTitleSubmit} autoFocus />
+            </TitleEditForm>
+          ) : (
+            <>
+              <PartyTitle>{party.title}</PartyTitle>
+              <EditButton onClick={() => setIsEditing(true)}>
+                <Pencil size={16} />
+              </EditButton>
+            </>
+          )}
+
+          {isHovered && (
+            <DeletePartyButton style={{ marginLeft: 'auto' }} className="delete-party-button" onClick={handlePartyDelete}>
+              <X size={16} />
+            </DeletePartyButton>
+          )}
+        </div>
       </PartyCardHeader>
       <PartyCardContent>
         {party.slots.map((slot, index) => {
@@ -158,12 +159,12 @@ export function PartyCard({
                 {slot !== 'empty' ? (
                   <div
                     draggable={!isMobile}
-                    onDragStart={!isMobile ? (e) => onCharacterDragStart(e, party.id, index, slot) : undefined}
+                    onDragStart={!isMobile ? (e) => onCharacterDragStart(e, index, slot) : undefined}
                     style={{ width: '100%', height: '100%' }}
                   >
                     <CharacterCard
                       character={slot as CharacterData}
-                      onDragStart={!isMobile ? (e) => onCharacterDragStart(e, party.id, index, slot) : undefined}
+                      onDragStart={!isMobile ? (e) => onCharacterDragStart(e, index, slot) : undefined}
                       onClick={() => handleCharacterClick(slot)}
                     />
                     <button className="delete-button" onClick={(e) => handleDeleteClick(e, index)}>
@@ -179,14 +180,14 @@ export function PartyCard({
           <PartyMemo isMobile={isMobile} value={party.memo} onChange={(e) => onMemoChange(e.target.value)} placeholder="파티 메모" />
         </PartyCardDetails>
       )}
-      <ExpandButton onClick={onToggleExpand}>{isExpanded ? '접기' : '펼치기'}</ExpandButton>
-      {(isHovered || party.isCompleted) && (
+      <ExpandButton onClick={handleToggleExpand}>{isExpanded ? '접기' : '펼치기'}</ExpandButton>
+      {/* {(isHovered || party.isCompleted) && (
         <CheckboxButton
           type="checkbox"
           checked={party.isCompleted}
           onChange={(e: React.ChangeEvent<HTMLInputElement>) => onCompletedChange(e.target.checked)}
         />
-      )}
+      )} */}
     </PartyCardContainer>
   );
 }
@@ -208,5 +209,21 @@ const TitleInput = styled.input`
   &:focus {
     outline: none;
     border-color: #2196f3;
+  }
+`;
+
+const EditButton = styled.button`
+  background: none;
+  border: none;
+  color: #666;
+  cursor: pointer;
+  padding: 4px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: color 0.2s ease;
+
+  &:hover {
+    color: #333;
   }
 `;
