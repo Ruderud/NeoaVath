@@ -518,6 +518,20 @@ export function GroupPage() {
     });
   }, []);
 
+  const handleDungeonDelete = useCallback(
+    (dungeonId: string) => {
+      const dungeon = dungeons.find((d) => d.id === dungeonId);
+      if (!dungeon) return;
+
+      const confirmMessage = `"${dungeon.name}" 파티그룹을 삭제하시겠습니까?\n이 작업은 되돌릴 수 없습니다.`;
+
+      if (window.confirm(confirmMessage)) {
+        setDungeons((prev) => prev.filter((dungeon) => dungeon.id !== dungeonId));
+      }
+    },
+    [dungeons],
+  );
+
   const handleDungeonDragStart = (e: React.DragEvent<HTMLDivElement>, dungeon: Dungeon) => {
     e.dataTransfer.setData('dungeon', JSON.stringify(dungeon));
     e.dataTransfer.setData('type', 'dungeon');
@@ -634,6 +648,7 @@ export function GroupPage() {
                   onDungeonNameChange={handleDungeonNameChange}
                   onCharacterDelete={handleCharacterDelete}
                   onPartyDelete={handlePartyDelete}
+                  onDungeonDelete={handleDungeonDelete}
                   onDragStart={(e) => handleDungeonDragStart(e, dungeon)}
                   onDragEnd={handleDungeonDragEnd}
                   onDragOver={handleDungeonDragOver}

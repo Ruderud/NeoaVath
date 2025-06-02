@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Plus, Pencil } from 'lucide-react';
+import { Plus, Pencil, X } from 'lucide-react';
 import styled from '@emotion/styled';
 import type { Party, CharacterData, PartySlot } from '../../types/types';
 import { PartyCard } from '../PartyCard';
@@ -26,6 +26,7 @@ export type DungeonColumnProps = {
   onCharacterDrop: (e: React.DragEvent, targetDungeonId: string, targetPartyId: string, targetSlotIndex: number) => void;
   onCharacterSelect: (character: CharacterData) => void;
   onDungeonNameChange: (dungeonId: string, newName: string) => void;
+  onDungeonDelete: (dungeonId: string) => void;
   onCharacterDelete: (partyId: string, slotIndex: number) => void;
   onPartyDelete: (partyId: string) => void;
   onDragStart: (e: React.DragEvent<HTMLDivElement>) => void;
@@ -57,6 +58,7 @@ export function DungeonColumn({
   onCharacterDrop,
   onCharacterSelect,
   onDungeonNameChange,
+  onDungeonDelete,
   onCharacterDelete,
   onPartyDelete,
   onDragStart,
@@ -93,6 +95,9 @@ export function DungeonColumn({
             </>
           )}
         </div>
+        <DeleteDungeonButton onClick={() => onDungeonDelete(id)}>
+          <X size={16} />
+        </DeleteDungeonButton>
       </ColumnHeader>
 
       {parties.length > 0 && (
@@ -224,5 +229,23 @@ const AddPartyButton = styled.button`
   &:hover {
     border-color: #2196f3;
     color: #2196f3;
+  }
+`;
+
+const DeleteDungeonButton = styled.button`
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  background: #ff4d4f;
+  color: white;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  border: none;
+  padding: 0;
+
+  &:hover {
+    background: #ff7875;
   }
 `;
