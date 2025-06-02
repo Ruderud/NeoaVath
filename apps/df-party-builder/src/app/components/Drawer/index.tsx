@@ -30,7 +30,7 @@ export function Drawer({ open, onToggle, groupName }: DrawerProps) {
             </DrawerCollapseButton>
           </DrawerHeader>
           <DrawerMenu>
-            <DrawerMenuButton>
+            <DrawerMenuButton onClick={() => alert('아직 안댐 ㅎ')}>
               <DundamIcon src="https://dundam.xyz/favicon.ico" alt="던담" />
               동기화
             </DrawerMenuButton>
