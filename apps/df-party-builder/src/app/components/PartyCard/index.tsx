@@ -21,11 +21,8 @@ import {
 type PartyCardProps = {
   party: Party;
   isMobile: boolean;
-  isExpanded: boolean;
-  onToggleExpand: () => void;
   onTitleChange: (newTitle: string) => void;
   onMemoChange: (newMemo: string) => void;
-  onCompletedChange: (isCompleted: boolean) => void;
   onDragStart?: (e: React.DragEvent<HTMLDivElement>, party: Party) => void;
   onDragEnd?: (e: React.DragEvent<HTMLDivElement>) => void;
   onDragOver?: (e: React.DragEvent) => void;
@@ -45,7 +42,6 @@ export function PartyCard({
   isMobile,
   onTitleChange,
   onMemoChange,
-  onCompletedChange,
   onDragStart,
   onDragEnd,
   onDragOver,

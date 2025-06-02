@@ -12,3 +12,18 @@ export const getCharacterDataFromDragEvent = (event: React.DragEvent): Character
 
   return JSON.parse(characterData) as CharacterData;
 };
+
+export const setCharacterDragData = (event: React.DragEvent, character: CharacterData, sourcePartyId?: string, sourceSlotIndex?: number) => {
+  event.dataTransfer.setData('character', JSON.stringify(character));
+  event.dataTransfer.setData('type', 'character');
+
+  if (sourcePartyId) {
+    event.dataTransfer.setData('sourcePartyId', sourcePartyId);
+  }
+
+  if (sourceSlotIndex !== undefined) {
+    event.dataTransfer.setData('sourceSlotIndex', String(sourceSlotIndex));
+  }
+
+  return event;
+};

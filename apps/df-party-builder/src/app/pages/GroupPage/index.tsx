@@ -28,7 +28,7 @@ import {
   AddDungeonButton,
 } from './styles';
 import { Toast } from '../../components/Toast';
-import { getCharacterDataFromDragEvent } from './utils';
+import { getCharacterDataFromDragEvent, setCharacterDragData } from './utils';
 
 const isExistGroupLoginData = (groupName?: string): boolean => {
   if (!groupName) return false;
@@ -274,12 +274,7 @@ export function GroupPage() {
     const characterData = typeof character === 'string' ? null : character;
     if (!characterData) return;
 
-    console.log('characterData', characterData);
-
-    e.dataTransfer.setData('character', JSON.stringify(characterData));
-    e.dataTransfer.setData('sourcePartyId', partyId);
-    e.dataTransfer.setData('sourceSlotIndex', String(slotIndex));
-    e.dataTransfer.setData('type', 'character');
+    setCharacterDragData(e, characterData, partyId, slotIndex);
     e.currentTarget.classList.add('dragging');
   };
 

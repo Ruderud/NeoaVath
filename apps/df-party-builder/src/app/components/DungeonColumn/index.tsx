@@ -92,11 +92,8 @@ export function DungeonColumn({
               key={party.id}
               party={party}
               isMobile={isMobile}
-              isExpanded={expandedPartyId === party.id}
-              onToggleExpand={() => onTogglePartyExpand(party.id)}
               onTitleChange={(newTitle) => onPartyTitleChange(party.id, newTitle)}
               onMemoChange={(newMemo) => onPartyMemoChange(party.id, newMemo)}
-              onCompletedChange={(isCompleted) => onPartyCompletedChange(party.id, isCompleted)}
               onDragStart={(e) => onPartyDragStart(e, party)}
               onDragEnd={onPartyDragEnd}
               onDragOver={onPartyDragOver}
