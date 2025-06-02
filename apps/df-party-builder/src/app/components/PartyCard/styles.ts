@@ -107,21 +107,10 @@ export const PartySlots = styled.div<{ isMobile: boolean }>`
   width: 100%;
 `;
 
-export const PartyTitle = styled.input`
-  width: 100%;
-  padding: 4px 8px;
-  border: 1px solid transparent;
-  border-radius: 4px;
-  font-size: 1.1rem;
+export const PartyTitle = styled.h4`
+  margin: 0;
+  font-size: 1.2em;
   font-weight: 600;
-  color: #333;
-  background: transparent;
-
-  &:focus {
-    outline: none;
-    border-color: #2196f3;
-    background: white;
-  }
 `;
 
 export const CheckboxButton = styled.input`

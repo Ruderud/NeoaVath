@@ -56,13 +56,8 @@ export function DungeonColumn({
   onCharacterDelete,
   onPartyDelete,
 }: DungeonColumnProps) {
-  const [isExpanded, setIsExpanded] = useState(true);
   const [isEditing, setIsEditing] = useState(false);
   const [editedName, setEditedName] = useState(name);
-
-  const toggleExpand = () => {
-    setIsExpanded(!isExpanded);
-  };
 
   const handleNameSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -75,23 +70,23 @@ export function DungeonColumn({
   return (
     <Column>
       <ColumnHeader>
-        {isEditing ? (
-          <NameEditForm onSubmit={handleNameSubmit}>
-            <NameInput type="text" value={editedName} onChange={(e) => setEditedName(e.target.value)} onBlur={handleNameSubmit} autoFocus />
-          </NameEditForm>
-        ) : (
-          <>
-            <ColumnTitle>{name}</ColumnTitle>
-            <EditButton onClick={() => setIsEditing(true)}>
-              <Pencil size={16} />
-            </EditButton>
-          </>
-        )}
-        <AddPartyButton onClick={() => onAddParty(id)}>
-          <Plus size={20} />
-        </AddPartyButton>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+          {isEditing ? (
+            <NameEditForm onSubmit={handleNameSubmit}>
+              <NameInput type="text" value={editedName} onChange={(e) => setEditedName(e.target.value)} onBlur={handleNameSubmit} autoFocus />
+            </NameEditForm>
+          ) : (
+            <>
+              <ColumnTitle>{name}</ColumnTitle>
+              <EditButton onClick={() => setIsEditing(true)}>
+                <Pencil size={16} />
+              </EditButton>
+            </>
+          )}
+        </div>
       </ColumnHeader>
-      {isExpanded && (
+
+      {parties.length > 0 && (
         <ColumnContent>
           {parties.map((party) => (
             <PartyCard
@@ -119,6 +114,10 @@ export function DungeonColumn({
           ))}
         </ColumnContent>
       )}
+
+      <AddPartyButton onClick={() => onAddParty(id)}>
+        <Plus size={20} />
+      </AddPartyButton>
     </Column>
   );
 }
@@ -128,15 +127,17 @@ const Column = styled.div`
   border-radius: 8px;
   padding: 16px;
   width: 450px;
-  max-height: calc(100vh - 200px);
   overflow-y: auto;
+
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
 `;
 
 const ColumnHeader = styled.div`
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin-bottom: 16px;
 `;
 
 const ColumnTitle = styled.h3`

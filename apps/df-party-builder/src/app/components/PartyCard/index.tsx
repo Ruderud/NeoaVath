@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import styled from '@emotion/styled';
-import { ChevronDown, Pencil, Check, X } from 'lucide-react';
+import { Pencil, X } from 'lucide-react';
 import type { Party, CharacterData, PartySlot } from '../../types/types';
 import { CharacterCard } from '../CharacterCard';
 import {
@@ -73,11 +73,6 @@ export function PartyCard({
     setIsEditing(false);
   };
 
-  const handleCheckboxClick = (e: React.MouseEvent) => {
-    e.stopPropagation();
-    onCompletedChange(!party.isCompleted);
-  };
-
   const handleCharacterClick = (character: PartySlot) => {
     if (character !== 'empty') {
       onCharacterSelect(character);
@@ -108,20 +103,24 @@ export function PartyCard({
       onMouseLeave={() => setIsHovered(false)}
       isCompleted={party.isCompleted}
     >
-      <DeletePartyButton className="delete-party-button" onClick={handlePartyDelete}>
-        <X size={16} />
-      </DeletePartyButton>
       <PartyCardHeader>
-        {isEditing ? (
-          <TitleEditForm onSubmit={handleTitleSubmit}>
-            <TitleInput type="text" value={editedTitle} onChange={(e) => setEditedTitle(e.target.value)} onBlur={handleTitleSubmit} autoFocus />
-          </TitleEditForm>
-        ) : (
-          <>
-            <PartyTitle value={party.title} onChange={(e) => onTitleChange(e.target.value)} placeholder="파티 이름" />
-            <Pencil size={16} />
-          </>
-        )}
+        <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+          {isEditing ? (
+            <TitleEditForm onSubmit={handleTitleSubmit}>
+              <TitleInput type="text" value={editedTitle} onChange={(e) => setEditedTitle(e.target.value)} onBlur={handleTitleSubmit} autoFocus />
+            </TitleEditForm>
+          ) : (
+            <>
+              <PartyTitle>{party.title}</PartyTitle>
+              <EditButton onClick={() => setIsEditing(true)}>
+                <Pencil size={16} />
+              </EditButton>
+            </>
+          )}
+        </div>
+        <DeletePartyButton className="delete-party-button" onClick={handlePartyDelete}>
+          <X size={16} />
+        </DeletePartyButton>
       </PartyCardHeader>
       <PartyCardContent>
         {party.slots.map((slot, index) => {
@@ -208,5 +207,21 @@ const TitleInput = styled.input`
   &:focus {
     outline: none;
     border-color: #2196f3;
+  }
+`;
+
+const EditButton = styled.button`
+  background: none;
+  border: none;
+  color: #666;
+  cursor: pointer;
+  padding: 4px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: color 0.2s ease;
+
+  &:hover {
+    color: #333;
   }
 `;
