@@ -1,8 +1,7 @@
 import { useState } from 'react';
-import { Plus, ChevronDown, ChevronUp, Pencil } from 'lucide-react';
+import { Plus, Pencil } from 'lucide-react';
 import styled from '@emotion/styled';
-import type { Party, PartySlot, CharacterData } from '../../types/types';
-import { CharacterCard } from '../CharacterCard';
+import type { Party, CharacterData, PartySlot } from '../../types/types';
 import { PartyCard } from '../PartyCard';
 
 export type DungeonColumnProps = {
@@ -21,11 +20,11 @@ export type DungeonColumnProps = {
   onPartyDragOver: (e: React.DragEvent) => void;
   onPartyDragLeave: (e: React.DragEvent) => void;
   onPartyDrop: (e: React.DragEvent, targetParty: Party) => void;
-  onCharacterDragStart: (e: React.DragEvent<HTMLDivElement>, partyId: string, slotIndex: number, character: CharacterData) => void;
+  onCharacterDragStart: (e: React.DragEvent<HTMLDivElement>, partyId: string, slotIndex: number, character: PartySlot) => void;
   onCharacterDragOver: (e: React.DragEvent) => void;
   onCharacterDragLeave: (e: React.DragEvent) => void;
   onCharacterDrop: (e: React.DragEvent, targetDungeonId: string, targetPartyId: string, targetSlotIndex: number) => void;
-  onCharacterSelect: (character: CharacterData) => void;
+  onCharacterSelect: (character: PartySlot) => void;
   onDungeonNameChange: (dungeonId: string, newName: string) => void;
   onCharacterDelete: (partyId: string, slotIndex: number) => void;
   onPartyDelete: (partyId: string) => void;
@@ -127,6 +126,7 @@ const Column = styled.div`
   border-radius: 8px;
   padding: 16px;
   width: 450px;
+  min-width: 450px;
   overflow-y: auto;
 
   display: flex;

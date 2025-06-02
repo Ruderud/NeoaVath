@@ -28,6 +28,7 @@ import {
   AddDungeonButton,
 } from './styles';
 import { Toast } from '../../components/Toast';
+import { getCharacterDataFromDragEvent } from './utils';
 
 const isExistGroupLoginData = (groupName?: string): boolean => {
   if (!groupName) return false;
@@ -270,7 +271,12 @@ export function GroupPage() {
     e.stopPropagation();
     if (character === 'empty') return;
 
-    e.dataTransfer.setData('character', JSON.stringify(character));
+    const characterData = typeof character === 'string' ? null : character;
+    if (!characterData) return;
+
+    console.log('characterData', characterData);
+
+    e.dataTransfer.setData('character', JSON.stringify(characterData));
     e.dataTransfer.setData('sourcePartyId', partyId);
     e.dataTransfer.setData('sourceSlotIndex', String(slotIndex));
     e.dataTransfer.setData('type', 'character');
@@ -351,20 +357,16 @@ export function GroupPage() {
 
   const handleDrop = (e: React.DragEvent, targetDungeonId: string, targetPartyId: string, targetSlotIndex: number) => {
     e.preventDefault();
-    const target = e.currentTarget as HTMLDivElement;
-    target.classList.remove('drag-over');
-
-    const type = e.dataTransfer.getData('type');
-    if (type !== 'character') return;
-
-    const characterData = e.dataTransfer.getData('character');
-    const sourcePartyId = e.dataTransfer.getData('sourcePartyId');
-    const sourceSlotIndex = e.dataTransfer.getData('sourceSlotIndex');
-
-    if (!characterData) return;
 
     try {
-      const character = JSON.parse(characterData) as CharacterData;
+      const target = e.currentTarget as HTMLDivElement;
+      target.classList.remove('drag-over');
+
+      const type = e.dataTransfer.getData('type');
+      if (type !== 'character') return;
+      const character = getCharacterDataFromDragEvent(e);
+      const sourcePartyId = e.dataTransfer.getData('sourcePartyId');
+      const sourceSlotIndex = e.dataTransfer.getData('sourceSlotIndex');
 
       setDungeons((prev) => {
         const newDungeons = [...prev];
@@ -384,6 +386,8 @@ export function GroupPage() {
 
         // 같은 파티 내에서의 이동인 경우
         if (sourcePartyId && sourcePartyId === targetPartyId) {
+          console.log('targetParty', targetParty);
+          console.log('moving character', character);
           const newSlots = [...targetParty.slots];
           const sourceCharacter = newSlots[Number(sourceSlotIndex)];
           const targetCharacter = newSlots[targetSlotIndex];
@@ -392,20 +396,10 @@ export function GroupPage() {
           newSlots[targetSlotIndex] = sourceCharacter;
           newSlots[Number(sourceSlotIndex)] = targetCharacter;
 
+          console.log('newSlots', newSlots);
+
           targetParty.slots = newSlots as [PartySlot, PartySlot, PartySlot, PartySlot];
         } else {
-          // 다른 파티로 이동하는 경우에만 모험단 체크
-          const hasSameAdventure = targetParty.slots.some((slot) => {
-            if (slot === 'empty' || typeof slot === 'string') return false;
-            const slotCharacter = slot as CharacterData;
-            return slotCharacter.adventure === character.adventure;
-          });
-
-          if (hasSameAdventure) {
-            showToast('같은 모험단의 캐릭터는 같은 파티에 추가할 수 없습니다.');
-            return prev;
-          }
-
           // 다른 파티로 이동하는 경우
           const newSlots = [...targetParty.slots];
           newSlots[targetSlotIndex] = character;
@@ -479,8 +473,9 @@ export function GroupPage() {
     setShowAddGroupInput(false);
   };
 
-  const handleCharacterSelect = (character: CharacterData) => {
-    setSelectedCharacter(character);
+  const handleCharacterSelect = (character: PartySlot) => {
+    if (character === 'empty') return;
+    setSelectedCharacter(character as CharacterData);
     setShowCharacterDetail(true);
   };
 

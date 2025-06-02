@@ -31,7 +31,7 @@ type PartyCardProps = {
   onDragOver?: (e: React.DragEvent) => void;
   onDragLeave?: (e: React.DragEvent) => void;
   onDrop?: (e: React.DragEvent, party: Party) => void;
-  onCharacterDragStart: (e: React.DragEvent<HTMLDivElement>, partyId: string, slotIndex: number, character: PartySlot) => void;
+  onCharacterDragStart: (e: React.DragEvent<HTMLDivElement>, slotIndex: number, character: PartySlot) => void;
   onCharacterDragOver: (e: React.DragEvent) => void;
   onCharacterDragLeave: (e: React.DragEvent) => void;
   onCharacterDrop: (e: React.DragEvent, partyId: string, slotIndex: number) => void;
@@ -43,8 +43,6 @@ type PartyCardProps = {
 export function PartyCard({
   party,
   isMobile,
-  isExpanded,
-  onToggleExpand,
   onTitleChange,
   onMemoChange,
   onCompletedChange,
@@ -64,6 +62,7 @@ export function PartyCard({
   const [isEditing, setIsEditing] = useState(false);
   const [editedTitle, setEditedTitle] = useState(party.title);
   const [isHovered, setIsHovered] = useState(false);
+  const [isExpanded, setIsExpanded] = useState(false);
 
   const handleTitleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -89,6 +88,10 @@ export function PartyCard({
     onPartyDelete(party.id);
   };
 
+  const handleToggleExpand = () => {
+    setIsExpanded(!isExpanded);
+  };
+
   return (
     <PartyCardContainer
       isMobile={isMobile}
@@ -104,7 +107,7 @@ export function PartyCard({
       isCompleted={party.isCompleted}
     >
       <PartyCardHeader>
-        <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '8px', width: '100%' }}>
           {isEditing ? (
             <TitleEditForm onSubmit={handleTitleSubmit}>
               <TitleInput type="text" value={editedTitle} onChange={(e) => setEditedTitle(e.target.value)} onBlur={handleTitleSubmit} autoFocus />
@@ -117,10 +120,13 @@ export function PartyCard({
               </EditButton>
             </>
           )}
+
+          {isHovered && (
+            <DeletePartyButton style={{ marginLeft: 'auto' }} className="delete-party-button" onClick={handlePartyDelete}>
+              <X size={16} />
+            </DeletePartyButton>
+          )}
         </div>
-        <DeletePartyButton className="delete-party-button" onClick={handlePartyDelete}>
-          <X size={16} />
-        </DeletePartyButton>
       </PartyCardHeader>
       <PartyCardContent>
         {party.slots.map((slot, index) => {
@@ -157,12 +163,12 @@ export function PartyCard({
                 {slot !== 'empty' ? (
                   <div
                     draggable={!isMobile}
-                    onDragStart={!isMobile ? (e) => onCharacterDragStart(e, party.id, index, slot) : undefined}
+                    onDragStart={!isMobile ? (e) => onCharacterDragStart(e, index, slot) : undefined}
                     style={{ width: '100%', height: '100%' }}
                   >
                     <CharacterCard
                       character={slot as CharacterData}
-                      onDragStart={!isMobile ? (e) => onCharacterDragStart(e, party.id, index, slot) : undefined}
+                      onDragStart={!isMobile ? (e) => onCharacterDragStart(e, index, slot) : undefined}
                       onClick={() => handleCharacterClick(slot)}
                     />
                     <button className="delete-button" onClick={(e) => handleDeleteClick(e, index)}>
@@ -178,14 +184,14 @@ export function PartyCard({
           <PartyMemo isMobile={isMobile} value={party.memo} onChange={(e) => onMemoChange(e.target.value)} placeholder="파티 메모" />
         </PartyCardDetails>
       )}
-      <ExpandButton onClick={onToggleExpand}>{isExpanded ? '접기' : '펼치기'}</ExpandButton>
-      {(isHovered || party.isCompleted) && (
+      <ExpandButton onClick={handleToggleExpand}>{isExpanded ? '접기' : '펼치기'}</ExpandButton>
+      {/* {(isHovered || party.isCompleted) && (
         <CheckboxButton
           type="checkbox"
           checked={party.isCompleted}
           onChange={(e: React.ChangeEvent<HTMLInputElement>) => onCompletedChange(e.target.checked)}
         />
-      )}
+      )} */}
     </PartyCardContainer>
   );
 }

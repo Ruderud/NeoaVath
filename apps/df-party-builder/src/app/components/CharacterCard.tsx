@@ -82,8 +82,18 @@ interface CharacterCardProps {
 }
 
 export function CharacterCard({ character, onDragStart, onClick }: CharacterCardProps) {
+  const handleDragStart = (e: React.DragEvent<HTMLDivElement>) => {
+    e.dataTransfer.setData('character', JSON.stringify(character));
+    e.dataTransfer.setData('type', 'character');
+    onDragStart?.(e, character);
+  };
+
+  const handleClick = () => {
+    onClick?.(character);
+  };
+
   return (
-    <Card draggable onDragStart={(e) => onDragStart?.(e, character)} onClick={() => onClick?.(character)}>
+    <Card draggable onDragStart={handleDragStart} onClick={handleClick}>
       <Image>
         <img
           src={`https://img-api.neople.co.kr/df/servers/${character.server}/characters/${character.key}?zoom=1`}

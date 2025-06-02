@@ -26,10 +26,6 @@ export const PartyCardContainer = styled.div<PartyCardContainerProps>`
     box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
   }
 
-  &:hover .delete-party-button {
-    opacity: 1;
-  }
-
   &.dragging {
     opacity: 0.5;
   }
@@ -180,9 +176,6 @@ export const PartyMemo = styled.textarea<{ isMobile: boolean }>`
 `;
 
 export const DeletePartyButton = styled.button`
-  position: absolute;
-  top: 8px;
-  right: 8px;
   width: 24px;
   height: 24px;
   border-radius: 50%;
@@ -192,9 +185,6 @@ export const DeletePartyButton = styled.button`
   align-items: center;
   justify-content: center;
   cursor: pointer;
-  opacity: 0;
-  transition: opacity 0.2s ease;
-  z-index: 2;
   border: none;
   padding: 0;
 
