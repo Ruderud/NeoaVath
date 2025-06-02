@@ -52,11 +52,30 @@ const SearchForm = styled.form`
   flex: 1;
 `;
 
+const SearchTypeSelect = styled.select`
+  padding: 8px 12px;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  background-color: white;
+  cursor: pointer;
+  min-width: 120px;
+
+  &:focus {
+    outline: none;
+    border-color: #2196f3;
+  }
+`;
+
 const Input = styled.input`
   padding: 8px 12px;
   border: 1px solid #ddd;
   border-radius: 4px;
   flex: 1;
+
+  &:focus {
+    outline: none;
+    border-color: #2196f3;
+  }
 `;
 
 const Button = styled.button`
@@ -116,10 +135,13 @@ interface CharacterSearchProps {
   }>;
 }
 
+type SearchType = 'character' | 'adventure';
+
 export function CharacterSearch({ isOpen, onCharacterSelect, onCharacterDragStart, dungeons }: CharacterSearchProps) {
   const [searchTerm, setSearchTerm] = useState('');
   const [debouncedSearchTerm, setDebouncedSearchTerm] = useState('');
-  const { data, isLoading, error } = useDundamQuery(debouncedSearchTerm, 'character');
+  const [searchType, setSearchType] = useState<SearchType>('character');
+  const { data, isLoading, error } = useDundamQuery(debouncedSearchTerm, searchType);
   const [hoveredCharacter, setHoveredCharacter] = useState<CharacterData | null>(null);
   const [helperText, setHelperText] = useState('');
 
@@ -172,6 +194,12 @@ export function CharacterSearch({ isOpen, onCharacterSelect, onCharacterDragStar
     debouncedSetSearchTerm(value);
   };
 
+  const handleSearchTypeChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
+    setSearchType(e.target.value as SearchType);
+    setSearchTerm('');
+    setDebouncedSearchTerm('');
+  };
+
   const handleDragStart = (e: React.DragEvent<HTMLDivElement>, character: CharacterData) => {
     e.dataTransfer.setData('data', JSON.stringify(character));
     e.dataTransfer.setData('type', 'character');
@@ -183,11 +211,21 @@ export function CharacterSearch({ isOpen, onCharacterSelect, onCharacterDragStar
     <SearchContainer className={isOpen ? '' : 'closed'}>
       <SearchHeader>
         <SearchTitle>캐릭터 검색</SearchTitle>
-        <SearchForm onSubmit={handleSearch}></SearchForm>
-        <Input type="text" value={searchTerm} onChange={handleInputChange} placeholder="캐릭터명을 입력하세요" />
-        <Button type="submit" disabled={isLoading}>
-          {isLoading ? '검색 중...' : '검색'}
-        </Button>
+        <SearchForm onSubmit={handleSearch}>
+          <SearchTypeSelect value={searchType} onChange={handleSearchTypeChange}>
+            <option value="character">캐릭터명</option>
+            <option value="adventure">모험단명</option>
+          </SearchTypeSelect>
+          <Input
+            type="text"
+            value={searchTerm}
+            onChange={handleInputChange}
+            placeholder={searchType === 'character' ? '캐릭터명을 입력하세요' : '모험단명을 입력하세요'}
+          />
+          <Button type="submit" disabled={isLoading}>
+            {isLoading ? '검색 중...' : '검색'}
+          </Button>
+        </SearchForm>
       </SearchHeader>
 
       {error && <div style={{ color: 'red', marginBottom: '16px' }}>캐릭터 정보를 가져오는데 실패했습니다.</div>}

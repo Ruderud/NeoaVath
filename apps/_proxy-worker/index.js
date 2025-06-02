@@ -4,11 +4,14 @@ addEventListener('fetch', (event) => {
 
 const DUNDAM_BASE_URL = 'https://dundam.xyz';
 
-async function searchCharacter(name, userAgent, rawData = false) {
+async function searchCharacter(name, type, userAgent, rawData = false) {
   try {
     console.log('Searching for character:', name);
+    console.log('Type:', type);
 
-    const searchResponse = await fetch(`${DUNDAM_BASE_URL}/dat/searchData.jsp?name=${encodeURIComponent(name)}&server=adven`, {
+    const searchServerType = type === 'adventure' ? 'adven' : 'all';
+
+    const searchResponse = await fetch(`${DUNDAM_BASE_URL}/dat/searchData.jsp?name=${encodeURIComponent(name)}&server=${searchServerType}`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
@@ -99,6 +102,7 @@ async function handleRequest(request) {
 
   const url = new URL(request.url);
   const characterName = url.searchParams.get('name');
+  const type = url.searchParams.get('type') || 'character';
   const rawData = url.searchParams.get('rawData') === 'true';
   const userAgent =
     request.headers.get('User-Agent') ||
@@ -113,8 +117,9 @@ async function handleRequest(request) {
 
   try {
     console.log('Processing request for character:', characterName);
+    console.log('Search type:', type);
 
-    const searchResult = await searchCharacter(characterName, userAgent, rawData);
+    const searchResult = await searchCharacter(characterName, type, userAgent, rawData);
     console.log('Search completed successfully');
 
     return new Response(JSON.stringify(searchResult), {
