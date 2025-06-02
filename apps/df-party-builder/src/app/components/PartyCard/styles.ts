@@ -120,42 +120,27 @@ export const CheckboxButton = styled.input`
 `;
 
 export const PartySlot = styled.div<PartySlotProps>`
-  position: relative;
-  height: 80px;
   background: #f5f5f5;
   border-radius: 4px;
   display: flex;
   align-items: center;
   justify-content: center;
-  min-width: 0;
-  flex: 1;
+  width: 50%;
 
-  &:hover .delete-button {
-    opacity: 1;
+  position: relative;
+
+  .character-card {
+    flex-grow: 1;
+    align-self: stretch;
+    width: 100%;
+    z-index: 1;
   }
 
   .delete-button {
     position: absolute;
     top: 4px;
     right: 4px;
-    width: 20px;
-    height: 20px;
-    border-radius: 50%;
-    background: #ff4d4f;
-    color: white;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    cursor: pointer;
-    opacity: 0;
-    transition: opacity 0.2s ease;
     z-index: 2;
-    border: none;
-    padding: 0;
-
-    &:hover {
-      background: #ff7875;
-    }
   }
 `;
 

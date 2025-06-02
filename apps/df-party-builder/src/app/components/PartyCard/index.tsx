@@ -124,27 +124,8 @@ export function PartyCard({
           )}
         </div>
       </PartyCardHeader>
-      <PartyCardContent>
-        {party.slots.map((slot, index) => {
-          if (slot === 'empty') return null;
-          const character = slot as CharacterData;
-          if (!character?.name) return null;
 
-          return (
-            <PartyCharacterPreview key={index}>
-              <span className="name">{character.name}</span>
-              <span className="level">명성 {character.level}</span>
-              {character.buffScore ? (
-                <span className="score">버프력 {character.buffScore}</span>
-              ) : character.ozma ? (
-                <span className="score">랭킹 {character.ozma}</span>
-              ) : null}
-            </PartyCharacterPreview>
-          );
-        })}
-      </PartyCardContent>
-
-      {isExpanded && (
+      {isExpanded ? (
         <PartyCardDetails>
           <PartySlotsContainer isMobile={isMobile}>
             {party.slots.map((slot, index) => (
@@ -157,20 +138,17 @@ export function PartyCard({
                 className={slot === 'empty' ? 'empty' : ''}
               >
                 {slot !== 'empty' ? (
-                  <div
-                    draggable={!isMobile}
-                    onDragStart={!isMobile ? (e) => onCharacterDragStart(e, index, slot) : undefined}
-                    style={{ width: '100%', height: '100%' }}
-                  >
+                  <>
                     <CharacterCard
+                      cardProps={{ className: 'character-card' }}
                       character={slot as CharacterData}
                       onDragStart={!isMobile ? (e) => onCharacterDragStart(e, index, slot) : undefined}
                       onClick={() => handleCharacterClick(slot)}
                     />
                     <button className="delete-button" onClick={(e) => handleDeleteClick(e, index)}>
-                      <X size={14} />
+                      <X size={16} />
                     </button>
-                  </div>
+                  </>
                 ) : (
                   <div>빈 슬롯</div>
                 )}
@@ -179,6 +157,26 @@ export function PartyCard({
           </PartySlotsContainer>
           <PartyMemo isMobile={isMobile} value={party.memo} onChange={(e) => onMemoChange(e.target.value)} placeholder="파티 메모" />
         </PartyCardDetails>
+      ) : (
+        <PartyCardContent>
+          {party.slots.map((slot, index) => {
+            if (slot === 'empty') return null;
+            const character = slot as CharacterData;
+            if (!character?.name) return null;
+
+            return (
+              <PartyCharacterPreview key={index}>
+                <span className="name">{character.name}</span>
+                <span className="level">명성 {character.level}</span>
+                {character.buffScore ? (
+                  <span className="score">버프력 {character.buffScore}</span>
+                ) : character.ozma ? (
+                  <span className="score">랭킹 {character.ozma}</span>
+                ) : null}
+              </PartyCharacterPreview>
+            );
+          })}
+        </PartyCardContent>
       )}
       <ExpandButton onClick={handleToggleExpand}>{isExpanded ? '접기' : '펼치기'}</ExpandButton>
       {/* {(isHovered || party.isCompleted) && (

@@ -12,7 +12,7 @@ const Card = styled.div`
   gap: 8px;
   transition: all 0.2s ease-in-out;
   cursor: move;
-  width: 180px;
+  width: auto;
   aspect-ratio: 3/4;
 
   &:hover {
@@ -75,13 +75,14 @@ const MainInfo = styled.div`
   }
 `;
 
-interface CharacterCardProps {
+type CharacterCardProps = {
+  cardProps?: React.HTMLAttributes<HTMLDivElement>;
   character: CharacterData;
   onDragStart?: (e: React.DragEvent<HTMLDivElement>, character: CharacterData) => void;
   onClick?: (character: CharacterData) => void;
-}
+};
 
-export function CharacterCard({ character, onDragStart, onClick }: CharacterCardProps) {
+export function CharacterCard({ character, onDragStart, onClick, cardProps }: CharacterCardProps) {
   const handleDragStart = (e: React.DragEvent<HTMLDivElement>) => {
     e.dataTransfer.setData('character', JSON.stringify(character));
     e.dataTransfer.setData('type', 'character');
@@ -93,7 +94,7 @@ export function CharacterCard({ character, onDragStart, onClick }: CharacterCard
   };
 
   return (
-    <Card draggable onDragStart={handleDragStart} onClick={handleClick}>
+    <Card {...cardProps} draggable onDragStart={handleDragStart} onClick={handleClick}>
       <Image>
         <img
           src={`https://img-api.neople.co.kr/df/servers/${character.server}/characters/${character.key}?zoom=1`}
