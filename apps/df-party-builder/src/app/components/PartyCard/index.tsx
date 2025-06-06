@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import styled from '@emotion/styled';
-import { Pencil, X } from 'lucide-react';
+import { Pencil, X, ChevronUp, ChevronDown } from 'lucide-react';
 import type { Party, CharacterData, PartySlot } from '../../types/types';
 import { CharacterCard } from '../CharacterCard';
 import {
@@ -166,8 +166,10 @@ export function PartyCard({
 
             return (
               <PartyCharacterPreview key={index}>
-                <span className="name">{character.name}</span>
-                <span className="level">명성 {character.level}</span>
+                <div className="character-info">
+                  <span className="name">{character.name}</span>
+                  <span className="level">명성 {character.level}</span>
+                </div>
                 {character.buffScore ? (
                   <span className="score">버프력 {character.buffScore}</span>
                 ) : character.ozma ? (
@@ -178,7 +180,7 @@ export function PartyCard({
           })}
         </PartyCardContent>
       )}
-      <ExpandButton onClick={handleToggleExpand}>{isExpanded ? '접기' : '펼치기'}</ExpandButton>
+      <ExpandButton onClick={handleToggleExpand}>{isExpanded ? <ChevronUp size={20} /> : <ChevronDown size={20} />}</ExpandButton>
       {/* {(isHovered || party.isCompleted) && (
         <CheckboxButton
           type="checkbox"

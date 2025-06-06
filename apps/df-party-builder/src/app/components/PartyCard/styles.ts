@@ -18,7 +18,7 @@ export const PartyCardContainer = styled.div<PartyCardContainerProps>`
   padding: 16px;
   display: flex;
   flex-direction: column;
-  gap: 16px;
+  gap: 8px;
   transition: all 0.2s ease;
   opacity: ${({ isCompleted }) => (isCompleted ? 0.7 : 1)};
 
@@ -44,30 +44,39 @@ export const PartyCardHeader = styled.div`
 export const PartyCardContent = styled.div`
   display: flex;
   flex-direction: column;
-  gap: 8px;
+  gap: 4px;
 `;
 
 export const PartyCharacterPreview = styled.div`
   display: flex;
-  flex-direction: column;
-  gap: 4px;
-  padding: 8px;
-  background: #f5f5f5;
-  border-radius: 4px;
+  align-items: center;
+  justify-content: space-between;
+  padding: 2px 4px;
+  font-size: 0.9rem;
+  color: #666;
+
+  .character-info {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
 
   .name {
+    width: 80px;
     font-weight: 500;
     color: #333;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
   }
 
   .level {
-    font-size: 0.9em;
     color: #666;
   }
 
   .score {
-    font-size: 0.9em;
     color: #2196f3;
+    font-weight: 500;
   }
 `;
 
@@ -76,17 +85,18 @@ export const ExpandButton = styled.button`
   border: none;
   color: #666;
   cursor: pointer;
-  padding: 8px;
+  padding: 4px;
   display: flex;
   align-items: center;
   justify-content: center;
-  transition: color 0.2s ease;
+  transition: all 0.2s ease;
   width: 100%;
   border-top: 1px solid #e0e0e0;
   margin-top: 8px;
 
   &:hover {
     color: #333;
+    background-color: #f5f5f5;
   }
 `;
 
@@ -171,8 +181,8 @@ export const PartyMemo = styled.textarea<{ isMobile: boolean }>`
 `;
 
 export const DeletePartyButton = styled.button`
-  width: 24px;
-  height: 24px;
+  width: 20px;
+  height: 20px;
   border-radius: 50%;
   background: #ff4d4f;
   color: white;
