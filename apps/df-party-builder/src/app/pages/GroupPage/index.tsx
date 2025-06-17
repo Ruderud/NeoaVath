@@ -5,7 +5,7 @@ import { PasswordDialog } from '../../components/PasswordDialog';
 import { useFirebase } from '../../context/FirebaseContext';
 import { throttle } from 'es-toolkit';
 import { getLocalStorageItem, setLocalStorageItem } from '../../utils/localStorage';
-import type { Party, PartySlot, CharacterData, Group } from '../../types/types';
+import { Party, PartySlot, CharacterData, Group, Dungeon } from '../../types/types';
 import { Plus } from 'lucide-react';
 import { Drawer } from '../../components/Drawer';
 import { DungeonColumn } from '../../components/DungeonColumn';
@@ -29,6 +29,8 @@ import {
 } from './styles';
 import { Toast } from '../../components/Toast';
 import { getCharacterDataFromDragEvent, setCharacterDragData } from './utils';
+import { getDundamData } from '../../api/dundam';
+import { DUNDAM_UPDATE_INTERVAL } from '../../consts/group.const';
 
 const isExistGroupLoginData = (groupName?: string): boolean => {
   if (!groupName) return false;
@@ -47,17 +49,11 @@ const isExistGroupLoginData = (groupName?: string): boolean => {
   return !result;
 };
 
-type Dungeon = {
-  id: string;
-  name: string;
-  parties: Party[];
-};
-
 export function GroupPage() {
   const { groupName } = useParams<{ groupName: string }>();
   const [showPasswordDialog, setShowPasswordDialog] = useState(isExistGroupLoginData(groupName));
   const [group, setGroup] = useState<Group | null>(null);
-  console.log('group', group);
+  // console.log('group', group);
   const [dungeons, setDungeons] = useState<Dungeon[]>([]);
   const [isMobile, setIsMobile] = useState(window.innerWidth <= 768);
   const [isDrawerOpen, setIsDrawerOpen] = useState(true);
@@ -75,6 +71,85 @@ export function GroupPage() {
   const handleToggleDrawer = useCallback(() => {
     setIsDrawerOpen((prev) => !prev);
   }, []);
+
+  const handleUpdateGroupCharacters = async () => {
+    const lastDundamUpdatedAt = group?.lastDundamUpdatedAt;
+    if (lastDundamUpdatedAt && new Date(lastDundamUpdatedAt).getTime() + DUNDAM_UPDATE_INTERVAL > Date.now()) {
+      return alert('그룹 전체 업데이트는 3분에 한번만 가능합니다.');
+    }
+
+    const needUpdateAdventures = Object.entries(
+      (group?.dungeons ?? [])
+        .flatMap((dungeon) => dungeon.parties)
+        .flatMap((party) => party.slots)
+        .filter((slot): slot is CharacterData => slot !== 'empty')
+        .reduce<Record<string, CharacterData[]>>((acc, character) => {
+          const key = character.adventureName;
+          if (!acc[key]) {
+            acc[key] = [];
+          }
+          acc[key].push(character);
+          return acc;
+        }, {}),
+    ).map(([adventureName, characters]) => ({
+      adventureName,
+      characters: [...new Set(characters.map((char) => char.name))],
+    }));
+
+    console.log('!!DEBUG needUpdateCharacters', needUpdateAdventures);
+
+    const updatedAdventures = await Promise.all(
+      needUpdateAdventures.map(async ({ adventureName }) => {
+        const data = await getDundamData({ name: adventureName, type: 'adventure' });
+        return {
+          adventureName,
+          characters: data.characters,
+        };
+      }),
+    );
+
+    console.log('!!DEBUG updatedAdventures', updatedAdventures);
+
+    if (!group) return;
+
+    // 업데이트된 모험단 데이터를 기반으로 새로운 그룹 객체 생성
+    const updatedGroup: Group = {
+      ...group,
+      dungeons: group.dungeons.map((dungeon) => ({
+        ...dungeon,
+        parties: dungeon.parties.map((party) => ({
+          ...party,
+          slots: party.slots.map((slot) => {
+            if (slot === 'empty') return slot;
+
+            // 현재 슬롯의 모험단에 해당하는 업데이트된 데이터 찾기
+            const needUpdateAdventure = updatedAdventures.find((adventure) => adventure.adventureName === slot.adventureName);
+
+            if (!needUpdateAdventure) return slot;
+
+            // 업데이트된 모험단의 캐릭터 데이터 찾기
+            const updatedCharacter = needUpdateAdventure.characters.find((char) => char.key === slot.key);
+
+            if (!updatedCharacter) return slot;
+
+            // 캐릭터 데이터 업데이트
+            return {
+              ...slot,
+              ...updatedCharacter,
+            };
+          }),
+        })),
+      })),
+    };
+    console.log('!!DEBUG updatedGroup', updatedGroup);
+
+    // 그룹 업데이트
+    setGroup({
+      ...updatedGroup,
+      lastDundamUpdatedAt: new Date().toISOString(),
+    });
+    setDungeons(updatedGroup.dungeons);
+  };
 
   // 모바일 여부 감지
   useEffect(() => {
@@ -629,7 +704,7 @@ export function GroupPage() {
 
   return (
     <>
-      <Drawer open={isDrawerOpen} groupName={groupName} onToggle={handleToggleDrawer} />
+      <Drawer open={isDrawerOpen} groupName={groupName} onToggle={handleToggleDrawer} onUpdateGroupCharacters={handleUpdateGroupCharacters} />
       <PageContainer drawerOpen={isDrawerOpen}>
         <MainContent style={{ backgroundColor: '#f5f5f5' }}>
           <Section>

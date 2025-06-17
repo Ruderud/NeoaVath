@@ -7,9 +7,20 @@ import { SearchType } from './search';
  * 파티는 4명의 파티원으로 만들어지는 최소한의 조직단위.
  */
 export type Group = {
+  id?: string; // not config yet
+  name?: string; // not config yet
+  config: GroupConfig;
+
+  dungeons: Dungeon[];
+  memo: string;
+
+  lastDundamUpdatedAt?: string; // iso string
+};
+
+export type Dungeon = {
   id: string;
   name: string;
-  config: GroupConfig;
+  parties: Party[];
 };
 
 export type GroupConfig = {

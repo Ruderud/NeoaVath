@@ -1,5 +1,6 @@
 import styled from '@emotion/styled';
 import type { CharacterData } from '../types/types';
+import { getDundamData } from '../api/dundam';
 
 const Card = styled.div`
   padding: 8px;

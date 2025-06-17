@@ -22,9 +22,10 @@ type DrawerProps = {
   open: boolean;
   groupName: string;
   onToggle: () => void;
+  onUpdateGroupCharacters: () => void;
 };
 
-export function Drawer({ open, onToggle, groupName }: DrawerProps) {
+export function Drawer({ open, onToggle, groupName, onUpdateGroupCharacters }: DrawerProps) {
   const [isMemoModalOpen, setIsMemoModalOpen] = useState(false);
   const [memo, setMemo] = useState('');
   const { writeData, readData } = useFirebase();
@@ -83,7 +84,7 @@ export function Drawer({ open, onToggle, groupName }: DrawerProps) {
               </DrawerCollapseButton>
             </DrawerHeader>
             <DrawerMenu>
-              <DrawerMenuButton onClick={() => alert('아직 안댐 ㅎ')}>
+              <DrawerMenuButton onClick={() => onUpdateGroupCharacters()}>
                 <DundamIcon src="https://dundam.xyz/favicon.ico" alt="던담" />
                 동기화
               </DrawerMenuButton>

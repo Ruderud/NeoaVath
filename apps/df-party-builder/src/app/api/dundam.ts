@@ -1,4 +1,5 @@
 import axios from 'axios';
+import { CharacterData } from '../types/types';
 
 const dundamProxyInstance = axios.create({
   baseURL: 'https://dundam-proxy.ruderud00552780.workers.dev',
