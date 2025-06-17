@@ -5,7 +5,7 @@ import { PasswordDialog } from '../../components/PasswordDialog';
 import { useFirebase } from '../../context/FirebaseContext';
 import { throttle } from 'es-toolkit';
 import { getLocalStorageItem, setLocalStorageItem } from '../../utils/localStorage';
-import type { Party, PartySlot, CharacterData } from '../../types/types';
+import type { Party, PartySlot, CharacterData, Group } from '../../types/types';
 import { Plus } from 'lucide-react';
 import { Drawer } from '../../components/Drawer';
 import { DungeonColumn } from '../../components/DungeonColumn';
@@ -56,6 +56,8 @@ type Dungeon = {
 export function GroupPage() {
   const { groupName } = useParams<{ groupName: string }>();
   const [showPasswordDialog, setShowPasswordDialog] = useState(isExistGroupLoginData(groupName));
+  const [group, setGroup] = useState<Group | null>(null);
+  console.log('group', group);
   const [dungeons, setDungeons] = useState<Dungeon[]>([]);
   const [isMobile, setIsMobile] = useState(window.innerWidth <= 768);
   const [isDrawerOpen, setIsDrawerOpen] = useState(true);
@@ -69,7 +71,6 @@ export function GroupPage() {
   const [selectedCharacter, setSelectedCharacter] = useState<CharacterData | null>(null);
   const [toastMessage, setToastMessage] = useState('');
   const [isToastVisible, setIsToastVisible] = useState(false);
-
   // Drawer 토글 함수
   const handleToggleDrawer = useCallback(() => {
     setIsDrawerOpen((prev) => !prev);
@@ -179,6 +180,18 @@ export function GroupPage() {
   useEffect(() => {
     if (!groupName) return;
 
+    const loadGroupData = async () => {
+      try {
+        const data = await readData(`groups/${groupName}`);
+        if (data) {
+          const validatedGroup = data as Group;
+          setGroup(validatedGroup);
+        }
+      } catch (error) {
+        console.error('그룹 데이터 로드 실패:', error);
+      }
+    };
+
     const loadDungeonData = async () => {
       try {
         const data = await readData(`groups/${groupName}/dungeons`);
@@ -207,6 +220,7 @@ export function GroupPage() {
 
     // 초기 데이터 로드
     loadDungeonData();
+    loadGroupData();
 
     // 리얼타임 구독 설정
     const unsubscribe = subscribeToData(`groups/${groupName}/dungeons`, (data) => {

@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { ChevronLeft, ChevronRight, FileText } from 'lucide-react';
+import { ChevronLeft, ChevronRight, FileText, Settings } from 'lucide-react';
 import { useFirebase } from '../../context/FirebaseContext';
 import { MemoModal } from '../MemoModal';
 import {
@@ -13,11 +13,14 @@ import {
   DrawerCollapseButton,
   DrawerCollapsed,
   DrawerExpandButton,
+  DrawerButton,
 } from './styles';
+import { GroupConfigModal } from '../GroupConfigModal';
+import { GroupConfig } from 'src/app/types/types';
 
 type DrawerProps = {
   open: boolean;
-  groupName?: string;
+  groupName: string;
   onToggle: () => void;
 };
 
@@ -25,6 +28,7 @@ export function Drawer({ open, onToggle, groupName }: DrawerProps) {
   const [isMemoModalOpen, setIsMemoModalOpen] = useState(false);
   const [memo, setMemo] = useState('');
   const { writeData, readData } = useFirebase();
+  const [isGroupConfigOpen, setIsGroupConfigOpen] = useState(false);
 
   useEffect(() => {
     if (groupName) {
@@ -54,6 +58,19 @@ export function Drawer({ open, onToggle, groupName }: DrawerProps) {
     }
   };
 
+  const handleGroupConfigClick = () => {
+    setIsGroupConfigOpen(true);
+  };
+
+  const handleSaveGroupConfig = async (newConfig: GroupConfig) => {
+    if (!groupName) return;
+    try {
+      await writeData(`groups/${groupName}/config`, newConfig);
+    } catch (error) {
+      console.error('그룹 설정 저장 실패:', error);
+    }
+  };
+
   return (
     <>
       <DrawerContainer open={open}>
@@ -75,6 +92,11 @@ export function Drawer({ open, onToggle, groupName }: DrawerProps) {
                 <FileText />
                 메모장
               </DrawerMenuButton>
+
+              <DrawerButton onClick={handleGroupConfigClick}>
+                <Settings size={24} />
+                <span>그룹 설정</span>
+              </DrawerButton>
             </DrawerMenu>
           </DrawerContent>
         ) : (
@@ -93,6 +115,7 @@ export function Drawer({ open, onToggle, groupName }: DrawerProps) {
       </DrawerContainer>
 
       <MemoModal isOpen={isMemoModalOpen} onClose={() => setIsMemoModalOpen(false)} onSave={handleSaveMemo} initialMemo={memo} />
+      <GroupConfigModal isOpen={isGroupConfigOpen} onClose={() => setIsGroupConfigOpen(false)} groupName={groupName} onSave={handleSaveGroupConfig} />
     </>
   );
 }

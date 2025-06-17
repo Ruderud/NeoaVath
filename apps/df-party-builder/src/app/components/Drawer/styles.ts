@@ -1,5 +1,4 @@
 import styled from '@emotion/styled';
-import type { HTMLAttributes } from 'react';
 
 export const DrawerContainer = styled.div<{ open: boolean }>`
   position: absolute;
@@ -102,4 +101,17 @@ export const DrawerExpandButton = styled.button`
   &:hover {
     color: #ccc;
   }
+`;
+
+export const DrawerButton = styled.button`
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px;
+  background: none;
+  border: none;
+  border-radius: 8px;
+  color: #fff;
+  cursor: pointer;
+  transition: background 0.2s ease;
 `;

@@ -1,8 +1,9 @@
 import { useState } from 'react';
 import styled from '@emotion/styled';
 import { Pencil, X, ChevronUp, ChevronDown } from 'lucide-react';
-import type { Party, CharacterData, PartySlot } from '../../types/types';
+import type { Party, CharacterData, PartySlot, GroupConfig, Tag } from '../../types/types';
 import { CharacterCard } from '../CharacterCard';
+import { Chip } from '../Chip';
 import {
   PartyCardContainer,
   PartyCardHeader,
@@ -21,6 +22,7 @@ import {
 type PartyCardProps = {
   party: Party;
   isMobile: boolean;
+  groupConfig: GroupConfig;
   onTitleChange: (newTitle: string) => void;
   onMemoChange: (newMemo: string) => void;
   onDragStart?: (e: React.DragEvent<HTMLDivElement>, party: Party) => void;
@@ -35,11 +37,14 @@ type PartyCardProps = {
   onCharacterSelect: (character: CharacterData) => void;
   onCharacterDelete: (partyId: string, slotIndex: number) => void;
   onPartyDelete: (partyId: string) => void;
+  onDungeonSelect?: (partyId: string, dungeon: string) => void;
+  onTagSelect?: (partyId: string, tagId: string) => void;
 };
 
 export function PartyCard({
   party,
   isMobile,
+  groupConfig,
   onTitleChange,
   onMemoChange,
   onDragStart,
@@ -54,11 +59,17 @@ export function PartyCard({
   onCharacterSelect,
   onCharacterDelete,
   onPartyDelete,
+  onDungeonSelect,
+  onTagSelect,
 }: PartyCardProps) {
   const [isEditing, setIsEditing] = useState(false);
   const [editedTitle, setEditedTitle] = useState(party.title);
   const [isHovered, setIsHovered] = useState(false);
   const [isExpanded, setIsExpanded] = useState(false);
+
+  // const { tags: groupTags } = groupConfig;
+
+  // const { tags: partyTags } = party;
 
   const handleTitleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -124,6 +135,11 @@ export function PartyCard({
           )}
         </div>
       </PartyCardHeader>
+      {/* <div style={{ display: 'flex', gap: '8px', marginTop: '8px' }}>
+        {groupTags.map((tag) => (
+          <Chip key={tag.id} color={tag.color} value={tag.name} isSelected={party.tags?.includes(tag.id)} onClick={() => onTagSelect?.(party.id, tag.id)} />
+        ))}
+      </div> */}
 
       {isExpanded ? (
         <PartyCardDetails>

@@ -1,6 +1,7 @@
-import { createContext, useContext, useEffect, useState } from 'react';
+import { createContext, useContext, useEffect, useState, ReactNode } from 'react';
 import { initializeApp } from 'firebase/app';
 import { getDatabase, ref, onValue, off, set, get, child, Database } from 'firebase/database';
+import type { GroupConfig } from '../types/types';
 
 const firebaseConfig = {
   apiKey: 'AIzaSyASapJ_v8qy-HqDXqmWLLAle7Sn_MqQltw',
@@ -18,11 +19,13 @@ type FirebaseContextType = {
   readData: (path: string) => Promise<unknown>;
   findGroup: (groupName: string) => Promise<unknown>;
   subscribeToData: (path: string, callback: (data: unknown) => void) => () => void;
+  getGroupConfig: (groupName: string) => Promise<GroupConfig>;
+  saveGroupConfig: (groupName: string, config: GroupConfig) => Promise<void>;
 };
 
 const FirebaseContext = createContext<FirebaseContextType | null>(null);
 
-export function FirebaseProvider({ children }: { children: React.ReactNode }) {
+export function FirebaseProvider({ children }: { children: ReactNode }) {
   const app = initializeApp(firebaseConfig);
   // const analytics = getAnalytics(app);
   const database = getDatabase(app);
@@ -65,12 +68,46 @@ export function FirebaseProvider({ children }: { children: React.ReactNode }) {
     };
   };
 
+  const getGroupConfig = async (groupName: string): Promise<GroupConfig> => {
+    try {
+      const snapshot = await get(child(ref(database), `groups/${groupName}/config`));
+      if (snapshot.exists()) {
+        return snapshot.val() as GroupConfig;
+      }
+      // 기본 설정 반환
+      return {
+        id: groupName,
+        name: groupName,
+        tags: [],
+        createdAt: new Date().toISOString(),
+        updatedAt: new Date().toISOString(),
+      };
+    } catch (error) {
+      console.error('그룹 설정 로드 실패:', error);
+      throw error;
+    }
+  };
+
+  const saveGroupConfig = async (groupName: string, config: GroupConfig): Promise<void> => {
+    try {
+      await set(ref(database, `groups/${groupName}/config`), {
+        ...config,
+        updatedAt: new Date().toISOString(),
+      });
+    } catch (error) {
+      console.error('그룹 설정 저장 실패:', error);
+      throw error;
+    }
+  };
+
   const value = {
     database,
     writeData,
     readData,
     findGroup,
     subscribeToData,
+    getGroupConfig,
+    saveGroupConfig,
   };
 
   return <FirebaseContext.Provider value={value}>{children}</FirebaseContext.Provider>;

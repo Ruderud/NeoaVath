@@ -6,10 +6,23 @@ import { SearchType } from './search';
  *
  * 파티는 4명의 파티원으로 만들어지는 최소한의 조직단위.
  */
-
-export type RecentGroup = {
+export type Group = {
   id: string;
   name: string;
+  config: GroupConfig;
+};
+
+export type GroupConfig = {
+  id: string;
+  name: string;
+  tags: Tag[];
+  createdAt: string;
+  updatedAt: string;
+};
+
+export type RecentGroup = {
+  id: Group['id'];
+  name: Group['name'];
   lastVisited: string;
 };
 
@@ -34,9 +47,10 @@ export type AdventureGuild = {
 export type Party = {
   id: string;
   title: string;
-  slots: [PartySlot, PartySlot, PartySlot, PartySlot];
+  slots: PartySlot[];
   memo: string;
-  isCompleted?: boolean;
+  isCompleted: boolean;
+  tags?: string[];
 };
 
 export type PartySlot = CharacterData | 'empty';
@@ -57,4 +71,16 @@ export type CharacterData = {
   bakal: number;
   key: string;
   adventure: string;
+};
+
+export type ChipColor = {
+  background: string;
+  text: string;
+  border: string;
+};
+
+export type Tag = {
+  id: string;
+  name: string;
+  color: ChipColor;
 };

@@ -1,4 +1,4 @@
-import { useState, useCallback } from 'react';
+import { useState, useCallback, useRef } from 'react';
 import styled from '@emotion/styled';
 import { useDundamQuery } from '../hooks/remote/useDundamQuery';
 import type { CharacterData } from '../types/types';
@@ -21,21 +21,6 @@ const SearchHeader = styled.div`
   padding: 16px;
   border-bottom: 1px solid #e0e0e0;
   height: 60px;
-`;
-
-const CloseButton = styled.button`
-  background: none;
-  border: none;
-  color: #666;
-  cursor: pointer;
-  padding: 8px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-
-  &:hover {
-    color: #333;
-  }
 `;
 
 const SearchTitle = styled.h2`
@@ -138,12 +123,11 @@ interface CharacterSearchProps {
 type SearchType = 'character' | 'adventure';
 
 export function CharacterSearch({ isOpen, onCharacterSelect, onCharacterDragStart, dungeons }: CharacterSearchProps) {
-  const [searchTerm, setSearchTerm] = useState('');
-  const [debouncedSearchTerm, setDebouncedSearchTerm] = useState('');
-  const [searchType, setSearchType] = useState<SearchType>('character');
-  const { data, isLoading, error } = useDundamQuery(debouncedSearchTerm, searchType);
+  const [searchParams, setSearchParams] = useState<{ name: string; type: SearchType }>({ name: '', type: 'character' });
+  const { data, isLoading, error } = useDundamQuery(searchParams.name, searchParams.type);
   const [hoveredCharacter, setHoveredCharacter] = useState<CharacterData | null>(null);
   const [helperText, setHelperText] = useState('');
+  const searchInputRef = useRef<HTMLInputElement>(null);
 
   const findCharacterParties = useCallback(
     (character: CharacterData) => {
@@ -177,27 +161,16 @@ export function CharacterSearch({ isOpen, onCharacterSelect, onCharacterDragStar
     setHelperText('');
   }, []);
 
-  const debouncedSetSearchTerm = useCallback(
-    debounce((value: string) => {
-      setDebouncedSearchTerm(value);
-    }, 500),
-    [],
-  );
-
-  const handleSearch = (e: React.FormEvent) => {
+  const handleSearch = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-  };
+    const searchInputValue = searchInputRef.current?.value;
+    if (!searchInputValue) return;
 
-  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const value = e.target.value;
-    setSearchTerm(value);
-    debouncedSetSearchTerm(value);
+    setSearchParams((prev) => ({ ...prev, name: searchInputValue }));
   };
 
   const handleSearchTypeChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
-    setSearchType(e.target.value as SearchType);
-    setSearchTerm('');
-    setDebouncedSearchTerm('');
+    setSearchParams((prev) => ({ ...prev, type: e.target.value as SearchType }));
   };
 
   const handleDragStart = (e: React.DragEvent<HTMLDivElement>, character: CharacterData) => {
@@ -212,16 +185,11 @@ export function CharacterSearch({ isOpen, onCharacterSelect, onCharacterDragStar
       <SearchHeader>
         <SearchTitle>캐릭터 검색</SearchTitle>
         <SearchForm onSubmit={handleSearch}>
-          <SearchTypeSelect value={searchType} onChange={handleSearchTypeChange}>
+          <SearchTypeSelect value={searchParams.type} onChange={handleSearchTypeChange}>
             <option value="character">캐릭터명</option>
             <option value="adventure">모험단명</option>
           </SearchTypeSelect>
-          <Input
-            type="text"
-            value={searchTerm}
-            onChange={handleInputChange}
-            placeholder={searchType === 'character' ? '캐릭터명을 입력하세요' : '모험단명을 입력하세요'}
-          />
+          <Input ref={searchInputRef} type="text" placeholder={searchParams.type === 'character' ? '캐릭터명을 입력하세요' : '모험단명을 입력하세요'} />
           <Button type="submit" disabled={isLoading}>
             {isLoading ? '검색 중...' : '검색'}
           </Button>
