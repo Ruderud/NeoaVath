@@ -100,11 +100,22 @@ export function GroupPage() {
 
     const updatedAdventures = await Promise.all(
       needUpdateAdventures.map(async ({ adventureName }) => {
-        const data = await getDundamData({ name: adventureName, type: 'adventure' });
-        return {
-          adventureName,
-          characters: data.characters,
-        };
+        try {
+          console.log('!!DEBUG 모험단 업데이트 시작:', adventureName);
+          const data = await getDundamData({ name: adventureName, type: 'adventure' });
+          console.log('!!DEBUG 모험단 업데이트 성공:', adventureName, data.characters.length);
+          return {
+            adventureName,
+            characters: data.characters,
+          };
+        } catch (error) {
+          console.error('!!DEBUG 모험단 업데이트 실패:', adventureName, error);
+          // 실패한 모험단은 빈 배열로 반환하여 전체 동기화가 중단되지 않도록 함
+          return {
+            adventureName,
+            characters: [],
+          };
+        }
       }),
     );
 

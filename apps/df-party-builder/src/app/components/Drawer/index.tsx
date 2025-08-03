@@ -3,6 +3,7 @@ import { ChevronLeft, ChevronRight, FileText, Settings } from 'lucide-react';
 import { useFirebase } from '../../context/FirebaseContext';
 import { MemoModal } from '../MemoModal';
 import { LoadingOverlay } from '../LoadingOverlay';
+import { ErrorOverlay } from '../ErrorOverlay';
 import {
   DrawerContainer,
   DrawerContent,
@@ -30,6 +31,8 @@ export function Drawer({ open, onToggle, groupName, onUpdateGroupCharacters }: D
   const [isMemoModalOpen, setIsMemoModalOpen] = useState(false);
   const [memo, setMemo] = useState('');
   const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState<{ title: string; message: string } | null>(null);
+  const [isRetrying, setIsRetrying] = useState(false);
   const { writeData, readData } = useFirebase();
   const [isGroupConfigOpen, setIsGroupConfigOpen] = useState(false);
 
@@ -76,13 +79,38 @@ export function Drawer({ open, onToggle, groupName, onUpdateGroupCharacters }: D
 
   const handleSyncClick = async () => {
     setIsLoading(true);
+    setError(null);
     try {
       await onUpdateGroupCharacters();
-    } catch (error) {
+    } catch (error: any) {
       console.error('!!DEBUG 동기화 실패:', error);
+      setError({
+        title: '동기화 실패',
+        message: error?.response?.data?.message || error?.message || '던담 서버에서 데이터를 가져오는데 실패했습니다. 잠시 후 다시 시도해주세요.',
+      });
     } finally {
       setIsLoading(false);
     }
+  };
+
+  const handleRetry = async () => {
+    setIsRetrying(true);
+    setError(null);
+    try {
+      await onUpdateGroupCharacters();
+    } catch (error: any) {
+      console.error('!!DEBUG 재시도 실패:', error);
+      setError({
+        title: '동기화 실패',
+        message: error?.response?.data?.message || error?.message || '던담 서버에서 데이터를 가져오는데 실패했습니다. 잠시 후 다시 시도해주세요.',
+      });
+    } finally {
+      setIsRetrying(false);
+    }
+  };
+
+  const handleCloseError = () => {
+    setError(null);
   };
 
   return (
@@ -128,7 +156,15 @@ export function Drawer({ open, onToggle, groupName, onUpdateGroupCharacters }: D
         )}
       </DrawerContainer>
 
-      <LoadingOverlay isVisible={isLoading} message="동기화 중..." />
+      <LoadingOverlay isVisible={isLoading || isRetrying} message={isRetrying ? '재시도 중...' : '동기화 중...'} />
+      <ErrorOverlay
+        isVisible={!!error}
+        title={error?.title}
+        message={error?.message}
+        onRetry={handleRetry}
+        onClose={handleCloseError}
+        isRetrying={isRetrying}
+      />
       <MemoModal isOpen={isMemoModalOpen} onClose={() => setIsMemoModalOpen(false)} onSave={handleSaveMemo} initialMemo={memo} />
       <GroupConfigModal isOpen={isGroupConfigOpen} onClose={() => setIsGroupConfigOpen(false)} groupName={groupName} onSave={handleSaveGroupConfig} />
     </>
