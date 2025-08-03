@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { ChevronLeft, ChevronRight, FileText, Settings } from 'lucide-react';
 import { useFirebase } from '../../context/FirebaseContext';
 import { MemoModal } from '../MemoModal';
+import { LoadingOverlay } from '../LoadingOverlay';
 import {
   DrawerContainer,
   DrawerContent,
@@ -22,12 +23,13 @@ type DrawerProps = {
   open: boolean;
   groupName: string;
   onToggle: () => void;
-  onUpdateGroupCharacters: () => void;
+  onUpdateGroupCharacters: () => Promise<void>;
 };
 
 export function Drawer({ open, onToggle, groupName, onUpdateGroupCharacters }: DrawerProps) {
   const [isMemoModalOpen, setIsMemoModalOpen] = useState(false);
   const [memo, setMemo] = useState('');
+  const [isLoading, setIsLoading] = useState(false);
   const { writeData, readData } = useFirebase();
   const [isGroupConfigOpen, setIsGroupConfigOpen] = useState(false);
 
@@ -72,6 +74,17 @@ export function Drawer({ open, onToggle, groupName, onUpdateGroupCharacters }: D
     }
   };
 
+  const handleSyncClick = async () => {
+    setIsLoading(true);
+    try {
+      await onUpdateGroupCharacters();
+    } catch (error) {
+      console.error('!!DEBUG 동기화 실패:', error);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
   return (
     <>
       <DrawerContainer open={open}>
@@ -84,7 +97,7 @@ export function Drawer({ open, onToggle, groupName, onUpdateGroupCharacters }: D
               </DrawerCollapseButton>
             </DrawerHeader>
             <DrawerMenu>
-              <DrawerMenuButton onClick={() => onUpdateGroupCharacters()}>
+              <DrawerMenuButton onClick={handleSyncClick} disabled={isLoading}>
                 <DundamIcon src="https://dundam.xyz/favicon.ico" alt="던담" />
                 동기화
               </DrawerMenuButton>
@@ -115,6 +128,7 @@ export function Drawer({ open, onToggle, groupName, onUpdateGroupCharacters }: D
         )}
       </DrawerContainer>
 
+      <LoadingOverlay isVisible={isLoading} message="동기화 중..." />
       <MemoModal isOpen={isMemoModalOpen} onClose={() => setIsMemoModalOpen(false)} onSave={handleSaveMemo} initialMemo={memo} />
       <GroupConfigModal isOpen={isGroupConfigOpen} onClose={() => setIsGroupConfigOpen(false)} groupName={groupName} onSave={handleSaveGroupConfig} />
     </>
