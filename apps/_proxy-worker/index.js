@@ -32,9 +32,31 @@ async function searchCharacter(name, type, userAgent, rawData = false) {
     }
 
     const responseText = await searchResponse.text();
+    console.log('!!DEBUG 던담 API 응답:', responseText);
+
     // JSON 문자열 추출 (앞뒤 불필요한 텍스트 제거)
     const jsonStr = responseText.replace('Raw HTML response: ', '').trim();
-    const data = JSON.parse(jsonStr);
+
+    // 응답이 JSON이 아닌 경우 처리
+    if (!jsonStr.startsWith('{') && !jsonStr.startsWith('[')) {
+      console.error('!!DEBUG 던담 API 응답이 JSON 형식이 아님:', jsonStr);
+      throw new Error('던담 API에서 유효하지 않은 응답을 받았습니다.');
+    }
+
+    let data;
+    try {
+      data = JSON.parse(jsonStr);
+    } catch (parseError) {
+      console.error('!!DEBUG JSON 파싱 실패:', parseError);
+      console.error('!!DEBUG 파싱 시도한 문자열:', jsonStr);
+      throw new Error('던담 API 응답을 파싱할 수 없습니다.');
+    }
+
+    // 데이터 구조 검증
+    if (!data || !data.characters || !Array.isArray(data.characters)) {
+      console.error('!!DEBUG 던담 API 응답 구조가 예상과 다름:', data);
+      throw new Error('던담 API 응답 구조가 올바르지 않습니다.');
+    }
 
     if (rawData) {
       return {
@@ -82,7 +104,12 @@ async function searchCharacter(name, type, userAgent, rawData = false) {
       total: characters.length,
     };
   } catch (error) {
-    console.error('Search request failed:', error);
+    console.error('!!DEBUG Search request failed:', error);
+    console.error('!!DEBUG Error details:', {
+      message: error.message,
+      stack: error.stack,
+      name: error.name,
+    });
     throw error;
   }
 }
