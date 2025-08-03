@@ -111,6 +111,7 @@ export const PartySlots = styled.div<{ isMobile: boolean }>`
   flex-direction: row;
   gap: 8px;
   width: 100%;
+  overflow-x: auto;
 `;
 
 export const PartyTitle = styled.h4`
