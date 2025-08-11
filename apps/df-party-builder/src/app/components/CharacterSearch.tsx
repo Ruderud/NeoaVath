@@ -1,7 +1,5 @@
-import { useState, useRef, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import styled from '@emotion/styled';
-import { useDundamQuery } from '../hooks/remote/useDundamQuery';
-import { useCharacterDetail } from '../context/CharacterDetailContext';
 import type { CharacterData, MultiAccount, Group } from '../types/types';
 import { CharacterCard } from './CharacterCard/index';
 import { useFirebase } from '../context/FirebaseContext';
@@ -197,42 +195,29 @@ export function CharacterSearch({ isOpen, groupName, onCharacterSelect, onCharac
   const [activeTab, setActiveTab] = useState<string>('');
   const [isSearching, setIsSearching] = useState(false);
   const { readData } = useFirebase();
-  const { showCharacterDetail } = useCharacterDetail();
 
   // 그룹 설정에서 다계정 정보 로드
   useEffect(() => {
     const loadMultiAccounts = async () => {
-      console.log('!!DEBUG groupName:', groupName);
       if (!groupName) return;
-
-      console.log('!!DEBUG 다계정 정보 로드 시작:', { groupName });
 
       try {
         // 먼저 전체 group 데이터에서 config 확인
         const groupData = (await readData(`groups/${groupName}`)) as Group;
-        console.log('!!DEBUG 전체 group 데이터:', groupData);
 
         let multiAccountsData = groupData?.config?.multiAccounts;
 
         // config에 multiAccounts가 없으면 별도 경로에서 로드 시도
         if (!multiAccountsData) {
-          console.log('!!DEBUG config에서 multiAccounts 없음, 별도 경로에서 로드 시도');
           try {
             const configData = (await readData(`groups/${groupName}/config`)) as any;
-            console.log('!!DEBUG 별도 config 데이터:', configData);
             multiAccountsData = configData?.multiAccounts;
-          } catch (configError) {
-            console.log('!!DEBUG 별도 config 로드 실패:', configError);
-          }
+          } catch (configError) {}
         }
-
-        console.log('!!DEBUG 최종 multiAccounts 데이터:', multiAccountsData);
 
         if (multiAccountsData && Array.isArray(multiAccountsData)) {
           setMultiAccounts(multiAccountsData);
-          console.log('!!DEBUG 다계정 정보 설정 완료:', multiAccountsData.length, '개');
         } else {
-          console.log('!!DEBUG 다계정 정보 없음 또는 배열이 아님');
           setMultiAccounts([]);
         }
       } catch (error) {
@@ -314,21 +299,8 @@ export function CharacterSearch({ isOpen, groupName, onCharacterSelect, onCharac
     onCharacterDragStart?.(e, character);
   };
 
-  const handleCharacterClick = (character: CharacterData) => {
-    showCharacterDetail(character);
-    onCharacterSelect?.(character);
-  };
-
   const isMultiAccountDisabled = multiAccounts.length === 0;
   const isSearchDisabled = (searchType === 'multi-account' && !selectedMultiAccount) || (searchType !== 'multi-account' && !searchTerm.trim()) || isSearching;
-
-  console.log('!!DEBUG CharacterSearch 상태:', {
-    searchType,
-    multiAccounts: multiAccounts.length,
-    isMultiAccountDisabled,
-    selectedMultiAccount,
-    isSearchDisabled,
-  });
 
   return (
     <SearchContainer>
