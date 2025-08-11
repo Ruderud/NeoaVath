@@ -228,8 +228,8 @@ export function GroupPage() {
       const containerRect = container.getBoundingClientRect();
       const newHeight = e.clientY - containerRect.top;
 
-      // 최소 높이 300px, 최대 높이 800px로 제한
-      const clampedHeight = Math.max(300, Math.min(800, newHeight));
+      // 최소 높이 100px
+      const clampedHeight = Math.max(100, newHeight);
       setSectionHeight(clampedHeight);
     },
     [isResizing],
