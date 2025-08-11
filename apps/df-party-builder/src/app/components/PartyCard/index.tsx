@@ -1,9 +1,9 @@
 import { useState } from 'react';
 import styled from '@emotion/styled';
 import { Pencil, X, ChevronUp, ChevronDown } from 'lucide-react';
-import type { Party, CharacterData, PartySlot, GroupConfig, Tag } from '../../types/types';
+import type { Party, CharacterData, PartySlot, GroupConfig } from '../../types/types';
 import { CharacterCard } from '../CharacterCard';
-import { Chip } from '../Chip';
+import { calculatePartyDamagePotential, formatDamagePotential } from '../../utils/partyDamagePotential';
 import {
   PartyCardContainer,
   PartyCardHeader,
@@ -15,7 +15,6 @@ import {
   PartySlot as PartySlotCard,
   PartyMemo,
   PartyTitle,
-  CheckboxButton,
   DeletePartyButton,
 } from './styles';
 
@@ -66,6 +65,10 @@ export function PartyCard({
   const [editedTitle, setEditedTitle] = useState(party.title);
   const [isHovered, setIsHovered] = useState(false);
   const [isExpanded, setIsExpanded] = useState(false);
+
+  // 데미지 포텐셜 계산
+  const damagePotentialResult = calculatePartyDamagePotential(party.slots);
+  const damagePotentialText = formatDamagePotential(damagePotentialResult);
 
   // const { tags: groupTags } = groupConfig;
 
@@ -143,6 +146,7 @@ export function PartyCard({
 
       {isExpanded ? (
         <PartyCardDetails>
+          <DamagePotentialDisplay isCalculable={damagePotentialResult.isCalculable}>{damagePotentialText}</DamagePotentialDisplay>
           <PartySlotsContainer isMobile={isMobile}>
             {party.slots.map((slot, index) => (
               <PartySlotCard
@@ -226,6 +230,18 @@ const TitleInput = styled.input`
     outline: none;
     border-color: #2196f3;
   }
+`;
+
+const DamagePotentialDisplay = styled.div<{ isCalculable: boolean }>`
+  padding: 8px 12px;
+  margin-bottom: 12px;
+  border-radius: 6px;
+  font-size: 0.9rem;
+  font-weight: 600;
+  text-align: center;
+  background: ${({ isCalculable }) => (isCalculable ? '#e8f5e8' : '#fff3cd')};
+  color: ${({ isCalculable }) => (isCalculable ? '#2e7d32' : '#856404')};
+  border: 1px solid ${({ isCalculable }) => (isCalculable ? '#c8e6c9' : '#ffeaa7')};
 `;
 
 const EditButton = styled.button`
