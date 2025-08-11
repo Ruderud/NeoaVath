@@ -4,10 +4,6 @@ type PageContainerProps = {
   drawerOpen: boolean;
 };
 
-type MainContentProps = {
-  sectionHeight: number;
-};
-
 export const PageContainer = styled.div<PageContainerProps>`
   display: grid;
   grid-template-rows: 1fr;
@@ -19,9 +15,9 @@ export const PageContainer = styled.div<PageContainerProps>`
   width: calc(100% - ${({ drawerOpen }) => (drawerOpen ? '280px' : '80px')});
 `;
 
-export const MainContent = styled.main<MainContentProps>`
-  display: grid;
-  grid-template-rows: ${({ sectionHeight }) => `${sectionHeight}px auto`};
+export const MainContent = styled.main`
+  display: flex;
+  flex-direction: column;
   gap: 20px;
   padding: 20px;
   height: 100%;
@@ -39,13 +35,13 @@ export const Section = styled.section`
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
   display: flex;
   flex-direction: column;
-  min-height: 0;
   width: 100%;
   overflow: auto;
   position: relative;
 
   &:first-of-type {
     flex: 1;
+    min-height: 0;
     overflow: auto;
   }
 `;

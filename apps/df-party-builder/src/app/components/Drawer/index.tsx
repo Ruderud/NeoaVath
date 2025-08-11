@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { ChevronLeft, ChevronRight, FileText, Settings } from 'lucide-react';
+import { ChevronLeft, ChevronRight, FileText, Settings, Search } from 'lucide-react';
 import { useFirebase } from '../../context/FirebaseContext';
 import { MemoModal } from '../MemoModal';
 import { LoadingOverlay } from '../LoadingOverlay';
@@ -25,9 +25,10 @@ type DrawerProps = {
   groupName: string;
   onToggle: () => void;
   onUpdateGroupCharacters: () => Promise<void>;
+  onOpenCharacterSearch: () => void;
 };
 
-export function Drawer({ open, onToggle, groupName, onUpdateGroupCharacters }: DrawerProps) {
+export function Drawer({ open, onToggle, groupName, onUpdateGroupCharacters, onOpenCharacterSearch }: DrawerProps) {
   const [isMemoModalOpen, setIsMemoModalOpen] = useState(false);
   const [memo, setMemo] = useState('');
   const [isLoading, setIsLoading] = useState(false);
@@ -139,6 +140,11 @@ export function Drawer({ open, onToggle, groupName, onUpdateGroupCharacters }: D
                 <Settings size={24} />
                 <span>그룹 설정</span>
               </DrawerButton>
+
+              <DrawerButton onClick={onOpenCharacterSearch}>
+                <Search size={24} />
+                <span>캐릭터/모험단 검색</span>
+              </DrawerButton>
             </DrawerMenu>
           </DrawerContent>
         ) : (
@@ -151,6 +157,9 @@ export function Drawer({ open, onToggle, groupName, onUpdateGroupCharacters }: D
             </DrawerMenuButton>
             <DrawerMenuButton onClick={() => setIsMemoModalOpen(true)}>
               <FileText />
+            </DrawerMenuButton>
+            <DrawerMenuButton onClick={onOpenCharacterSearch}>
+              <Search />
             </DrawerMenuButton>
           </DrawerCollapsed>
         )}

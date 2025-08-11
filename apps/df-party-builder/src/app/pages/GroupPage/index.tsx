@@ -11,7 +11,7 @@ import { Drawer } from '../../components/Drawer';
 import { DungeonColumn } from '../../components/DungeonColumn';
 import { PartyModal } from '../../components/PartyModal';
 import { CharacterDetailModal } from '../../components/CharacterDetailModal';
-import { CharacterSearch } from '../../components/CharacterSearch';
+import { DraggableCharacterSearch } from '../../components/DraggableCharacterSearch';
 import { v4 as uuidv4 } from 'uuid';
 import {
   PageContainer,
@@ -26,8 +26,8 @@ import {
   AddGroupButtonRow,
   CancelButton,
   AddDungeonButton,
-  ResizeHandler,
 } from './styles';
+
 import { Toast } from '../../components/Toast';
 import { getCharacterDataFromDragEvent, setCharacterDragData } from './utils';
 import { getDundamData } from '../../api/dundam';
@@ -68,11 +68,7 @@ export function GroupPage() {
   const [selectedCharacter, setSelectedCharacter] = useState<CharacterData | null>(null);
   const [toastMessage, setToastMessage] = useState('');
   const [isToastVisible, setIsToastVisible] = useState(false);
-
-  // 리사이즈 관련 상태
-  const [sectionHeight, setSectionHeight] = useState<number>(600);
-  const [isResizing, setIsResizing] = useState(false);
-  const resizeRef = useRef<HTMLDivElement>(null);
+  const [isDraggableSearchOpen, setIsDraggableSearchOpen] = useState(false);
 
   // Drawer 토글 함수
   const handleToggleDrawer = useCallback(() => {
@@ -209,50 +205,6 @@ export function GroupPage() {
       addToRecentGroups();
     }
   }, [groupName]);
-
-  // 리사이즈 핸들러 함수들
-  const handleResizeStart = useCallback((e: React.MouseEvent<HTMLDivElement>) => {
-    e.preventDefault();
-    setIsResizing(true);
-    document.body.style.cursor = 'ns-resize';
-    document.body.style.userSelect = 'none';
-  }, []);
-
-  const handleResizeMove = useCallback(
-    (e: MouseEvent) => {
-      if (!isResizing) return;
-
-      const container = document.querySelector('[data-main-content]') as HTMLElement;
-      if (!container) return;
-
-      const containerRect = container.getBoundingClientRect();
-      const newHeight = e.clientY - containerRect.top;
-
-      // 최소 높이 100px
-      const clampedHeight = Math.max(100, newHeight);
-      setSectionHeight(clampedHeight);
-    },
-    [isResizing],
-  );
-
-  const handleResizeEnd = useCallback(() => {
-    setIsResizing(false);
-    document.body.style.cursor = '';
-    document.body.style.userSelect = '';
-  }, []);
-
-  // 리사이즈 이벤트 리스너 등록
-  useEffect(() => {
-    if (isResizing) {
-      document.addEventListener('mousemove', handleResizeMove);
-      document.addEventListener('mouseup', handleResizeEnd);
-
-      return () => {
-        document.removeEventListener('mousemove', handleResizeMove);
-        document.removeEventListener('mouseup', handleResizeEnd);
-      };
-    }
-  }, [isResizing, handleResizeMove, handleResizeEnd]);
 
   // 파티 데이터 저장을 위한 debounce 함수 (텍스트 입력)
   const savePartyDataDebounced = useCallback(
@@ -756,12 +708,17 @@ export function GroupPage() {
 
   return (
     <>
-      <Drawer open={isDrawerOpen} groupName={groupName} onToggle={handleToggleDrawer} onUpdateGroupCharacters={handleUpdateGroupCharacters} />
+      <Drawer
+        open={isDrawerOpen}
+        groupName={groupName || ''}
+        onToggle={handleToggleDrawer}
+        onUpdateGroupCharacters={handleUpdateGroupCharacters}
+        onOpenCharacterSearch={() => setIsDraggableSearchOpen(true)}
+      />
       <PageContainer drawerOpen={isDrawerOpen}>
-        <MainContent sectionHeight={sectionHeight} style={{ backgroundColor: '#f5f5f5' }} data-main-content>
+        <MainContent style={{ backgroundColor: '#f5f5f5' }} data-main-content>
           <Section>
             <SectionTitle>파티 구성</SectionTitle>
-            <ResizeHandler ref={resizeRef} onMouseDown={handleResizeStart} />
 
             <KanbanBoard>
               {dungeons.map((dungeon) => (
@@ -825,10 +782,6 @@ export function GroupPage() {
             </KanbanBoard>
           </Section>
 
-          <Section>
-            <CharacterSearch isOpen={true} onCharacterSelect={handleCharacterSelect} onCharacterDragStart={handleCharacterDragStart} dungeons={dungeons} />
-          </Section>
-
           {selectedPartyId && selectedParty && (
             <PartyModal
               isOpen={true}
@@ -848,6 +801,13 @@ export function GroupPage() {
           <CharacterDetailModal isOpen={showCharacterDetail} character={selectedCharacter} onClose={handleCharacterDetailClose} />
         </MainContent>
       </PageContainer>
+      <DraggableCharacterSearch
+        isOpen={isDraggableSearchOpen}
+        onClose={() => setIsDraggableSearchOpen(false)}
+        onCharacterSelect={handleCharacterSelect}
+        onCharacterDragStart={handleCharacterDragStart}
+        dungeons={dungeons}
+      />
       <Toast message={toastMessage} isVisible={isToastVisible} />
     </>
   );
