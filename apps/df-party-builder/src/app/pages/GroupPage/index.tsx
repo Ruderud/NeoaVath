@@ -3,7 +3,6 @@ import { useParams } from 'react-router-dom';
 import { useErrorBoundary } from 'react-error-boundary';
 import { PasswordDialog } from '../../components/PasswordDialog';
 import { useFirebase } from '../../context/FirebaseContext';
-import { CharacterDetailProvider } from '../../context/CharacterDetailContext';
 import { throttle } from 'es-toolkit';
 import { getLocalStorageItem, setLocalStorageItem } from '../../utils/localStorage';
 import { Party, PartySlot, CharacterData, Group, Dungeon } from '../../types/types';
@@ -687,7 +686,7 @@ export function GroupPage() {
   }
 
   return (
-    <CharacterDetailProvider>
+    <>
       <Drawer
         open={isDrawerOpen}
         groupName={groupName || ''}
@@ -787,7 +786,7 @@ export function GroupPage() {
         onCharacterDragStart={handleCharacterDragStart}
       />
       <Toast message={toastMessage} isVisible={isToastVisible} />
-    </CharacterDetailProvider>
+    </>
   );
 }
 

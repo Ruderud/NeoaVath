@@ -13,9 +13,7 @@ type GetDundamDataParams = {
 export const getDundamData = async (params: GetDundamDataParams): Promise<{ characters: CharacterData[]; total: number }> => {
   const { name, type } = params;
   try {
-    console.log('!!DEBUG 던담 API 호출:', { name, type });
     const response = await dundamProxyInstance.get(`/search?name=${name}&type=${type}`);
-    console.log('!!DEBUG 던담 API 응답:', response.data);
     return response.data;
   } catch (error: any) {
     console.error('!!DEBUG 던담 API 호출 실패:', error);
