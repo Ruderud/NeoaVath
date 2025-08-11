@@ -4,6 +4,10 @@ type PageContainerProps = {
   drawerOpen: boolean;
 };
 
+type MainContentProps = {
+  sectionHeight: number;
+};
+
 export const PageContainer = styled.div<PageContainerProps>`
   display: grid;
   grid-template-rows: 1fr;
@@ -15,9 +19,9 @@ export const PageContainer = styled.div<PageContainerProps>`
   width: calc(100% - ${({ drawerOpen }) => (drawerOpen ? '280px' : '80px')});
 `;
 
-export const MainContent = styled.main`
+export const MainContent = styled.main<MainContentProps>`
   display: grid;
-  grid-template-rows: 2fr auto;
+  grid-template-rows: ${({ sectionHeight }) => `${sectionHeight}px auto`};
   gap: 20px;
   padding: 20px;
   height: 100%;
@@ -25,6 +29,7 @@ export const MainContent = styled.main`
   max-height: 100vh;
   margin: 0;
   overflow: hidden;
+  position: relative;
 `;
 
 export const Section = styled.section`
@@ -37,10 +42,44 @@ export const Section = styled.section`
   min-height: 0;
   width: 100%;
   overflow: auto;
+  position: relative;
 
   &:first-of-type {
     flex: 1;
     overflow: auto;
+  }
+`;
+
+export const ResizeHandler = styled.div`
+  position: absolute;
+  left: 0;
+  bottom: 0;
+  width: 20px;
+  height: 20px;
+  background: #2196f3;
+  border-radius: 0 0 0 8px;
+  cursor: ns-resize;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 10;
+  transition: background-color 0.2s ease;
+
+  &:hover {
+    background: #1976d2;
+  }
+
+  &::before {
+    content: '';
+    width: 8px;
+    height: 8px;
+    background: white;
+    border-radius: 1px;
+    opacity: 0.8;
+  }
+
+  &:active {
+    background: #1565c0;
   }
 `;
 

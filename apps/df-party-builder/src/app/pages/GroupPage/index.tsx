@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useRef } from 'react';
 import { useParams } from 'react-router-dom';
 import { useErrorBoundary } from 'react-error-boundary';
 import { PasswordDialog } from '../../components/PasswordDialog';
@@ -26,6 +26,7 @@ import {
   AddGroupButtonRow,
   CancelButton,
   AddDungeonButton,
+  ResizeHandler,
 } from './styles';
 import { Toast } from '../../components/Toast';
 import { getCharacterDataFromDragEvent, setCharacterDragData } from './utils';
@@ -67,6 +68,12 @@ export function GroupPage() {
   const [selectedCharacter, setSelectedCharacter] = useState<CharacterData | null>(null);
   const [toastMessage, setToastMessage] = useState('');
   const [isToastVisible, setIsToastVisible] = useState(false);
+
+  // 리사이즈 관련 상태
+  const [sectionHeight, setSectionHeight] = useState<number>(600);
+  const [isResizing, setIsResizing] = useState(false);
+  const resizeRef = useRef<HTMLDivElement>(null);
+
   // Drawer 토글 함수
   const handleToggleDrawer = useCallback(() => {
     setIsDrawerOpen((prev) => !prev);
@@ -202,6 +209,50 @@ export function GroupPage() {
       addToRecentGroups();
     }
   }, [groupName]);
+
+  // 리사이즈 핸들러 함수들
+  const handleResizeStart = useCallback((e: React.MouseEvent<HTMLDivElement>) => {
+    e.preventDefault();
+    setIsResizing(true);
+    document.body.style.cursor = 'ns-resize';
+    document.body.style.userSelect = 'none';
+  }, []);
+
+  const handleResizeMove = useCallback(
+    (e: MouseEvent) => {
+      if (!isResizing) return;
+
+      const container = document.querySelector('[data-main-content]') as HTMLElement;
+      if (!container) return;
+
+      const containerRect = container.getBoundingClientRect();
+      const newHeight = e.clientY - containerRect.top;
+
+      // 최소 높이 300px, 최대 높이 800px로 제한
+      const clampedHeight = Math.max(300, Math.min(800, newHeight));
+      setSectionHeight(clampedHeight);
+    },
+    [isResizing],
+  );
+
+  const handleResizeEnd = useCallback(() => {
+    setIsResizing(false);
+    document.body.style.cursor = '';
+    document.body.style.userSelect = '';
+  }, []);
+
+  // 리사이즈 이벤트 리스너 등록
+  useEffect(() => {
+    if (isResizing) {
+      document.addEventListener('mousemove', handleResizeMove);
+      document.addEventListener('mouseup', handleResizeEnd);
+
+      return () => {
+        document.removeEventListener('mousemove', handleResizeMove);
+        document.removeEventListener('mouseup', handleResizeEnd);
+      };
+    }
+  }, [isResizing, handleResizeMove, handleResizeEnd]);
 
   // 파티 데이터 저장을 위한 debounce 함수 (텍스트 입력)
   const savePartyDataDebounced = useCallback(
@@ -707,9 +758,10 @@ export function GroupPage() {
     <>
       <Drawer open={isDrawerOpen} groupName={groupName} onToggle={handleToggleDrawer} onUpdateGroupCharacters={handleUpdateGroupCharacters} />
       <PageContainer drawerOpen={isDrawerOpen}>
-        <MainContent style={{ backgroundColor: '#f5f5f5' }}>
+        <MainContent sectionHeight={sectionHeight} style={{ backgroundColor: '#f5f5f5' }} data-main-content>
           <Section>
             <SectionTitle>파티 구성</SectionTitle>
+            <ResizeHandler ref={resizeRef} onMouseDown={handleResizeStart} />
 
             <KanbanBoard>
               {dungeons.map((dungeon) => (
