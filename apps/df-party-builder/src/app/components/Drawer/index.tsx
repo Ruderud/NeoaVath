@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
-import { ChevronLeft, ChevronRight, FileText, Settings, Search } from 'lucide-react';
+import { useNavigate, useLocation } from 'react-router-dom';
+import { ChevronLeft, ChevronRight, FileText, Settings, Search, Home } from 'lucide-react';
 import { useFirebase } from '../../context/FirebaseContext';
 import { MemoModal } from '../MemoModal';
 import { LoadingOverlay } from '../LoadingOverlay';
@@ -17,8 +18,6 @@ import {
   DrawerExpandButton,
   DrawerButton,
 } from './styles';
-import { GroupConfigModal } from '../GroupConfigModal';
-import { GroupConfig } from 'src/app/types/types';
 
 type DrawerProps = {
   open: boolean;
@@ -29,13 +28,17 @@ type DrawerProps = {
 };
 
 export function Drawer({ open, onToggle, groupName, onUpdateGroupCharacters, onOpenCharacterSearch }: DrawerProps) {
+  const navigate = useNavigate();
+  const location = useLocation();
   const [isMemoModalOpen, setIsMemoModalOpen] = useState(false);
   const [memo, setMemo] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<{ title: string; message: string } | null>(null);
   const [isRetrying, setIsRetrying] = useState(false);
   const { writeData, readData } = useFirebase();
-  const [isGroupConfigOpen, setIsGroupConfigOpen] = useState(false);
+
+  // 현재 페이지가 설정 페이지인지 확인
+  const isSettingPage = location.pathname.includes('/setting');
 
   useEffect(() => {
     if (groupName) {
@@ -66,16 +69,11 @@ export function Drawer({ open, onToggle, groupName, onUpdateGroupCharacters, onO
   };
 
   const handleGroupConfigClick = () => {
-    setIsGroupConfigOpen(true);
+    navigate(`/group/${groupName}/setting`);
   };
 
-  const handleSaveGroupConfig = async (newConfig: GroupConfig) => {
-    if (!groupName) return;
-    try {
-      await writeData(`groups/${groupName}/config`, newConfig);
-    } catch (error) {
-      console.error('그룹 설정 저장 실패:', error);
-    }
+  const handleMainClick = () => {
+    navigate(`/group/${groupName}`);
   };
 
   const handleSyncClick = async () => {
@@ -126,24 +124,31 @@ export function Drawer({ open, onToggle, groupName, onUpdateGroupCharacters, onO
               </DrawerCollapseButton>
             </DrawerHeader>
             <DrawerMenu>
-              <DrawerMenuButton onClick={handleSyncClick} disabled={isLoading}>
-                <DundamIcon src="https://dundam.xyz/favicon.ico" alt="던담" />
-                동기화
+              <DrawerMenuButton onClick={handleMainClick}>
+                <Home size={20} />
+                메인
               </DrawerMenuButton>
+
+              <div style={{ paddingLeft: '8px' }}>
+                <DrawerMenuButton onClick={handleSyncClick} disabled={isLoading || isSettingPage}>
+                  <DundamIcon src="https://dundam.xyz/favicon.ico" alt="던담" />
+                  동기화
+                </DrawerMenuButton>
+
+                <DrawerMenuButton onClick={onOpenCharacterSearch} disabled={isSettingPage}>
+                  <Search size={20} />
+                  캐릭터/모험단 검색
+                </DrawerMenuButton>
+              </div>
 
               <DrawerMenuButton onClick={() => setIsMemoModalOpen(true)}>
                 <FileText />
                 메모장
               </DrawerMenuButton>
 
-              <DrawerButton onClick={handleGroupConfigClick}>
+              <DrawerButton onClick={handleGroupConfigClick} style={{ marginTop: 'auto' }}>
                 <Settings size={24} />
                 <span>그룹 설정</span>
-              </DrawerButton>
-
-              <DrawerButton onClick={onOpenCharacterSearch}>
-                <Search size={24} />
-                <span>캐릭터/모험단 검색</span>
               </DrawerButton>
             </DrawerMenu>
           </DrawerContent>
@@ -152,14 +157,22 @@ export function Drawer({ open, onToggle, groupName, onUpdateGroupCharacters, onO
             <DrawerExpandButton onClick={onToggle}>
               <ChevronRight />
             </DrawerExpandButton>
-            <DrawerMenuButton onClick={() => alert('아직 안댐 ㅎ')}>
-              <DundamIcon src="https://dundam.xyz/favicon.ico" alt="던담" style={{ marginTop: 16 }} />
+            <DrawerMenuButton onClick={handleMainClick}>
+              <Home size={20} />
             </DrawerMenuButton>
+            <div style={{ paddingLeft: '8px' }}>
+              <DrawerMenuButton onClick={() => alert('아직 안댐 ㅎ')} disabled={isSettingPage}>
+                <DundamIcon src="https://dundam.xyz/favicon.ico" alt="던담" style={{ marginTop: 16 }} />
+              </DrawerMenuButton>
+              <DrawerMenuButton onClick={onOpenCharacterSearch} disabled={isSettingPage}>
+                <Search />
+              </DrawerMenuButton>
+            </div>
             <DrawerMenuButton onClick={() => setIsMemoModalOpen(true)}>
               <FileText />
             </DrawerMenuButton>
-            <DrawerMenuButton onClick={onOpenCharacterSearch}>
-              <Search />
+            <DrawerMenuButton onClick={handleGroupConfigClick} style={{ marginTop: 'auto' }}>
+              <Settings size={20} />
             </DrawerMenuButton>
           </DrawerCollapsed>
         )}
@@ -175,7 +188,6 @@ export function Drawer({ open, onToggle, groupName, onUpdateGroupCharacters, onO
         isRetrying={isRetrying}
       />
       <MemoModal isOpen={isMemoModalOpen} onClose={() => setIsMemoModalOpen(false)} onSave={handleSaveMemo} initialMemo={memo} />
-      <GroupConfigModal isOpen={isGroupConfigOpen} onClose={() => setIsGroupConfigOpen(false)} groupName={groupName} onSave={handleSaveGroupConfig} />
     </>
   );
 }

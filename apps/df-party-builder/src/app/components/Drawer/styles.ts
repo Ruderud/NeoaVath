@@ -44,6 +44,7 @@ export const DrawerMenu = styled.nav`
   display: flex;
   flex-direction: column;
   gap: 8px;
+  height: 100%;
 `;
 
 export const DrawerMenuButton = styled.button`
@@ -60,6 +61,16 @@ export const DrawerMenuButton = styled.button`
 
   &:hover {
     background: #2a2a2a;
+  }
+
+  &:disabled {
+    color: #666;
+    cursor: not-allowed;
+    opacity: 0.5;
+
+    &:hover {
+      background: none;
+    }
   }
 `;
 
@@ -85,6 +96,7 @@ export const DrawerCollapsed = styled.div`
   flex-direction: column;
   align-items: center;
   padding: 16px;
+  gap: 8px;
 `;
 
 export const DrawerExpandButton = styled.button`
@@ -114,4 +126,18 @@ export const DrawerButton = styled.button`
   color: #fff;
   cursor: pointer;
   transition: background 0.2s ease;
+
+  &:hover {
+    background: #2a2a2a;
+  }
+
+  &:disabled {
+    color: #666;
+    cursor: not-allowed;
+    opacity: 0.5;
+
+    &:hover {
+      background: none;
+    }
+  }
 `;

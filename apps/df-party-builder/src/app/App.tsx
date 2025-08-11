@@ -5,6 +5,7 @@ import { CreateGroup } from './pages/CreateGroup';
 import { GroupAuthProvider } from './context/GroupAuthContext';
 import { ErrorBoundary } from 'react-error-boundary';
 import GroupPage from './pages/GroupPage';
+import GroupSettingPage from './pages/GroupSettingPage';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 
 const queryClient = new QueryClient({
@@ -26,6 +27,7 @@ export function App() {
             <Route path="/login" element={<Login />} />
             <Route path="/create" element={<CreateGroup />} />
             <Route path="/group/:groupName" element={<GroupPage />} />
+            <Route path="/group/:groupName/setting" element={<GroupSettingPage />} />
           </Routes>
         </ErrorBoundary>
       </GroupAuthProvider>
