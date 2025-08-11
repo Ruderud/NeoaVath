@@ -7,10 +7,11 @@ import type { CharacterData } from '../../types/types';
 type DraggableCharacterSearchProps = {
   isOpen: boolean;
   onClose: () => void;
+  groupName?: string;
   onCharacterDragStart: (e: React.DragEvent<HTMLDivElement>, character: CharacterData) => void;
 };
 
-export function DraggableCharacterSearch({ isOpen, onClose, onCharacterDragStart }: DraggableCharacterSearchProps) {
+export function DraggableCharacterSearch({ isOpen, onClose, groupName, onCharacterDragStart }: DraggableCharacterSearchProps) {
   const { zIndex, bringToFront } = useZIndex('character-search');
   const { showCharacterDetail } = useCharacterDetail();
 
@@ -29,7 +30,7 @@ export function DraggableCharacterSearch({ isOpen, onClose, onCharacterDragStart
       initialPosition={{ x: 100, y: 100 }}
       initialSize={{ width: 600, height: 400 }}
     >
-      <CharacterSearch isOpen={true} onCharacterSelect={handleCharacterSelect} onCharacterDragStart={onCharacterDragStart} />
+      <CharacterSearch isOpen={true} groupName={groupName} onCharacterSelect={handleCharacterSelect} onCharacterDragStart={onCharacterDragStart} />
     </DraggableDialog>
   );
 }

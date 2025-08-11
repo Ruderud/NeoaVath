@@ -1,9 +1,10 @@
-import { useState, useRef } from 'react';
+import { useState, useRef, useEffect } from 'react';
 import styled from '@emotion/styled';
 import { useDundamQuery } from '../hooks/remote/useDundamQuery';
 import { useCharacterDetail } from '../context/CharacterDetailContext';
-import type { CharacterData } from '../types/types';
+import type { CharacterData, MultiAccount, Group } from '../types/types';
 import { CharacterCard } from './CharacterCard/index';
+import { useFirebase } from '../context/FirebaseContext';
 
 const SearchContainer = styled.div`
   display: flex;
@@ -49,6 +50,30 @@ const SearchTypeSelect = styled.select`
     outline: none;
     border-color: #2196f3;
   }
+
+  &:disabled {
+    background-color: #f5f5f5;
+    cursor: not-allowed;
+  }
+`;
+
+const MultiAccountSelect = styled.select`
+  padding: 8px 12px;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  background-color: white;
+  cursor: pointer;
+  flex: 1;
+
+  &:focus {
+    outline: none;
+    border-color: #2196f3;
+  }
+
+  &:disabled {
+    background-color: #f5f5f5;
+    cursor: not-allowed;
+  }
 `;
 
 const Input = styled.input`
@@ -61,6 +86,11 @@ const Input = styled.input`
     outline: none;
     border-color: #2196f3;
   }
+
+  &:disabled {
+    background-color: #f5f5f5;
+    cursor: not-allowed;
+  }
 `;
 
 const Button = styled.button`
@@ -72,8 +102,13 @@ const Button = styled.button`
   cursor: pointer;
   white-space: nowrap;
 
-  &:hover {
+  &:hover:not(:disabled) {
     background-color: #1976d2;
+  }
+
+  &:disabled {
+    background-color: #ccc;
+    cursor: not-allowed;
   }
 `;
 
@@ -106,73 +141,255 @@ const CharacterList = styled.div`
   }
 `;
 
-const NoResultsMessage = styled.div`
+const TabContainer = styled.div`
   display: flex;
-  align-items: center;
+  border-bottom: 1px solid #e0e0e0;
+  background: #f9f9f9;
+`;
+
+const Tab = styled.button<{ active: boolean }>`
+  padding: 12px 16px;
+  border: none;
+  background: ${({ active }) => (active ? 'white' : 'transparent')};
+  color: ${({ active }) => (active ? '#2196f3' : '#666')};
+  cursor: pointer;
+  border-bottom: 2px solid ${({ active }) => (active ? '#2196f3' : 'transparent')};
+  font-weight: ${({ active }) => (active ? '600' : '400')};
+
+  &:hover {
+    background: ${({ active }) => (active ? 'white' : '#f0f0f0')};
+  }
+`;
+
+const LoadingMessage = styled.div`
+  display: flex;
   justify-content: center;
-  width: 100%;
+  align-items: center;
   height: 100px;
   color: #666;
-  font-size: 1rem;
-  font-style: italic;
+  font-size: 1.1em;
+`;
+
+const NoResultsMessage = styled.div`
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 100px;
+  color: #666;
+  font-size: 1.1em;
 `;
 
 interface CharacterSearchProps {
   isOpen: boolean;
+  groupName?: string;
   onCharacterSelect?: (characterInfo: CharacterData) => void;
   onCharacterDragStart?: (e: React.DragEvent<HTMLDivElement>, character: CharacterData) => void;
 }
 
-type SearchType = 'character' | 'adventure';
+type SearchType = 'character' | 'adventure' | 'multi-account';
 
-export function CharacterSearch({ isOpen, onCharacterSelect, onCharacterDragStart }: CharacterSearchProps) {
-  const [searchParams, setSearchParams] = useState<{ name: string; type: SearchType }>({ name: '', type: 'character' });
-  const { data, isLoading, error } = useDundamQuery(searchParams.name, searchParams.type);
-  const searchInputRef = useRef<HTMLInputElement>(null);
+export function CharacterSearch({ isOpen, groupName, onCharacterSelect, onCharacterDragStart }: CharacterSearchProps) {
+  const [searchType, setSearchType] = useState<SearchType>('character');
+  const [searchTerm, setSearchTerm] = useState('');
+  const [selectedMultiAccount, setSelectedMultiAccount] = useState<string>('');
+  const [multiAccounts, setMultiAccounts] = useState<MultiAccount[]>([]);
+  const [searchResults, setSearchResults] = useState<{ [key: string]: CharacterData[] }>({});
+  const [activeTab, setActiveTab] = useState<string>('');
+  const [isSearching, setIsSearching] = useState(false);
+  const { readData } = useFirebase();
   const { showCharacterDetail } = useCharacterDetail();
 
-  const handleSearch = (e: React.FormEvent<HTMLFormElement>) => {
-    e.preventDefault();
-    const searchInputValue = searchInputRef.current?.value;
-    if (!searchInputValue) return;
+  // 그룹 설정에서 다계정 정보 로드
+  useEffect(() => {
+    const loadMultiAccounts = async () => {
+      console.log('!!DEBUG groupName:', groupName);
+      if (!groupName) return;
 
-    setSearchParams((prev) => ({ ...prev, name: searchInputValue }));
+      console.log('!!DEBUG 다계정 정보 로드 시작:', { groupName });
+
+      try {
+        // 먼저 전체 group 데이터에서 config 확인
+        const groupData = (await readData(`groups/${groupName}`)) as Group;
+        console.log('!!DEBUG 전체 group 데이터:', groupData);
+
+        let multiAccountsData = groupData?.config?.multiAccounts;
+
+        // config에 multiAccounts가 없으면 별도 경로에서 로드 시도
+        if (!multiAccountsData) {
+          console.log('!!DEBUG config에서 multiAccounts 없음, 별도 경로에서 로드 시도');
+          try {
+            const configData = (await readData(`groups/${groupName}/config`)) as any;
+            console.log('!!DEBUG 별도 config 데이터:', configData);
+            multiAccountsData = configData?.multiAccounts;
+          } catch (configError) {
+            console.log('!!DEBUG 별도 config 로드 실패:', configError);
+          }
+        }
+
+        console.log('!!DEBUG 최종 multiAccounts 데이터:', multiAccountsData);
+
+        if (multiAccountsData && Array.isArray(multiAccountsData)) {
+          setMultiAccounts(multiAccountsData);
+          console.log('!!DEBUG 다계정 정보 설정 완료:', multiAccountsData.length, '개');
+        } else {
+          console.log('!!DEBUG 다계정 정보 없음 또는 배열이 아님');
+          setMultiAccounts([]);
+        }
+      } catch (error) {
+        console.error('!!DEBUG 다계정 정보 로드 실패:', error);
+        setMultiAccounts([]);
+      }
+    };
+
+    loadMultiAccounts();
+  }, [groupName, readData]);
+
+  const handleSearch = async (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+
+    if (searchType === 'multi-account' && !selectedMultiAccount) return;
+    if (searchType !== 'multi-account' && !searchTerm.trim()) return;
+
+    setIsSearching(true);
+    setSearchResults({});
+
+    try {
+      if (searchType === 'multi-account') {
+        // 다계정 검색
+        const selectedAccount = multiAccounts.find((account) => account.id === selectedMultiAccount);
+        if (!selectedAccount) return;
+
+        const results: { [key: string]: CharacterData[] } = {};
+
+        // 각 모험단별로 검색
+        for (const adventureName of selectedAccount.adventureNames) {
+          try {
+            const result = await fetch(`https://dundam-proxy.ruderud00552780.workers.dev/search?name=${adventureName}&type=adventure`);
+            const data = await result.json();
+
+            if (data.characters && data.characters.length > 0) {
+              results[adventureName] = data.characters;
+            }
+          } catch (error) {
+            console.error(`!!DEBUG 모험단 "${adventureName}" 검색 실패:`, error);
+          }
+        }
+
+        setSearchResults(results);
+        if (Object.keys(results).length > 0) {
+          setActiveTab(Object.keys(results)[0]);
+        }
+      } else {
+        // 일반 검색 (캐릭터/모험단)
+        const result = await fetch(`https://dundam-proxy.ruderud00552780.workers.dev/search?name=${searchTerm}&type=${searchType}`);
+        const data = await result.json();
+
+        if (data.characters && data.characters.length > 0) {
+          setSearchResults({ [searchTerm]: data.characters });
+          setActiveTab(searchTerm);
+        }
+      }
+    } catch (error) {
+      console.error('!!DEBUG 검색 실패:', error);
+    } finally {
+      setIsSearching(false);
+    }
   };
 
   const handleSearchTypeChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
-    setSearchParams((prev) => ({ ...prev, type: e.target.value as SearchType }));
+    setSearchType(e.target.value as SearchType);
+    setSearchTerm('');
+    setSelectedMultiAccount('');
+    setSearchResults({});
+    setActiveTab('');
+  };
+
+  const handleMultiAccountChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
+    setSelectedMultiAccount(e.target.value);
+    setSearchResults({});
+    setActiveTab('');
   };
 
   const handleDragStart = (e: React.DragEvent<HTMLDivElement>, character: CharacterData) => {
-    e.dataTransfer.setData('data', JSON.stringify(character));
-    e.dataTransfer.setData('type', 'character');
-    e.currentTarget.classList.add('dragging');
     onCharacterDragStart?.(e, character);
   };
 
+  const handleCharacterClick = (character: CharacterData) => {
+    showCharacterDetail(character);
+    onCharacterSelect?.(character);
+  };
+
+  const isMultiAccountDisabled = multiAccounts.length === 0;
+  const isSearchDisabled = (searchType === 'multi-account' && !selectedMultiAccount) || (searchType !== 'multi-account' && !searchTerm.trim()) || isSearching;
+
+  console.log('!!DEBUG CharacterSearch 상태:', {
+    searchType,
+    multiAccounts: multiAccounts.length,
+    isMultiAccountDisabled,
+    selectedMultiAccount,
+    isSearchDisabled,
+  });
+
   return (
-    <SearchContainer className={isOpen ? '' : 'closed'}>
+    <SearchContainer>
       <SearchHeader>
         <SearchTitle>캐릭터 검색</SearchTitle>
         <SearchForm onSubmit={handleSearch}>
-          <SearchTypeSelect value={searchParams.type} onChange={handleSearchTypeChange}>
-            <option value="character">캐릭터명</option>
-            <option value="adventure">모험단명</option>
+          <SearchTypeSelect value={searchType} onChange={handleSearchTypeChange} disabled={isMultiAccountDisabled && searchType === 'multi-account'}>
+            <option value="character">캐릭터</option>
+            <option value="adventure">모험단</option>
+            <option value="multi-account" disabled={isMultiAccountDisabled}>
+              다계정 {isMultiAccountDisabled ? '(설정 없음)' : ''}
+            </option>
           </SearchTypeSelect>
-          <Input ref={searchInputRef} type="text" placeholder={searchParams.type === 'character' ? '캐릭터명을 입력하세요' : '모험단명을 입력하세요'} />
-          <Button type="submit" disabled={isLoading}>
-            {isLoading ? '검색 중...' : '검색'}
+
+          {searchType === 'multi-account' ? (
+            <MultiAccountSelect
+              value={selectedMultiAccount}
+              onChange={handleMultiAccountChange}
+              disabled={isMultiAccountDisabled}
+              title={`다계정 ${multiAccounts.length}개 로드됨`}
+            >
+              <option value="">다계정 선택 ({multiAccounts.length}개)</option>
+              {multiAccounts.map((account) => (
+                <option key={account.id} value={account.id}>
+                  {account.username} ({account.adventureNames.length}개 모험단)
+                </option>
+              ))}
+            </MultiAccountSelect>
+          ) : (
+            <Input
+              type="text"
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+              placeholder={`${searchType === 'character' ? '캐릭터' : '모험단'} 이름을 입력하세요`}
+              disabled={isSearching}
+            />
+          )}
+
+          <Button type="submit" disabled={isSearchDisabled}>
+            {isSearching ? '검색중...' : '검색'}
           </Button>
         </SearchForm>
       </SearchHeader>
 
-      {error && <div style={{ color: 'red', marginBottom: '16px' }}>캐릭터 정보를 가져오는데 실패했습니다.</div>}
+      {Object.keys(searchResults).length > 0 && (
+        <TabContainer>
+          {Object.keys(searchResults).map((tabName) => (
+            <Tab key={tabName} active={activeTab === tabName} onClick={() => setActiveTab(tabName)}>
+              {tabName} ({searchResults[tabName].length})
+            </Tab>
+          ))}
+        </TabContainer>
+      )}
 
       <CharacterList>
-        {data ? (
-          data.characters.map((character) => <CharacterCard key={character.key} character={character} onDragStart={(e) => handleDragStart(e, character)} />)
+        {isSearching ? (
+          <LoadingMessage>검색중...</LoadingMessage>
+        ) : Object.keys(searchResults).length > 0 ? (
+          searchResults[activeTab]?.map((character) => <CharacterCard key={character.key} character={character} onDragStart={handleDragStart} />)
         ) : (
-          <NoResultsMessage>검색 결과가 없습니다.</NoResultsMessage>
+          <NoResultsMessage>{searchType === 'multi-account' ? '다계정을 선택하고 검색해주세요' : '검색 결과가 없습니다'}</NoResultsMessage>
         )}
       </CharacterList>
     </SearchContainer>

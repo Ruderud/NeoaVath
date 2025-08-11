@@ -708,7 +708,7 @@ export function GroupPage() {
                   parties={dungeon.parties}
                   isMobile={isMobile}
                   expandedPartyId={expandedPartyId}
-                  groupConfig={group?.config || { id: '', name: '', createdAt: '', updatedAt: '', tags: [] }}
+                  groupConfig={group?.config || { id: '', name: '', createdAt: '', updatedAt: '', tags: [], multiAccounts: [] }}
                   onTogglePartyExpand={togglePartyExpand}
                   onPartyTitleChange={handlePartyTitleChange}
                   onPartyMemoChange={handlePartyMemoChange}
@@ -783,6 +783,7 @@ export function GroupPage() {
       <DraggableCharacterSearch
         isOpen={isDraggableSearchOpen}
         onClose={() => setIsDraggableSearchOpen(false)}
+        groupName={groupName}
         onCharacterDragStart={handleCharacterDragStart}
       />
       <Toast message={toastMessage} isVisible={isToastVisible} />
