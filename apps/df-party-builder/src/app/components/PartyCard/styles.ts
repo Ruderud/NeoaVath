@@ -156,6 +156,7 @@ export const PartySlot = styled.div<PartySlotProps>`
 
   .empty-slot {
     min-height: 120px;
+    min-width: 120px;
     width: 100%;
     height: 100%;
     display: flex;
