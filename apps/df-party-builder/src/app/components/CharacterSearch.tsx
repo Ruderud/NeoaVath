@@ -1,9 +1,9 @@
-import { useState, useCallback, useRef } from 'react';
+import { useState, useRef } from 'react';
 import styled from '@emotion/styled';
 import { useDundamQuery } from '../hooks/remote/useDundamQuery';
+import { useCharacterDetail } from '../context/CharacterDetailContext';
 import type { CharacterData } from '../types/types';
-import { CharacterCard } from './CharacterCard';
-import { debounce } from 'es-toolkit';
+import { CharacterCard } from './CharacterCard/index';
 
 const SearchContainer = styled.div`
   display: flex;
@@ -121,57 +121,15 @@ interface CharacterSearchProps {
   isOpen: boolean;
   onCharacterSelect?: (characterInfo: CharacterData) => void;
   onCharacterDragStart?: (e: React.DragEvent<HTMLDivElement>, character: CharacterData) => void;
-  dungeons: Array<{
-    id: string;
-    name: string;
-    parties: Array<{
-      id: string;
-      title: string;
-      slots: Array<CharacterData | 'empty'>;
-    }>;
-  }>;
 }
 
 type SearchType = 'character' | 'adventure';
 
-export function CharacterSearch({ isOpen, onCharacterSelect, onCharacterDragStart, dungeons }: CharacterSearchProps) {
+export function CharacterSearch({ isOpen, onCharacterSelect, onCharacterDragStart }: CharacterSearchProps) {
   const [searchParams, setSearchParams] = useState<{ name: string; type: SearchType }>({ name: '', type: 'character' });
   const { data, isLoading, error } = useDundamQuery(searchParams.name, searchParams.type);
-  const [hoveredCharacter, setHoveredCharacter] = useState<CharacterData | null>(null);
-  const [helperText, setHelperText] = useState('');
   const searchInputRef = useRef<HTMLInputElement>(null);
-
-  const findCharacterParties = useCallback(
-    (character: CharacterData) => {
-      const characterParties = dungeons.flatMap((dungeon) =>
-        dungeon.parties
-          .filter((party) => party.slots.some((slot) => slot !== 'empty' && slot.key === character.key))
-          .map((party) => ({
-            dungeonName: dungeon.name,
-            partyTitle: party.title,
-          })),
-      );
-
-      if (characterParties.length === 0) return '';
-
-      return characterParties.map(({ dungeonName, partyTitle }) => `${dungeonName} - ${partyTitle}`).join('\n');
-    },
-    [dungeons],
-  );
-
-  const handleMouseEnter = useCallback(
-    (character: CharacterData) => {
-      setHoveredCharacter(character);
-      const parties = findCharacterParties(character);
-      setHelperText(parties);
-    },
-    [findCharacterParties],
-  );
-
-  const handleMouseLeave = useCallback(() => {
-    setHoveredCharacter(null);
-    setHelperText('');
-  }, []);
+  const { showCharacterDetail } = useCharacterDetail();
 
   const handleSearch = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
@@ -212,19 +170,7 @@ export function CharacterSearch({ isOpen, onCharacterSelect, onCharacterDragStar
 
       <CharacterList>
         {data ? (
-          data.characters.map((character) => (
-            <CharacterCard
-              key={character.key}
-              character={character}
-              onClick={() => onCharacterSelect?.(character)}
-              onDragStart={(e) => handleDragStart(e, character)}
-              helperText={hoveredCharacter?.key === character.key ? helperText : ''}
-              onMouseEnter={() => handleMouseEnter(character)}
-              onMouseLeave={handleMouseLeave}
-              width={200}
-              height={280}
-            />
-          ))
+          data.characters.map((character) => <CharacterCard key={character.key} character={character} onDragStart={(e) => handleDragStart(e, character)} />)
         ) : (
           <NoResultsMessage>검색 결과가 없습니다.</NoResultsMessage>
         )}

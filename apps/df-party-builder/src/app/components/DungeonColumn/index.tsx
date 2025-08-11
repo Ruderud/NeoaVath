@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { Plus, Pencil, X } from 'lucide-react';
 import styled from '@emotion/styled';
-import type { Party, CharacterData, PartySlot } from '../../types/types';
+import type { Party, CharacterData, PartySlot, GroupConfig } from '../../types/types';
 import { PartyCard } from '../PartyCard';
 
 export type DungeonColumnProps = {
@@ -10,6 +10,7 @@ export type DungeonColumnProps = {
   parties: Party[];
   isMobile: boolean;
   expandedPartyId: string | null;
+  groupConfig: GroupConfig;
   onTogglePartyExpand: (partyId: string) => void;
   onPartyTitleChange: (partyId: string, newTitle: string) => void;
   onPartyMemoChange: (partyId: string, newMemo: string) => void;
@@ -24,7 +25,6 @@ export type DungeonColumnProps = {
   onCharacterDragOver: (e: React.DragEvent) => void;
   onCharacterDragLeave: (e: React.DragEvent) => void;
   onCharacterDrop: (e: React.DragEvent, targetDungeonId: string, targetPartyId: string, targetSlotIndex: number) => void;
-  onCharacterSelect: (character: CharacterData) => void;
   onDungeonNameChange: (dungeonId: string, newName: string) => void;
   onDungeonDelete: (dungeonId: string) => void;
   onCharacterDelete: (partyId: string, slotIndex: number) => void;
@@ -42,6 +42,7 @@ export function DungeonColumn({
   parties,
   isMobile,
   expandedPartyId,
+  groupConfig,
   onTogglePartyExpand,
   onPartyTitleChange,
   onPartyMemoChange,
@@ -56,7 +57,6 @@ export function DungeonColumn({
   onCharacterDragOver,
   onCharacterDragLeave,
   onCharacterDrop,
-  onCharacterSelect,
   onDungeonNameChange,
   onDungeonDelete,
   onCharacterDelete,
@@ -118,7 +118,6 @@ export function DungeonColumn({
               onCharacterDragOver={onCharacterDragOver}
               onCharacterDragLeave={onCharacterDragLeave}
               onCharacterDrop={(e, targetPartyId, targetSlotIndex) => onCharacterDrop(e, id, targetPartyId, targetSlotIndex)}
-              onCharacterSelect={onCharacterSelect}
               onCharacterDelete={onCharacterDelete}
               onPartyDelete={onPartyDelete}
             />

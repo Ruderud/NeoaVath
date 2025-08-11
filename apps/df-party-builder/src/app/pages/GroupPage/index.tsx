@@ -1,8 +1,9 @@
-import { useState, useEffect, useCallback, useRef } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { useParams } from 'react-router-dom';
 import { useErrorBoundary } from 'react-error-boundary';
 import { PasswordDialog } from '../../components/PasswordDialog';
 import { useFirebase } from '../../context/FirebaseContext';
+import { CharacterDetailProvider } from '../../context/CharacterDetailContext';
 import { throttle } from 'es-toolkit';
 import { getLocalStorageItem, setLocalStorageItem } from '../../utils/localStorage';
 import { Party, PartySlot, CharacterData, Group, Dungeon } from '../../types/types';
@@ -54,7 +55,6 @@ export function GroupPage() {
   const { groupName } = useParams<{ groupName: string }>();
   const [showPasswordDialog, setShowPasswordDialog] = useState(isExistGroupLoginData(groupName));
   const [group, setGroup] = useState<Group | null>(null);
-  // console.log('group', group);
   const [dungeons, setDungeons] = useState<Dungeon[]>([]);
   const [isMobile, setIsMobile] = useState(window.innerWidth <= 768);
   const [isDrawerOpen, setIsDrawerOpen] = useState(true);
@@ -64,8 +64,6 @@ export function GroupPage() {
   const [newDungeonName, setNewDungeonName] = useState('');
   const { showBoundary } = useErrorBoundary();
   const { writeData, readData, subscribeToData } = useFirebase();
-  const [showCharacterDetail, setShowCharacterDetail] = useState(false);
-  const [selectedCharacter, setSelectedCharacter] = useState<CharacterData | null>(null);
   const [toastMessage, setToastMessage] = useState('');
   const [isToastVisible, setIsToastVisible] = useState(false);
   const [isDraggableSearchOpen, setIsDraggableSearchOpen] = useState(false);
@@ -99,14 +97,10 @@ export function GroupPage() {
       characters: [...new Set(characters.map((char) => char.name))],
     }));
 
-    console.log('!!DEBUG needUpdateCharacters', needUpdateAdventures);
-
     const updatedAdventures = await Promise.all(
       needUpdateAdventures.map(async ({ adventureName }) => {
         try {
-          console.log('!!DEBUG 모험단 업데이트 시작:', adventureName);
           const data = await getDundamData({ name: adventureName, type: 'adventure' });
-          console.log('!!DEBUG 모험단 업데이트 성공:', adventureName, data.characters.length);
           return {
             adventureName,
             characters: data.characters,
@@ -121,8 +115,6 @@ export function GroupPage() {
         }
       }),
     );
-
-    console.log('!!DEBUG updatedAdventures', updatedAdventures);
 
     if (!group) return;
 
@@ -155,7 +147,6 @@ export function GroupPage() {
         })),
       })),
     };
-    console.log('!!DEBUG updatedGroup', updatedGroup);
 
     // 그룹 업데이트
     setGroup({
@@ -211,7 +202,6 @@ export function GroupPage() {
     async (groupName: string, dungeons: Dungeon[]) => {
       try {
         await writeData(`groups/${groupName}/dungeons`, dungeons);
-        console.log('savePartyDataDebounced', groupName, dungeons);
       } catch (error) {
         console.error('던전 데이터 저장 실패:', error);
       }
@@ -224,7 +214,6 @@ export function GroupPage() {
     throttle(async (groupName: string, dungeons: Dungeon[]) => {
       try {
         await writeData(`groups/${groupName}/dungeons`, dungeons);
-        console.log('savePartyDataThrottled', groupName, dungeons);
       } catch (error) {
         console.error('던전 데이터 저장 실패:', error);
       }
@@ -358,6 +347,7 @@ export function GroupPage() {
       title: '새 파티',
       slots: ['empty', 'empty', 'empty', 'empty'] as [PartySlot, PartySlot, PartySlot, PartySlot],
       memo: '',
+      isCompleted: false,
     };
 
     setDungeons((prev) => prev.map((dungeon) => (dungeon.id === dungeonId ? { ...dungeon, parties: [...dungeon.parties, newParty] } : dungeon)));
@@ -374,9 +364,7 @@ export function GroupPage() {
     e.stopPropagation();
     if (character === 'empty') return;
 
-    const characterData = typeof character === 'string' ? null : character;
-    if (!characterData) return;
-
+    const characterData = character as CharacterData;
     setCharacterDragData(e, characterData, partyId, slotIndex);
     e.currentTarget.classList.add('dragging');
   };
@@ -484,8 +472,6 @@ export function GroupPage() {
           newSlots[targetSlotIndex] = sourceCharacter;
           newSlots[Number(sourceSlotIndex)] = targetCharacter;
 
-          console.log('newSlots', newSlots);
-
           targetParty.slots = newSlots as [PartySlot, PartySlot, PartySlot, PartySlot];
         } else {
           // 다른 파티로 이동하는 경우
@@ -561,14 +547,8 @@ export function GroupPage() {
     setShowAddGroupInput(false);
   };
 
-  const handleCharacterSelect = (character: CharacterData) => {
-    setSelectedCharacter(character);
-    setShowCharacterDetail(true);
-  };
-
   const handleCharacterDetailClose = () => {
-    setShowCharacterDetail(false);
-    setSelectedCharacter(null);
+    // 이 함수는 더 이상 필요하지 않음 (Context API에서 처리)
   };
 
   const handleDungeonNameChange = (dungeonId: string, newName: string) => {
@@ -707,7 +687,7 @@ export function GroupPage() {
   }
 
   return (
-    <>
+    <CharacterDetailProvider>
       <Drawer
         open={isDrawerOpen}
         groupName={groupName || ''}
@@ -729,6 +709,7 @@ export function GroupPage() {
                   parties={dungeon.parties}
                   isMobile={isMobile}
                   expandedPartyId={expandedPartyId}
+                  groupConfig={group?.config || { id: '', name: '', createdAt: '', updatedAt: '', tags: [] }}
                   onTogglePartyExpand={togglePartyExpand}
                   onPartyTitleChange={handlePartyTitleChange}
                   onPartyMemoChange={handlePartyMemoChange}
@@ -743,7 +724,6 @@ export function GroupPage() {
                   onCharacterDragOver={handleDragOver}
                   onCharacterDragLeave={handleDragLeave}
                   onCharacterDrop={handleDrop}
-                  onCharacterSelect={handleCharacterSelect}
                   onDungeonNameChange={handleDungeonNameChange}
                   onCharacterDelete={handleCharacterDelete}
                   onPartyDelete={handlePartyDelete}
@@ -798,18 +778,16 @@ export function GroupPage() {
               }}
             />
           )}
-          <CharacterDetailModal isOpen={showCharacterDetail} character={selectedCharacter} onClose={handleCharacterDetailClose} />
         </MainContent>
       </PageContainer>
+      <CharacterDetailModal />
       <DraggableCharacterSearch
         isOpen={isDraggableSearchOpen}
         onClose={() => setIsDraggableSearchOpen(false)}
-        onCharacterSelect={handleCharacterSelect}
         onCharacterDragStart={handleCharacterDragStart}
-        dungeons={dungeons}
       />
       <Toast message={toastMessage} isVisible={isToastVisible} />
-    </>
+    </CharacterDetailProvider>
   );
 }
 

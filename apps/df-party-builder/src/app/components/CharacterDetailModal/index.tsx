@@ -1,65 +1,61 @@
 import { X } from 'lucide-react';
 import styled from '@emotion/styled';
-import type { CharacterData } from '../../types/types';
+import { useCharacterDetail } from '../../context/CharacterDetailContext';
 
-type CharacterDetailModalProps = {
-  isOpen: boolean;
-  character: CharacterData | null;
-  onClose: () => void;
-};
+export function CharacterDetailModal() {
+  const { isOpen, selectedCharacter, hideCharacterDetail } = useCharacterDetail();
 
-export function CharacterDetailModal({ isOpen, character, onClose }: CharacterDetailModalProps) {
-  if (!isOpen || !character) return null;
+  if (!isOpen || !selectedCharacter) return null;
 
   return (
-    <ModalOverlay onClick={onClose}>
+    <ModalOverlay onClick={hideCharacterDetail}>
       <ModalContent onClick={(e) => e.stopPropagation()}>
         <ModalHeader>
           <ModalTitle>캐릭터 정보</ModalTitle>
-          <CloseButton onClick={onClose}>
+          <CloseButton onClick={hideCharacterDetail}>
             <X size={24} />
           </CloseButton>
         </ModalHeader>
         <ModalBody>
           <CharacterImage>
             <img
-              src={`https://img-api.neople.co.kr/df/servers/${character.server}/characters/${character.key}?zoom=1`}
-              alt={`${character.name} 캐릭터 이미지`}
+              src={`https://img-api.neople.co.kr/df/servers/${selectedCharacter.server}/characters/${selectedCharacter.key}?zoom=1`}
+              alt={`${selectedCharacter.name} 캐릭터 이미지`}
             />
           </CharacterImage>
           <CharacterInfo>
             <InfoRow>
               <InfoLabel>캐릭터명</InfoLabel>
-              <InfoValue>{character.name}</InfoValue>
+              <InfoValue>{selectedCharacter.name}</InfoValue>
             </InfoRow>
             <InfoRow>
               <InfoLabel>서버</InfoLabel>
-              <InfoValue>{character.server}</InfoValue>
+              <InfoValue>{selectedCharacter.server}</InfoValue>
             </InfoRow>
             <InfoRow>
               <InfoLabel>직업</InfoLabel>
-              <InfoValue>{character.job}</InfoValue>
+              <InfoValue>{selectedCharacter.job}</InfoValue>
             </InfoRow>
             <InfoRow>
               <InfoLabel>명성</InfoLabel>
-              <InfoValue>{character.level}</InfoValue>
+              <InfoValue>{selectedCharacter.level}</InfoValue>
             </InfoRow>
-            {character.buffScore && (
+            {selectedCharacter.buffScore && (
               <InfoRow>
                 <InfoLabel>버프력</InfoLabel>
-                <InfoValue>{character.buffScore}</InfoValue>
+                <InfoValue>{selectedCharacter.buffScore}</InfoValue>
               </InfoRow>
             )}
-            {character.ozma && (
+            {selectedCharacter.ozma && (
               <InfoRow>
                 <InfoLabel>오즈마 랭킹</InfoLabel>
-                <InfoValue>{character.ozma}</InfoValue>
+                <InfoValue>{selectedCharacter.ozma}</InfoValue>
               </InfoRow>
             )}
-            {character.adventureName && (
+            {selectedCharacter.adventureName && (
               <InfoRow>
                 <InfoLabel>모험단</InfoLabel>
-                <InfoValue>{character.adventureName}</InfoValue>
+                <InfoValue>{selectedCharacter.adventureName}</InfoValue>
               </InfoRow>
             )}
           </CharacterInfo>

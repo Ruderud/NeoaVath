@@ -2,7 +2,7 @@ import { useState } from 'react';
 import styled from '@emotion/styled';
 import { Pencil, X, ChevronUp, ChevronDown } from 'lucide-react';
 import type { Party, CharacterData, PartySlot, GroupConfig } from '../../types/types';
-import { CharacterCard } from '../CharacterCard';
+import { CharacterCard } from '../CharacterCard/index';
 import { calculatePartyDamagePotential, formatDamagePotential } from '../../utils/partyDamagePotential';
 import {
   PartyCardContainer,
@@ -33,7 +33,6 @@ type PartyCardProps = {
   onCharacterDragOver: (e: React.DragEvent) => void;
   onCharacterDragLeave: (e: React.DragEvent) => void;
   onCharacterDrop: (e: React.DragEvent, partyId: string, slotIndex: number) => void;
-  onCharacterSelect: (character: CharacterData) => void;
   onCharacterDelete: (partyId: string, slotIndex: number) => void;
   onPartyDelete: (partyId: string) => void;
   onDungeonSelect?: (partyId: string, dungeon: string) => void;
@@ -55,7 +54,6 @@ export function PartyCard({
   onCharacterDragOver,
   onCharacterDragLeave,
   onCharacterDrop,
-  onCharacterSelect,
   onCharacterDelete,
   onPartyDelete,
   onDungeonSelect,
@@ -114,17 +112,6 @@ export function PartyCard({
       onTitleChange(editedTitle.trim());
     }
     setIsEditing(false);
-  };
-
-  const handleCharacterClick = (character: PartySlot) => {
-    if (character !== 'empty') {
-      onCharacterSelect(character as CharacterData);
-    }
-  };
-
-  const handleDeleteClick = (e: React.MouseEvent, slotIndex: number) => {
-    e.stopPropagation();
-    onCharacterDelete(party.id, slotIndex);
   };
 
   const handlePartyDelete = (e: React.MouseEvent) => {
@@ -197,17 +184,12 @@ export function PartyCard({
                 className={slot === 'empty' ? 'empty' : ''}
               >
                 {slot !== 'empty' ? (
-                  <>
-                    <CharacterCard
-                      cardProps={{ className: 'character-card' }}
-                      character={slot as CharacterData}
-                      onDragStart={!isMobile ? (e) => onCharacterDragStart(e, index, slot) : undefined}
-                      onClick={() => handleCharacterClick(slot)}
-                    />
-                    <button className="delete-button" onClick={(e) => handleDeleteClick(e, index)}>
-                      <X size={16} />
-                    </button>
-                  </>
+                  <CharacterCard
+                    cardProps={{ className: 'character-card' }}
+                    character={slot as CharacterData}
+                    onDragStart={!isMobile ? (e) => onCharacterDragStart(e, index, slot) : undefined}
+                    onDelete={() => onCharacterDelete(party.id, index)}
+                  />
                 ) : (
                   <div className="empty-slot">빈 슬롯</div>
                 )}
