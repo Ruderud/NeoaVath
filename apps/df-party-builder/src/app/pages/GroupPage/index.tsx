@@ -442,14 +442,6 @@ export function GroupPage() {
     target.classList.remove('drag-over');
   };
 
-  const showToast = useCallback((message: string) => {
-    setToastMessage(message);
-    setIsToastVisible(true);
-    setTimeout(() => {
-      setIsToastVisible(false);
-    }, 3000);
-  }, []);
-
   const handleDrop = (e: React.DragEvent, targetDungeonId: string, targetPartyId: string, targetSlotIndex: number) => {
     e.preventDefault();
 
@@ -481,8 +473,6 @@ export function GroupPage() {
 
         // 같은 파티 내에서의 이동인 경우
         if (sourcePartyId && sourcePartyId === targetPartyId) {
-          console.log('targetParty', targetParty);
-          console.log('moving character', character);
           const newSlots = [...targetParty.slots];
           const sourceCharacter = newSlots[Number(sourceSlotIndex)];
           const targetCharacter = newSlots[targetSlotIndex];
