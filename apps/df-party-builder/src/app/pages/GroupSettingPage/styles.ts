@@ -264,3 +264,35 @@ export const ColorPicker = styled.input`
     border-radius: 4px;
   }
 `;
+
+export const MultiAccountContainer = styled.div`
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+`;
+
+export const MultiAccountItem = styled.div`
+  border: 1px solid #e0e0e0;
+  border-radius: 8px;
+  padding: 16px;
+  background: #fafafa;
+`;
+
+export const AdventureNameList = styled.div`
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 8px;
+`;
+
+export const AdventureNameItem = styled.div`
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 12px;
+  background: #e3f2fd;
+  border: 1px solid #2196f3;
+  border-radius: 16px;
+  font-size: 0.9em;
+  color: #1976d2;
+`;

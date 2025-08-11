@@ -8,6 +8,7 @@ import { Group, GroupConfig } from '../../types/types';
 import { Settings, Users, Tag, Calendar, Save, X } from 'lucide-react';
 import { Drawer } from '../../components/Drawer';
 import { Toast } from '../../components/Toast';
+import { MultiAccountSettings } from './components/MultiAccountSettings';
 import {
   PageContainer,
   MainContent,
@@ -53,6 +54,7 @@ export function GroupSettingPage() {
     id: '',
     name: '',
     tags: [],
+    multiAccounts: [],
     createdAt: new Date().toISOString(),
     updatedAt: new Date().toISOString(),
   });
@@ -60,6 +62,7 @@ export function GroupSettingPage() {
     id: '',
     name: '',
     tags: [],
+    multiAccounts: [],
     createdAt: new Date().toISOString(),
     updatedAt: new Date().toISOString(),
   });
@@ -78,7 +81,11 @@ export function GroupSettingPage() {
 
   // 변경사항이 있는지 확인
   const hasChanges = () => {
-    return JSON.stringify(groupConfig) !== JSON.stringify(originalGroupConfig);
+    const currentString = JSON.stringify(groupConfig);
+    const originalString = JSON.stringify(originalGroupConfig);
+    const hasChangesResult = currentString !== originalString;
+
+    return hasChangesResult;
   };
 
   // 그룹 데이터 로드
@@ -87,19 +94,39 @@ export function GroupSettingPage() {
 
     const loadGroupData = async () => {
       try {
+        // 전체 group 데이터 로드
         const data = await readData(`groups/${groupName}`);
         if (data) {
           const validatedGroup = data as Group;
           setGroup(validatedGroup);
-          const config = validatedGroup.config || {
+
+          // config 데이터도 별도로 로드 (백업용)
+          let configData = validatedGroup.config;
+          if (!configData) {
+            try {
+              configData = (await readData(`groups/${groupName}/config`)) as GroupConfig;
+            } catch (configError) {
+              console.error('!!DEBUG config 별도 로드 실패, 기본값 사용', configError);
+            }
+          }
+
+          const config = configData || {
             id: groupName,
             name: groupName,
             tags: [],
+            multiAccounts: [],
             createdAt: new Date().toISOString(),
             updatedAt: new Date().toISOString(),
           };
-          setGroupConfig(config);
-          setOriginalGroupConfig(config);
+
+          setGroupConfig({
+            ...config,
+            multiAccounts: config.multiAccounts || [],
+          });
+          setOriginalGroupConfig({
+            ...config,
+            multiAccounts: config.multiAccounts || [],
+          });
         }
       } catch (error) {
         console.error('!!DEBUG 그룹 데이터 로드 실패:', error);
@@ -147,6 +174,12 @@ export function GroupSettingPage() {
   const handleSaveConfig = async () => {
     if (!groupName || !group) return;
 
+    console.log('!!DEBUG 저장 시작:', {
+      groupName,
+      groupConfig,
+      multiAccounts: groupConfig.multiAccounts,
+    });
+
     try {
       const updatedConfig = {
         ...groupConfig,
@@ -158,7 +191,12 @@ export function GroupSettingPage() {
         config: updatedConfig,
       };
 
+      // 전체 group 객체를 저장
       await writeData(`groups/${groupName}`, updatedGroup);
+
+      // config만 별도로도 저장 (백업용)
+      await writeData(`groups/${groupName}/config`, updatedConfig);
+
       setGroup(updatedGroup);
       setGroupConfig(updatedConfig);
       setOriginalGroupConfig(updatedConfig);
@@ -310,6 +348,21 @@ export function GroupSettingPage() {
                 </SettingLabel>
                 <div style={{ color: '#666', fontSize: '0.9em' }}>{new Date(groupConfig.updatedAt).toLocaleDateString('ko-KR')}</div>
               </SettingItem>
+
+              <MultiAccountSettings
+                multiAccounts={groupConfig.multiAccounts || []}
+                onMultiAccountsChange={(newMultiAccounts) =>
+                  setGroupConfig((prev) => ({
+                    ...prev,
+                    multiAccounts: newMultiAccounts,
+                  }))
+                }
+                onShowToast={(message) => {
+                  setToastMessage(message);
+                  setIsToastVisible(true);
+                  setTimeout(() => setIsToastVisible(false), 3000);
+                }}
+              />
             </SettingSection>
 
             <ButtonGroup>
@@ -317,7 +370,11 @@ export function GroupSettingPage() {
                 <X size={20} />
                 취소
               </CancelButton>
-              <SaveButton onClick={handleSaveConfig} disabled={!hasChanges()}>
+              <SaveButton
+                onClick={handleSaveConfig}
+                disabled={!hasChanges()}
+                title={`변경사항: ${hasChanges() ? '있음' : '없음'}, 다계정: ${groupConfig.multiAccounts?.length || 0}개`}
+              >
                 <Save size={20} />
                 저장
               </SaveButton>

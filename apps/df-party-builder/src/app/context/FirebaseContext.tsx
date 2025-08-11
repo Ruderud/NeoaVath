@@ -78,6 +78,7 @@ export function FirebaseProvider({ children }: { children: ReactNode }) {
       return {
         id: groupName,
         name: groupName,
+        multiAccounts: [],
         tags: [],
         createdAt: new Date().toISOString(),
         updatedAt: new Date().toISOString(),

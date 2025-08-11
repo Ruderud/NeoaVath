@@ -27,6 +27,7 @@ export type GroupConfig = {
   id: string;
   name: string;
   tags: Tag[];
+  multiAccounts: MultiAccount[];
   createdAt: string;
   updatedAt: string;
 };
@@ -94,4 +95,12 @@ export type Tag = {
   id: string;
   name: string;
   color: ChipColor;
+};
+
+export type MultiAccount = {
+  id: string;
+  username: string;
+  adventureNames: string[];
+  createdAt: string;
+  updatedAt: string;
 };
