@@ -3,6 +3,89 @@ addEventListener('fetch', (event) => {
 });
 
 const DUNDAM_BASE_URL = 'https://dundam.xyz';
+const GEMINI_API_URL = 'https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent';
+
+async function callGeminiAPI(prompt, userAgent) {
+  try {
+    console.log('!!DEBUG Gemini API 호출 시작:', prompt);
+
+    const apiKey = GEMINI_API_KEY; // 환경변수에서 가져옴
+
+    if (!apiKey) {
+      throw new Error('GEMINI_API_KEY가 설정되지 않았습니다.');
+    }
+
+    const requestBody = {
+      contents: [
+        {
+          parts: [
+            {
+              text: prompt,
+            },
+          ],
+        },
+      ],
+    };
+
+    const response = await fetch(`${GEMINI_API_URL}?key=${apiKey}`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'User-Agent': userAgent,
+      },
+      body: JSON.stringify(requestBody),
+    });
+
+    console.log('!!DEBUG Gemini API 응답 상태:', response.status);
+
+    if (!response.ok) {
+      const errorText = await response.text();
+      console.error('!!DEBUG Gemini API 오류 응답:', errorText);
+      throw new Error(`Gemini API 요청 실패: ${response.status}`);
+    }
+
+    const data = await response.json();
+    console.log('!!DEBUG Gemini API 응답:', data);
+
+    // 응답 구조 검증
+    if (!data || !data.candidates || !data.candidates[0] || !data.candidates[0].content) {
+      console.error('!!DEBUG Gemini API 응답 구조가 예상과 다름:', data);
+      throw new Error('Gemini API 응답 구조가 올바르지 않습니다.');
+    }
+
+    const candidate = data.candidates[0];
+    const content = candidate.content;
+    const textParts = content.parts.filter((part) => part.text);
+    const responseText = textParts.map((part) => part.text).join('');
+
+    // 사용량 정보 추출
+    const usageInfo = data.usageMetadata
+      ? {
+          promptTokens: data.usageMetadata.promptTokenCount,
+          responseTokens: data.usageMetadata.candidatesTokenCount,
+          totalTokens: data.usageMetadata.totalTokenCount,
+        }
+      : null;
+
+    return {
+      success: true,
+      response: responseText,
+      finishReason: candidate.finishReason,
+      usage: usageInfo,
+      modelVersion: data.modelVersion,
+      responseId: data.responseId,
+      rawData: data,
+    };
+  } catch (error) {
+    console.error('!!DEBUG Gemini API 호출 실패:', error);
+    console.error('!!DEBUG 오류 상세:', {
+      message: error.message,
+      stack: error.stack,
+      name: error.name,
+    });
+    throw error;
+  }
+}
 
 async function searchCharacter(name, type, userAgent, rawData = false) {
   try {
@@ -128,12 +211,79 @@ async function handleRequest(request) {
   }
 
   const url = new URL(request.url);
-  const characterName = url.searchParams.get('name');
-  const type = url.searchParams.get('type') || 'character';
-  const rawData = url.searchParams.get('rawData') === 'true';
   const userAgent =
     request.headers.get('User-Agent') ||
     'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/135.0.0.0 Safari/537.36';
+
+  // Gemini API 엔드포인트 처리
+  if (url.pathname === '/api/gemini') {
+    const prompt = url.searchParams.get('prompt');
+    const rawData = url.searchParams.get('rawData') === 'true';
+
+    if (!prompt) {
+      return new Response(
+        JSON.stringify({
+          error: 'Prompt is required',
+          message: '프롬프트가 필요합니다.',
+        }),
+        {
+          status: 400,
+          headers: {
+            ...corsHeaders,
+            'Content-Type': 'application/json',
+          },
+        },
+      );
+    }
+
+    try {
+      console.log('!!DEBUG Gemini API 요청 처리 중:', prompt);
+
+      const result = await callGeminiAPI(prompt, userAgent);
+
+      if (rawData) {
+        return new Response(JSON.stringify(result), {
+          headers: {
+            ...corsHeaders,
+            'Content-Type': 'application/json',
+          },
+        });
+      } else {
+        return new Response(
+          JSON.stringify({
+            response: result.response,
+          }),
+          {
+            headers: {
+              ...corsHeaders,
+              'Content-Type': 'application/json',
+            },
+          },
+        );
+      }
+    } catch (error) {
+      console.error('!!DEBUG Gemini API 요청 처리 실패:', error);
+      return new Response(
+        JSON.stringify({
+          error: 'Failed to call Gemini API',
+          message: 'Gemini API 호출에 실패했습니다.',
+          details: error.message,
+        }),
+        {
+          status: 500,
+          headers: {
+            ...corsHeaders,
+            'Content-Type': 'application/json',
+          },
+        },
+      );
+    }
+  }
+
+  // 기존 던담 API 엔드포인트 처리
+  const characterName = url.searchParams.get('name');
+  const type = url.searchParams.get('type') || 'character';
+  const rawData = url.searchParams.get('rawData') === 'true';
 
   if (!characterName) {
     return new Response('Character name is required', {
