@@ -7,11 +7,11 @@ type DamagePotentialResult = {
 };
 
 /**
- * ozma 문자열을 억 단위로 파싱합니다.
- * 예: "193 억 8463 만" → 193 (억 단위만)
+ * ozma 문자열을 만 단위로 파싱합니다.
+ * 예: "193 억 8463 만" → 1938463 (만 단위로 통일)
  *
  * @param ozmaString ozma 문자열
- * @returns 파싱된 숫자 (억 단위, 실패시 0)
+ * @returns 파싱된 숫자 (만 단위, 실패시 0)
  */
 function parseOzma(ozmaString: string): number {
   if (!ozmaString || ozmaString.trim() === '') {
@@ -19,22 +19,29 @@ function parseOzma(ozmaString: string): number {
   }
 
   try {
-    // "193 억 8463 만" 형태 파싱 - 억 단위만 추출
-    const match = ozmaString.match(/(\d+)\s*억/);
-    if (match) {
-      const billion = parseInt(match[1], 10);
-      return billion;
+    // "193 억 8463 만" 형태 파싱 - 억과 만을 모두 추출하여 만 단위로 통일
+    const billionMatch = ozmaString.match(/(\d+)\s*억/);
+    const millionMatch = ozmaString.match(/(\d+)\s*만/);
+
+    let billion = 0;
+    let million = 0;
+
+    if (billionMatch) {
+      billion = parseInt(billionMatch[1], 10) * 10000; // 억을 만 단위로 변환
     }
 
-    // 단순 숫자만 있는 경우 (억 단위로 가정)
+    if (millionMatch) {
+      million = parseInt(millionMatch[1], 10);
+    }
+
+    if (billion > 0 || million > 0) {
+      return billion + million;
+    }
+
+    // 단순 숫자만 있는 경우 (만 단위로 가정)
     const simpleNumber = parseInt(ozmaString.replace(/[^\d]/g, ''), 10);
     if (!isNaN(simpleNumber)) {
-      // 만 단위로 입력된 경우 억 단위로 변환
-      if (simpleNumber < 10000) {
-        return simpleNumber;
-      } else {
-        return Math.floor(simpleNumber / 10000);
-      }
+      return simpleNumber;
     }
 
     return 0;
@@ -45,11 +52,11 @@ function parseOzma(ozmaString: string): number {
 }
 
 /**
- * buffScore 문자열을 만 단위로 파싱합니다.
- * 예: "4,589,611" → 458 (만 단위)
+ * buffScore 문자열을 파싱합니다.
+ * 예: "4,589,611" → 4589611 (원래 값 그대로)
  *
  * @param buffScoreString buffScore 문자열
- * @returns 파싱된 숫자 (만 단위, 실패시 0)
+ * @returns 파싱된 숫자 (원래 값, 실패시 0)
  */
 function parseBuffScore(buffScoreString: string): number {
   if (!buffScoreString || buffScoreString.trim() === '') {
@@ -65,8 +72,8 @@ function parseBuffScore(buffScoreString: string): number {
       return 0;
     }
 
-    // 만 단위로 변환 (예: 4589611 → 458)
-    return Math.floor(number / 10000);
+    // 원래 값 그대로 반환
+    return number;
   } catch (error) {
     console.error('!!DEBUG buffScore 파싱 오류:', buffScoreString, error);
     return 0;
@@ -114,7 +121,7 @@ export function calculatePartyDamagePotential(slots: PartySlot[]): DamagePotenti
     };
   }
 
-  // 랭킹 데미지 총합 계산 (억 단위)
+  // 랭킹 데미지 총합 계산 (만 단위로 통일)
   const totalOzma = ozmaSlots.reduce((sum, slot) => {
     if ('ozma' in slot && slot.ozma) {
       const ozmaValue = parseOzma(slot.ozma);
@@ -123,7 +130,7 @@ export function calculatePartyDamagePotential(slots: PartySlot[]): DamagePotenti
     return sum;
   }, 0);
 
-  // 최고 버프력 찾기 (만 단위)
+  // 최고 버프력 찾기 (원래 값)
   const buffScores = buffSlots.map((slot) => {
     if ('buffScore' in slot && slot.buffScore) {
       const buffValue = parseBuffScore(slot.buffScore);
@@ -144,7 +151,7 @@ export function calculatePartyDamagePotential(slots: PartySlot[]): DamagePotenti
   }
 
   // 데미지 포텐셜 계산
-  const damagePotential = totalOzma * maxBuffScore;
+  const damagePotential = (totalOzma * maxBuffScore) / 100000000;
 
   // 계산 결과가 유효하지 않으면 계산 불가
   if (isNaN(damagePotential) || !isFinite(damagePotential)) {
@@ -156,7 +163,7 @@ export function calculatePartyDamagePotential(slots: PartySlot[]): DamagePotenti
   }
 
   return {
-    value: damagePotential,
+    value: Math.floor(damagePotential),
     isCalculable: true,
   };
 }

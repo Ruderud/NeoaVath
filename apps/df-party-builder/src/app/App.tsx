@@ -8,6 +8,7 @@ import { CharacterDetailProvider } from './context/CharacterDetailContext';
 import { ErrorBoundary } from 'react-error-boundary';
 import GroupPage from './pages/GroupPage';
 import GroupSettingPage from './pages/GroupSettingPage';
+import AutoGeneratePage from './pages/AutoGeneratePage';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 
 const queryClient = new QueryClient({
@@ -32,6 +33,7 @@ export function App() {
                 <Route path="/create" element={<CreateGroup />} />
                 <Route path="/group/:groupName" element={<GroupPage />} />
                 <Route path="/group/:groupName/setting" element={<GroupSettingPage />} />
+                <Route path="/group/:groupName/auto-generate" element={<AutoGeneratePage />} />
               </Routes>
             </ErrorBoundary>
           </DialogOverlayProvider>

@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
-import { ChevronLeft, ChevronRight, FileText, Settings, Search, Home } from 'lucide-react';
+import { ChevronLeft, ChevronRight, FileText, Settings, Search, Home, Target } from 'lucide-react';
 import { useFirebase } from '../../context/FirebaseContext';
 import { DraggableMemo } from '../DraggableMemo';
 import { LoadingOverlay } from '../LoadingOverlay';
@@ -76,6 +76,10 @@ export function Drawer({ open, onToggle, groupName, onUpdateGroupCharacters, onO
     navigate(`/group/${groupName}`);
   };
 
+  const handleAutoGenerateClick = () => {
+    navigate(`/group/${groupName}/auto-generate`);
+  };
+
   const handleSyncClick = async () => {
     setIsLoading(true);
     setError(null);
@@ -146,6 +150,11 @@ export function Drawer({ open, onToggle, groupName, onUpdateGroupCharacters, onO
                 메모장
               </DrawerMenuButton>
 
+              <DrawerMenuButton onClick={handleAutoGenerateClick} disabled={isSettingPage}>
+                <Target size={20} />
+                자동 조합 생성
+              </DrawerMenuButton>
+
               <DrawerButton onClick={handleGroupConfigClick} style={{ marginTop: 'auto' }}>
                 <Settings size={24} />
                 <span>그룹 설정</span>
@@ -170,6 +179,9 @@ export function Drawer({ open, onToggle, groupName, onUpdateGroupCharacters, onO
             </div>
             <DrawerMenuButton onClick={() => setIsMemoModalOpen(true)}>
               <FileText />
+            </DrawerMenuButton>
+            <DrawerMenuButton onClick={handleAutoGenerateClick} disabled={isSettingPage}>
+              <Target size={20} />
             </DrawerMenuButton>
             <DrawerMenuButton onClick={handleGroupConfigClick} style={{ marginTop: 'auto' }}>
               <Settings size={20} />
