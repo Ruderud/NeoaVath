@@ -70,6 +70,40 @@ export function PartyCard({
   const damagePotentialResult = calculatePartyDamagePotential(party.slots);
   const damagePotentialText = formatDamagePotential(damagePotentialResult);
 
+  // 계산식 생성
+  const generateCalculationFormula = () => {
+    const validSlots = party.slots.filter((slot) => slot !== 'empty');
+    const ozmaSlots = validSlots.filter((slot) => 'ozma' in slot && slot.ozma);
+    const buffSlots = validSlots.filter((slot) => 'buffScore' in slot && slot.buffScore);
+
+    if (ozmaSlots.length === 0 || buffSlots.length === 0) {
+      return '계산 불가';
+    }
+
+    const ozmaValues = ozmaSlots.map((slot) => {
+      if ('ozma' in slot && slot.ozma) {
+        const ozmaValue = parseInt(slot.ozma.match(/(\d+)\s*억/)?.[1] || '0', 10);
+        return `${ozmaValue}억`;
+      }
+      return '0억';
+    });
+
+    const maxBuffValue = Math.max(
+      ...buffSlots.map((slot) => {
+        if ('buffScore' in slot && slot.buffScore) {
+          const buffValue = Math.floor(parseInt(slot.buffScore.replace(/,/g, ''), 10) / 10000);
+          return buffValue;
+        }
+        return 0;
+      }),
+    );
+
+    const ozmaFormula = ozmaValues.join(' + ');
+    return `(${ozmaFormula}) × (${maxBuffValue}만)`;
+  };
+
+  const calculationFormula = generateCalculationFormula();
+
   // const { tags: groupTags } = groupConfig;
 
   // const { tags: partyTags } = party;
@@ -146,7 +180,12 @@ export function PartyCard({
 
       {isExpanded ? (
         <PartyCardDetails>
-          <DamagePotentialDisplay isCalculable={damagePotentialResult.isCalculable}>{damagePotentialText}</DamagePotentialDisplay>
+          <DamagePotentialDisplay
+            isCalculable={damagePotentialResult.isCalculable}
+            data-tooltip={`${calculationFormula}\n버프력은 해당 파티에서 가장 큰 버프력 1인만 사용합니다.`}
+          >
+            {damagePotentialText.replace(' (억×만)', '')}
+          </DamagePotentialDisplay>
           <PartySlotsContainer isMobile={isMobile}>
             {party.slots.map((slot, index) => (
               <PartySlotCard
@@ -242,6 +281,28 @@ const DamagePotentialDisplay = styled.div<{ isCalculable: boolean }>`
   background: ${({ isCalculable }) => (isCalculable ? '#e8f5e8' : '#fff3cd')};
   color: ${({ isCalculable }) => (isCalculable ? '#2e7d32' : '#856404')};
   border: 1px solid ${({ isCalculable }) => (isCalculable ? '#c8e6c9' : '#ffeaa7')};
+  cursor: help;
+  position: relative;
+
+  &:hover::after {
+    content: attr(data-tooltip);
+    position: absolute;
+    bottom: -50px;
+    left: 50%;
+    transform: translateX(-50%);
+    background: rgba(0, 0, 0, 0.9);
+    color: white;
+    padding: 10px 12px;
+    border-radius: 6px;
+    font-size: 0.8rem;
+    font-weight: normal;
+    white-space: pre-line;
+    z-index: 1000;
+    pointer-events: none;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+    text-align: center;
+    min-width: max-content;
+  }
 `;
 
 const EditButton = styled.button`

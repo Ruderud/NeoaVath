@@ -172,5 +172,5 @@ export function formatDamagePotential(result: DamagePotentialResult): string {
     return `데미지 포텐셜: ${result.reason || '계산불가'}`;
   }
 
-  return `데미지 포텐셜: ${result.value.toLocaleString()} (억×만)`;
+  return `데미지 포텐셜: ${result.value.toLocaleString()}`;
 }
