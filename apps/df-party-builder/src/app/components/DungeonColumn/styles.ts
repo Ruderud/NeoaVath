@@ -4,7 +4,7 @@ import type { HTMLAttributes } from 'react';
 export const DungeonColumnContainer = styled.div<HTMLAttributes<HTMLDivElement>>`
   display: flex;
   flex-direction: column;
-  min-width: 300px;
+  min-width: 400px;
   background: #1a1a1a;
   border-radius: 8px;
   padding: 16px;

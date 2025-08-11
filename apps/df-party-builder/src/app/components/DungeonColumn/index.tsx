@@ -137,8 +137,8 @@ const Column = styled.div`
   background: #f5f5f5;
   border-radius: 8px;
   padding: 16px;
-  width: 450px;
-  min-width: 450px;
+  width: 600px;
+  min-width: 600px;
   overflow-y: auto;
   display: flex;
   flex-direction: column;

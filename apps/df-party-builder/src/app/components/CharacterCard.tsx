@@ -1,8 +1,7 @@
 import styled from '@emotion/styled';
 import type { CharacterData } from '../types/types';
-import { getDundamData } from '../api/dundam';
 
-const Card = styled.div`
+const Card = styled.div<{ width?: number; height?: number }>`
   padding: 8px;
   border: 1px solid #ddd;
   border-radius: 8px;
@@ -13,8 +12,8 @@ const Card = styled.div`
   gap: 8px;
   transition: all 0.2s ease-in-out;
   cursor: move;
-  width: auto;
-  aspect-ratio: 3/4;
+  width: ${({ width }) => width || 160}px;
+  height: ${({ height }) => height || 280}px;
   position: relative;
 
   &:hover {
@@ -124,9 +123,11 @@ type CharacterCardProps = {
   helperText?: string;
   onMouseEnter?: () => void;
   onMouseLeave?: () => void;
+  width?: number;
+  height?: number;
 };
 
-export function CharacterCard({ character, onDragStart, onClick, cardProps, helperText, onMouseEnter, onMouseLeave }: CharacterCardProps) {
+export function CharacterCard({ character, onDragStart, onClick, cardProps, helperText, onMouseEnter, onMouseLeave, width, height }: CharacterCardProps) {
   const handleDragStart = (e: React.DragEvent<HTMLDivElement>) => {
     onDragStart?.(e);
   };
@@ -138,6 +139,8 @@ export function CharacterCard({ character, onDragStart, onClick, cardProps, help
   return (
     <Card
       {...cardProps}
+      width={width}
+      height={height}
       draggable
       onDragStart={handleDragStart}
       onClick={handleClick}

@@ -79,15 +79,16 @@ const Button = styled.button`
 
 const CharacterList = styled.div`
   display: flex;
-  gap: 16px;
+  flex-wrap: wrap;
+  gap: 12px;
   padding: 16px;
-  overflow-x: auto;
-  overflow-y: hidden;
+  overflow-y: auto;
+  overflow-x: hidden;
   flex: 1;
   position: relative;
 
   &::-webkit-scrollbar {
-    height: 8px;
+    width: 8px;
   }
 
   &::-webkit-scrollbar-track {
@@ -103,6 +104,17 @@ const CharacterList = styled.div`
   &::-webkit-scrollbar-thumb:hover {
     background: #555;
   }
+`;
+
+const NoResultsMessage = styled.div`
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  height: 100px;
+  color: #666;
+  font-size: 1rem;
+  font-style: italic;
 `;
 
 interface CharacterSearchProps {
@@ -209,10 +221,12 @@ export function CharacterSearch({ isOpen, onCharacterSelect, onCharacterDragStar
               helperText={hoveredCharacter?.key === character.key ? helperText : ''}
               onMouseEnter={() => handleMouseEnter(character)}
               onMouseLeave={handleMouseLeave}
+              width={200}
+              height={280}
             />
           ))
         ) : (
-          <div>검색 결과가 없습니다.</div>
+          <NoResultsMessage>검색 결과가 없습니다.</NoResultsMessage>
         )}
       </CharacterList>
     </SearchContainer>
