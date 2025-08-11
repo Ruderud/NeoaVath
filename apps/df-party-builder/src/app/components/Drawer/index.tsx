@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { ChevronLeft, ChevronRight, FileText, Settings, Search, Home } from 'lucide-react';
 import { useFirebase } from '../../context/FirebaseContext';
-import { MemoModal } from '../MemoModal';
+import { DraggableMemo } from '../DraggableMemo';
 import { LoadingOverlay } from '../LoadingOverlay';
 import { ErrorOverlay } from '../ErrorOverlay';
 import {
@@ -187,7 +187,7 @@ export function Drawer({ open, onToggle, groupName, onUpdateGroupCharacters, onO
         onClose={handleCloseError}
         isRetrying={isRetrying}
       />
-      <MemoModal isOpen={isMemoModalOpen} onClose={() => setIsMemoModalOpen(false)} onSave={handleSaveMemo} initialMemo={memo} />
+      <DraggableMemo isOpen={isMemoModalOpen} onClose={() => setIsMemoModalOpen(false)} onSave={handleSaveMemo} initialMemo={memo} />
     </>
   );
 }
