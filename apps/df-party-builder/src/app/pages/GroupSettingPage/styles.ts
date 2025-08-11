@@ -38,8 +38,6 @@ export const Section = styled.section`
   width: 100%;
   overflow: auto;
   position: relative;
-  max-width: 800px;
-  margin: 0 auto;
 `;
 
 export const SectionTitle = styled.h2`
@@ -54,10 +52,12 @@ export const SectionTitle = styled.h2`
 
 export const ButtonGroup = styled.div`
   display: flex;
-  justify-content: space-between;
+  justify-content: flex-end;
   align-items: center;
-  margin-bottom: 24px;
+  margin-top: 32px;
   gap: 12px;
+  padding-top: 24px;
+  border-top: 1px solid #e0e0e0;
 `;
 
 export const BackButton = styled.button`
@@ -92,8 +92,38 @@ export const SaveButton = styled.button`
   transition: all 0.2s ease;
   font-size: 0.9em;
 
-  &:hover {
+  &:hover:not(:disabled) {
     background: #1976d2;
+  }
+
+  &:disabled {
+    background: #ccc;
+    cursor: not-allowed;
+  }
+`;
+
+export const CancelButton = styled.button`
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 12px 16px;
+  background: #f5f5f5;
+  border: 1px solid #ddd;
+  border-radius: 6px;
+  color: #666;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  font-size: 0.9em;
+
+  &:hover:not(:disabled) {
+    background: #e0e0e0;
+    border-color: #ccc;
+  }
+
+  &:disabled {
+    background: #f9f9f9;
+    color: #ccc;
+    cursor: not-allowed;
   }
 `;
 

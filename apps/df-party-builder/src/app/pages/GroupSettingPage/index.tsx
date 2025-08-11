@@ -5,7 +5,7 @@ import { PasswordDialog } from '../../components/PasswordDialog';
 import { useFirebase } from '../../context/FirebaseContext';
 import { getLocalStorageItem, setLocalStorageItem } from '../../utils/localStorage';
 import { Group, GroupConfig } from '../../types/types';
-import { ArrowLeft, Settings, Users, Tag, Calendar, Save } from 'lucide-react';
+import { Settings, Users, Tag, Calendar, Save, X } from 'lucide-react';
 import { Drawer } from '../../components/Drawer';
 import { Toast } from '../../components/Toast';
 import {
@@ -17,14 +17,12 @@ import {
   SettingItem,
   SettingLabel,
   SettingInput,
-  SettingTextarea,
   SettingButton,
-  BackButton,
   SaveButton,
+  CancelButton,
   ButtonGroup,
   TagContainer,
   TagItem,
-  TagInput,
   TagButton,
   ColorPicker,
 } from './styles';
@@ -58,6 +56,13 @@ export function GroupSettingPage() {
     createdAt: new Date().toISOString(),
     updatedAt: new Date().toISOString(),
   });
+  const [originalGroupConfig, setOriginalGroupConfig] = useState<GroupConfig>({
+    id: '',
+    name: '',
+    tags: [],
+    createdAt: new Date().toISOString(),
+    updatedAt: new Date().toISOString(),
+  });
   const [isDrawerOpen, setIsDrawerOpen] = useState(true);
   const [toastMessage, setToastMessage] = useState('');
   const [isToastVisible, setIsToastVisible] = useState(false);
@@ -71,6 +76,11 @@ export function GroupSettingPage() {
     setIsDrawerOpen((prev) => !prev);
   };
 
+  // 변경사항이 있는지 확인
+  const hasChanges = () => {
+    return JSON.stringify(groupConfig) !== JSON.stringify(originalGroupConfig);
+  };
+
   // 그룹 데이터 로드
   useEffect(() => {
     if (!groupName) return;
@@ -81,15 +91,15 @@ export function GroupSettingPage() {
         if (data) {
           const validatedGroup = data as Group;
           setGroup(validatedGroup);
-          setGroupConfig(
-            validatedGroup.config || {
-              id: groupName,
-              name: groupName,
-              tags: [],
-              createdAt: new Date().toISOString(),
-              updatedAt: new Date().toISOString(),
-            },
-          );
+          const config = validatedGroup.config || {
+            id: groupName,
+            name: groupName,
+            tags: [],
+            createdAt: new Date().toISOString(),
+            updatedAt: new Date().toISOString(),
+          };
+          setGroupConfig(config);
+          setOriginalGroupConfig(config);
         }
       } catch (error) {
         console.error('!!DEBUG 그룹 데이터 로드 실패:', error);
@@ -104,38 +114,38 @@ export function GroupSettingPage() {
     if (!groupName) return;
 
     const addToRecentGroups = () => {
-      const storedGroups = localStorage.getItem('recentGroups');
-      let recentGroups = storedGroups ? JSON.parse(storedGroups) : [];
+      const storedGroups =
+        getLocalStorageItem<{
+          recentGroups?: {
+            name: string;
+            id: string;
+            lastVisited: string;
+          }[];
+        }>('recentGroups')?.recentGroups || [];
 
-      // 이미 존재하는 그룹이면 제거
-      recentGroups = recentGroups.filter((g: unknown) => (g as { id: string }).id !== groupName);
+      const existingGroupIndex = storedGroups.findIndex((group) => group.name === groupName);
 
-      // 새로운 그룹 정보를 맨 앞에 추가
-      recentGroups.unshift({
-        id: groupName,
-        name: groupName,
-        lastVisited: new Date().toISOString(),
-      });
+      if (existingGroupIndex !== -1) {
+        storedGroups[existingGroupIndex].lastVisited = new Date().toISOString();
+      } else {
+        storedGroups.push({
+          name: groupName,
+          id: groupName,
+          lastVisited: new Date().toISOString(),
+        });
+      }
 
-      // 최대 5개까지만 저장
-      recentGroups = recentGroups.slice(0, 5);
+      // 최근 10개만 유지
+      const sortedGroups = storedGroups.sort((a, b) => new Date(b.lastVisited).getTime() - new Date(a.lastVisited).getTime()).slice(0, 10);
 
-      localStorage.setItem('recentGroups', JSON.stringify(recentGroups));
+      setLocalStorageItem('recentGroups', { recentGroups: sortedGroups });
     };
 
-    // 인증이 완료된 경우에만 방문 정보 저장
-    const isAuthenticated = sessionStorage.getItem(`auth_${groupName}`);
-    if (isAuthenticated) {
-      addToRecentGroups();
-    }
+    addToRecentGroups();
   }, [groupName]);
 
-  const handleBackClick = () => {
-    navigate(`/group/${groupName}`);
-  };
-
   const handleSaveConfig = async () => {
-    if (!groupName) return;
+    if (!groupName || !group) return;
 
     try {
       const updatedConfig = {
@@ -143,8 +153,15 @@ export function GroupSettingPage() {
         updatedAt: new Date().toISOString(),
       };
 
-      await writeData(`groups/${groupName}/config`, updatedConfig);
+      const updatedGroup = {
+        ...group,
+        config: updatedConfig,
+      };
+
+      await writeData(`groups/${groupName}`, updatedGroup);
+      setGroup(updatedGroup);
       setGroupConfig(updatedConfig);
+      setOriginalGroupConfig(updatedConfig);
 
       setToastMessage('설정이 저장되었습니다.');
       setIsToastVisible(true);
@@ -157,6 +174,17 @@ export function GroupSettingPage() {
     }
   };
 
+  const handleCancelChanges = () => {
+    if (hasChanges()) {
+      const confirmed = window.confirm('저장되지 않은 변경사항이 있습니다. 정말로 취소하시겠습니까?');
+      if (confirmed) {
+        setGroupConfig(originalGroupConfig);
+        setNewTagName('');
+        setNewTagColor('#2196f3');
+      }
+    }
+  };
+
   const handleAddTag = () => {
     if (!newTagName.trim()) return;
 
@@ -165,7 +193,7 @@ export function GroupSettingPage() {
       name: newTagName.trim(),
       color: {
         background: newTagColor,
-        text: '#ffffff',
+        text: getContrastColor(newTagColor),
         border: newTagColor,
       },
     };
@@ -193,34 +221,17 @@ export function GroupSettingPage() {
     }));
   };
 
+  // 색상 대비를 계산하는 함수
+  const getContrastColor = (hexColor: string) => {
+    const r = parseInt(hexColor.slice(1, 3), 16);
+    const g = parseInt(hexColor.slice(3, 5), 16);
+    const b = parseInt(hexColor.slice(5, 7), 16);
+    const brightness = (r * 299 + g * 587 + b * 114) / 1000;
+    return brightness > 128 ? '#000000' : '#ffffff';
+  };
+
   if (showPasswordDialog) {
-    return (
-      <PasswordDialog
-        groupName={groupName}
-        onSuccess={(groupId) => {
-          setShowPasswordDialog(false);
-          const currentRecentGroups =
-            getLocalStorageItem<{
-              recentGroups?: {
-                name: string;
-                id: string;
-                lastVisited: string;
-              }[];
-            }>('recentGroups')?.recentGroups || [];
-          setLocalStorageItem('recentGroups', {
-            recentGroups: [
-              ...currentRecentGroups,
-              {
-                name: groupName,
-                id: groupId,
-                lastVisited: new Date().toISOString(),
-              },
-            ],
-          });
-        }}
-        onFailure={() => showBoundary(new Error('인증에 실패했습니다.'))}
-      />
-    );
+    return <PasswordDialog groupName={groupName} onSuccess={() => setShowPasswordDialog(false)} onFailure={() => navigate('/')} />;
   }
 
   return (
@@ -229,23 +240,16 @@ export function GroupSettingPage() {
         open={isDrawerOpen}
         groupName={groupName || ''}
         onToggle={handleToggleDrawer}
-        onUpdateGroupCharacters={async () => {}}
-        onOpenCharacterSearch={() => {}}
+        onUpdateGroupCharacters={async () => {
+          // 설정 페이지에서는 업데이트 기능을 사용하지 않음
+        }}
+        onOpenCharacterSearch={() => {
+          // 설정 페이지에서는 검색 기능을 사용하지 않음
+        }}
       />
       <PageContainer drawerOpen={isDrawerOpen}>
         <MainContent>
           <Section>
-            <ButtonGroup>
-              <BackButton onClick={handleBackClick}>
-                <ArrowLeft size={20} />
-                뒤로 가기
-              </BackButton>
-              <SaveButton onClick={handleSaveConfig}>
-                <Save size={20} />
-                저장
-              </SaveButton>
-            </ButtonGroup>
-
             <SectionTitle>
               <Settings size={24} />
               그룹 설정
@@ -260,7 +264,7 @@ export function GroupSettingPage() {
                 <SettingInput
                   type="text"
                   value={groupConfig.name}
-                  onChange={(e) => handleConfigChange('name', e.target.value)}
+                  onChange={(e: React.ChangeEvent<HTMLInputElement>) => handleConfigChange('name', e.target.value)}
                   placeholder="그룹 이름을 입력하세요"
                 />
               </SettingItem>
@@ -279,8 +283,14 @@ export function GroupSettingPage() {
                   ))}
                 </TagContainer>
                 <div style={{ display: 'flex', gap: '8px', marginTop: '8px' }}>
-                  <SettingInput type="text" value={newTagName} onChange={(e) => setNewTagName(e.target.value)} placeholder="새 태그 이름" style={{ flex: 1 }} />
-                  <ColorPicker type="color" value={newTagColor} onChange={(e) => setNewTagColor(e.target.value)} />
+                  <SettingInput
+                    type="text"
+                    value={newTagName}
+                    onChange={(e: React.ChangeEvent<HTMLInputElement>) => setNewTagName(e.target.value)}
+                    placeholder="새 태그 이름"
+                    style={{ flex: 1 }}
+                  />
+                  <ColorPicker type="color" value={newTagColor} onChange={(e: React.ChangeEvent<HTMLInputElement>) => setNewTagColor(e.target.value)} />
                   <SettingButton onClick={handleAddTag}>추가</SettingButton>
                 </div>
               </SettingItem>
@@ -301,6 +311,17 @@ export function GroupSettingPage() {
                 <div style={{ color: '#666', fontSize: '0.9em' }}>{new Date(groupConfig.updatedAt).toLocaleDateString('ko-KR')}</div>
               </SettingItem>
             </SettingSection>
+
+            <ButtonGroup>
+              <CancelButton onClick={handleCancelChanges} disabled={!hasChanges()}>
+                <X size={20} />
+                취소
+              </CancelButton>
+              <SaveButton onClick={handleSaveConfig} disabled={!hasChanges()}>
+                <Save size={20} />
+                저장
+              </SaveButton>
+            </ButtonGroup>
           </Section>
         </MainContent>
       </PageContainer>
