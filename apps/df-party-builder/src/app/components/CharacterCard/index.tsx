@@ -14,6 +14,7 @@ type CharacterCardProps = React.HTMLAttributes<HTMLDivElement> & {
 
 export function CharacterCard(props: CharacterCardProps) {
   const { character, helperText, width, height, onDelete, ...restCardProps } = props;
+  const showMultipleBuffScore = Boolean(character.buffScore && character.buffScore3 && character.buffScore4);
   const { showCharacterDetail } = useCharacterDetail();
   const [isTooltipVisible, setIsTooltipVisible] = useState(false);
 
@@ -67,12 +68,18 @@ export function CharacterCard(props: CharacterCardProps) {
           <div className="level">명성 {character.level}</div>
           <div className="name">{character.name}</div>
           <div className="adventure">{character.adventureName}</div>
+
+          {/* buff score Section - 븝퍼제외 */}
+          {!showMultipleBuffScore && character.buffScore ? <div className="score">{character.buffScore}</div> : null}
+
+          {/* buff score Section - 븝퍼 */}
+          {showMultipleBuffScore && character.buffScore ? <div className="score">(2인) {character.buffScore}</div> : null}
+          {showMultipleBuffScore && character.buffScore3 ? <div className="score">(3인) {character.buffScore3}</div> : null}
+          {showMultipleBuffScore && character.buffScore4 ? <div className="score">(4인) {character.buffScore4}</div> : null}
+
+          {/* rank damage Section */}
+          {character.rankDamage ? <div className="score">{character.rankDamage}</div> : null}
         </StyledComponents.MainInfo>
-        {character.buffScore ? (
-          <div className="score">버프력 {character.buffScore}</div>
-        ) : character.rankDamage ? (
-          <div className="score">랭킹 {character.rankDamage}</div>
-        ) : null}
       </StyledComponents.Info>
 
       {/* tooltip Section - card center popup */}

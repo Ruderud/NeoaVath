@@ -124,10 +124,9 @@ const MainInfo = styled.div`
   }
 
   .score {
-    margin-top: 2px;
-    font-weight: 500;
-    color: #e91e63;
-    font-size: 0.9em;
+    font-size: 0.8em;
+    color: #666;
+    word-break: break-all;
   }
 `;
 
@@ -152,6 +151,12 @@ const Tooltip = styled.div<{ visible: boolean }>`
   text-align: center;
 `;
 
+const Label = styled.span`
+  font-size: 0.8em;
+  color: #666;
+  word-break: break-all;
+`;
+
 export const CharacterCard = {
   Container,
   DetailButton,
@@ -160,6 +165,7 @@ export const CharacterCard = {
   Info,
   MainInfo,
   Tooltip,
+  Label,
 };
 
 export default CharacterCard;

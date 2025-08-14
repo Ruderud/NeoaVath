@@ -4,6 +4,7 @@ import { useCharacterDetail } from '../../context/CharacterDetailContext';
 
 export function CharacterDetailModal() {
   const { isOpen, selectedCharacter, hideCharacterDetail } = useCharacterDetail();
+  const showMultipleBuffScore = Boolean(selectedCharacter?.buffScore && selectedCharacter?.buffScore3 && selectedCharacter?.buffScore4);
 
   if (!isOpen || !selectedCharacter) return null;
 
@@ -43,7 +44,11 @@ export function CharacterDetailModal() {
             {selectedCharacter.buffScore && (
               <InfoRow>
                 <InfoLabel>버프력</InfoLabel>
-                <InfoValue>{selectedCharacter.buffScore}</InfoValue>
+                {!showMultipleBuffScore && <InfoValue>{selectedCharacter.buffScore}</InfoValue>}
+
+                {showMultipleBuffScore && <InfoValue>(2인) {selectedCharacter.buffScore}</InfoValue>}
+                {showMultipleBuffScore && <InfoValue>(3인) {selectedCharacter.buffScore3}</InfoValue>}
+                {showMultipleBuffScore && <InfoValue>(4인) {selectedCharacter.buffScore4}</InfoValue>}
               </InfoRow>
             )}
             {selectedCharacter.rankDamage && (
