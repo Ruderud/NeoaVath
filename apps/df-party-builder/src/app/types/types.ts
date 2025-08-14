@@ -78,9 +78,12 @@ export type CharacterData = {
   skillDamage: string;
   critical: string;
   buffScore: string;
+  buffScore3?: string;
+  buffScore4?: string;
   switching: string;
-  ozma: string;
-  bakal: number;
+  rankDamage: string;
+  raidClearCount: number;
+  advenRaidClearCount: number;
   key: string;
   adventure: string;
 };

@@ -122,12 +122,12 @@ export function AutoGeneratePage() {
     try {
       const characterInfo = selectedCharacters
         .map((char) => {
-          const isDps = char.ozma && parseInt(char.ozma) > 0;
+          const isDps = char.rankDamage && parseInt(char.rankDamage) > 0;
           const isBuffer = char.buffScore && parseInt(char.buffScore) > 0;
 
           let stats = `레벨: ${char.level}`;
           if (isDps) {
-            stats += `, 딜러 데미지: ${char.ozma}`;
+            stats += `, 딜러 데미지: ${char.rankDamage}`;
           }
           if (isBuffer) {
             stats += `, 버프점수: ${char.buffScore}`;

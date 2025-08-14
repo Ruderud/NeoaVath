@@ -212,7 +212,9 @@ export function CharacterSearch({ isOpen, groupName, onCharacterSelect, onCharac
           try {
             const configData = (await readData(`groups/${groupName}/config`)) as any;
             multiAccountsData = configData?.multiAccounts;
-          } catch (configError) {}
+          } catch (configError) {
+            console.error('!!DEBUG 다계정 정보 로드 실패:', configError);
+          }
         }
 
         if (multiAccountsData && Array.isArray(multiAccountsData)) {
@@ -359,7 +361,9 @@ export function CharacterSearch({ isOpen, groupName, onCharacterSelect, onCharac
         {isSearching ? (
           <LoadingMessage>검색중...</LoadingMessage>
         ) : Object.keys(searchResults).length > 0 ? (
-          searchResults[activeTab]?.map((character) => <CharacterCard key={character.key} character={character} onDragStart={handleDragStart} />)
+          searchResults[activeTab]?.map((character) => (
+            <CharacterCard key={character.key} character={character} onDragStart={handleDragStart} helperText={'123'} />
+          ))
         ) : (
           <NoResultsMessage>{searchType === 'multi-account' ? '다계정을 선택하고 검색해주세요' : '검색 결과가 없습니다'}</NoResultsMessage>
         )}

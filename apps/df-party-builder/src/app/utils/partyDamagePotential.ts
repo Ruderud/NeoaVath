@@ -7,21 +7,21 @@ type DamagePotentialResult = {
 };
 
 /**
- * ozma 문자열을 만 단위로 파싱합니다.
+ * rankDamage 문자열을 만 단위로 파싱합니다.
  * 예: "193 억 8463 만" → 1938463 (만 단위로 통일)
  *
- * @param ozmaString ozma 문자열
+ * @param rankDamage rankDamage 문자열
  * @returns 파싱된 숫자 (만 단위, 실패시 0)
  */
-function parseOzma(ozmaString: string): number {
-  if (!ozmaString || ozmaString.trim() === '') {
+function parseRankDamage(rankDamage: string): number {
+  if (!rankDamage || rankDamage.trim() === '') {
     return 0;
   }
 
   try {
     // "193 억 8463 만" 형태 파싱 - 억과 만을 모두 추출하여 만 단위로 통일
-    const billionMatch = ozmaString.match(/(\d+)\s*억/);
-    const millionMatch = ozmaString.match(/(\d+)\s*만/);
+    const billionMatch = rankDamage.match(/(\d+)\s*억/);
+    const millionMatch = rankDamage.match(/(\d+)\s*만/);
 
     let billion = 0;
     let million = 0;
@@ -39,14 +39,14 @@ function parseOzma(ozmaString: string): number {
     }
 
     // 단순 숫자만 있는 경우 (만 단위로 가정)
-    const simpleNumber = parseInt(ozmaString.replace(/[^\d]/g, ''), 10);
+    const simpleNumber = parseInt(rankDamage.replace(/[^\d]/g, ''), 10);
     if (!isNaN(simpleNumber)) {
       return simpleNumber;
     }
 
     return 0;
   } catch (error) {
-    console.error('!!DEBUG ozma 파싱 오류:', ozmaString, error);
+    console.error('!!DEBUG rankDamage 파싱 오류:', rankDamage, error);
     return 0;
   }
 }
@@ -101,11 +101,11 @@ export function calculatePartyDamagePotential(slots: PartySlot[]): DamagePotenti
   }
 
   // 랭킹 데미지와 버프력을 분리
-  const ozmaSlots = validSlots.filter((slot) => 'ozma' in slot && slot.ozma);
+  const rankDamageSlots = validSlots.filter((slot) => 'rankDamage' in slot && slot.rankDamage);
   const buffSlots = validSlots.filter((slot) => 'buffScore' in slot && slot.buffScore);
 
   // 랭킹 데미지가 없거나 버프력이 없으면 계산 불가
-  if (ozmaSlots.length === 0) {
+  if (rankDamageSlots.length === 0) {
     return {
       value: null,
       isCalculable: false,
@@ -122,10 +122,10 @@ export function calculatePartyDamagePotential(slots: PartySlot[]): DamagePotenti
   }
 
   // 랭킹 데미지 총합 계산 (만 단위로 통일)
-  const totalOzma = ozmaSlots.reduce((sum, slot) => {
-    if ('ozma' in slot && slot.ozma) {
-      const ozmaValue = parseOzma(slot.ozma);
-      return sum + ozmaValue;
+  const totalRankDamage = rankDamageSlots.reduce((sum, slot) => {
+    if ('rankDamage' in slot && slot.rankDamage) {
+      const rankDamageValue = parseRankDamage(slot.rankDamage);
+      return sum + rankDamageValue;
     }
     return sum;
   }, 0);
@@ -142,7 +142,7 @@ export function calculatePartyDamagePotential(slots: PartySlot[]): DamagePotenti
   const maxBuffScore = Math.max(...buffScores);
 
   // 유효하지 않은 값이 있으면 계산 불가
-  if (totalOzma === 0 || maxBuffScore === 0 || isNaN(totalOzma) || isNaN(maxBuffScore)) {
+  if (totalRankDamage === 0 || maxBuffScore === 0 || isNaN(totalRankDamage) || isNaN(maxBuffScore)) {
     return {
       value: null,
       isCalculable: false,
@@ -151,7 +151,7 @@ export function calculatePartyDamagePotential(slots: PartySlot[]): DamagePotenti
   }
 
   // 데미지 포텐셜 계산
-  const damagePotential = (totalOzma * maxBuffScore) / 100000000;
+  const damagePotential = (totalRankDamage * maxBuffScore) / 100000000;
 
   // 계산 결과가 유효하지 않으면 계산 불가
   if (isNaN(damagePotential) || !isFinite(damagePotential)) {

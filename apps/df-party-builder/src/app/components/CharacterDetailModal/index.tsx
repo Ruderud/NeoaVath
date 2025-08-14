@@ -46,10 +46,10 @@ export function CharacterDetailModal() {
                 <InfoValue>{selectedCharacter.buffScore}</InfoValue>
               </InfoRow>
             )}
-            {selectedCharacter.ozma && (
+            {selectedCharacter.rankDamage && (
               <InfoRow>
-                <InfoLabel>오즈마 랭킹</InfoLabel>
-                <InfoValue>{selectedCharacter.ozma}</InfoValue>
+                <InfoLabel>랭킹 데미지</InfoLabel>
+                <InfoValue>{selectedCharacter.rankDamage}</InfoValue>
               </InfoRow>
             )}
             {selectedCharacter.adventureName && (

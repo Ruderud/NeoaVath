@@ -71,17 +71,17 @@ export function PartyCard({
   // 계산식 생성
   const generateCalculationFormula = () => {
     const validSlots = party.slots.filter((slot) => slot !== 'empty');
-    const ozmaSlots = validSlots.filter((slot) => 'ozma' in slot && slot.ozma);
+    const rankDamageSlots = validSlots.filter((slot) => 'rankDamage' in slot && slot.rankDamage);
     const buffSlots = validSlots.filter((slot) => 'buffScore' in slot && slot.buffScore);
 
-    if (ozmaSlots.length === 0 || buffSlots.length === 0) {
+    if (rankDamageSlots.length === 0 || buffSlots.length === 0) {
       return '계산 불가';
     }
 
-    const ozmaValues = ozmaSlots.map((slot) => {
-      if ('ozma' in slot && slot.ozma) {
-        const ozmaValue = parseInt(slot.ozma.match(/(\d+)\s*억/)?.[1] || '0', 10);
-        return `${ozmaValue}억`;
+    const rankDamageValues = rankDamageSlots.map((slot) => {
+      if ('rankDamage' in slot && slot.rankDamage) {
+        const rankDamageValue = parseInt(slot.rankDamage.match(/(\d+)\s*억/)?.[1] || '0', 10);
+        return `${rankDamageValue}억`;
       }
       return '0억';
     });
@@ -96,8 +96,8 @@ export function PartyCard({
       }),
     );
 
-    const ozmaFormula = ozmaValues.join(' + ');
-    return `(${ozmaFormula}) × (${maxBuffValue}만)`;
+    const rankDamageFormula = rankDamageValues.join(' + ');
+    return `(${rankDamageFormula}) × (${maxBuffValue}만)`;
   };
 
   const calculationFormula = generateCalculationFormula();
@@ -185,10 +185,12 @@ export function PartyCard({
               >
                 {slot !== 'empty' ? (
                   <CharacterCard
-                    cardProps={{ className: 'character-card' }}
+                    className="character-card"
+                    draggable
                     character={slot as CharacterData}
                     onDragStart={!isMobile ? (e) => onCharacterDragStart(e, index, slot) : undefined}
                     onDelete={() => onCharacterDelete(party.id, index)}
+                    helperText={`${slot.name} 캐릭터 정보`}
                   />
                 ) : (
                   <div className="empty-slot">빈 슬롯</div>
@@ -213,8 +215,8 @@ export function PartyCard({
                 </div>
                 {character.buffScore ? (
                   <span className="score">버프력 {character.buffScore}</span>
-                ) : character.ozma ? (
-                  <span className="score">랭킹 {character.ozma}</span>
+                ) : character.rankDamage ? (
+                  <span className="score">랭킹 {character.rankDamage}</span>
                 ) : null}
               </PartyCharacterPreview>
             );
