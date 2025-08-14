@@ -1,4 +1,4 @@
-import { useState, useRef, useEffect } from 'react';
+import { useState, useRef } from 'react';
 import { createPortal } from 'react-dom';
 import { Info as InfoIcon, X } from 'lucide-react';
 import type { CharacterData } from '../../types/types';
@@ -17,8 +17,8 @@ export function CharacterCard(props: CharacterCardProps) {
   const { character, helperText, width, height, onDelete, ...restCardProps } = props;
   const showMultipleBuffScore = Boolean(character.buffScore && character.buffScore3 && character.buffScore4);
   const { showCharacterDetail } = useCharacterDetail();
-  const [isTooltipVisible, setIsTooltipVisible] = useState(false);
-  const [tooltipPosition, setTooltipPosition] = useState({ top: 0, left: 0 });
+  const [tooltipPosition, setTooltipPosition] = useState<{ top: number; left: number } | null>(null);
+  const isTooltipVisible = Boolean(tooltipPosition);
   const containerRef = useRef<HTMLDivElement>(null);
 
   const handleDetailClick = (e: React.MouseEvent) => {
@@ -33,20 +33,13 @@ export function CharacterCard(props: CharacterCardProps) {
 
   const handleMouseEnter = (e: React.MouseEvent<HTMLDivElement>) => {
     if (helperText && containerRef.current) {
-      const rect = containerRef.current.getBoundingClientRect();
-      setTooltipPosition({
-        top: rect.bottom + window.scrollY,
-        left: rect.left + rect.width / 2 + window.scrollX,
-      });
-      setIsTooltipVisible(true);
+      setTooltipPosition(getTooltipPosition(containerRef.current));
     }
     restCardProps.onMouseEnter?.(e);
   };
 
   const handleMouseLeave = (e: React.MouseEvent<HTMLDivElement>) => {
-    if (helperText) {
-      setIsTooltipVisible(false);
-    }
+    setTooltipPosition(null);
     restCardProps.onMouseLeave?.(e);
   };
 
@@ -101,9 +94,9 @@ export function CharacterCard(props: CharacterCardProps) {
       </StyledComponents.Container>
 
       {/* tooltip Section - Portal을 사용해서 DOM 최상위에 렌더링 */}
-      {helperText &&
+      {isTooltipVisible &&
         createPortal(
-          <StyledComponents.Tooltip visible={isTooltipVisible} top={tooltipPosition.top} left={tooltipPosition.left}>
+          <StyledComponents.Tooltip visible={isTooltipVisible} top={tooltipPosition?.top} left={tooltipPosition?.left}>
             {helperText}
           </StyledComponents.Tooltip>,
           document.body,
@@ -111,3 +104,11 @@ export function CharacterCard(props: CharacterCardProps) {
     </>
   );
 }
+
+const getTooltipPosition = (container: HTMLDivElement) => {
+  const rect = container.getBoundingClientRect();
+  return {
+    top: rect.bottom + window.scrollY,
+    left: rect.left + rect.width / 2 + window.scrollX,
+  };
+};
