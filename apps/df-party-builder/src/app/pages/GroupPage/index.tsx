@@ -32,6 +32,7 @@ import { Toast } from '../../components/Toast';
 import { getCharacterDataFromDragEvent, setCharacterDragData } from './utils';
 import { getDundamData } from '../../api/dundam';
 import { DUNDAM_UPDATE_INTERVAL } from '../../consts/group.const';
+import { useGroupInfo } from '../../context/GroupInfoContext';
 
 const isExistGroupLoginData = (groupName?: string): boolean => {
   if (!groupName) return false;
@@ -53,7 +54,7 @@ const isExistGroupLoginData = (groupName?: string): boolean => {
 export function GroupPage() {
   const { groupName } = useParams<{ groupName: string }>();
   const [showPasswordDialog, setShowPasswordDialog] = useState(isExistGroupLoginData(groupName));
-  const [group, setGroup] = useState<Group | null>(null);
+  const { group, setGroup } = useGroupInfo();
   const [dungeons, setDungeons] = useState<Dungeon[]>([]);
   const [isMobile, setIsMobile] = useState(window.innerWidth <= 768);
   const [isDrawerOpen, setIsDrawerOpen] = useState(true);

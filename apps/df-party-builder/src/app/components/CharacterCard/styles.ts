@@ -130,18 +130,14 @@ const MainInfo = styled.div`
   }
 `;
 
-const Tooltip = styled.div<{ visible: boolean }>`
-  position: fixed;
-  top: 50%;
-  left: 50%;
-  transform: translate(-50%, -50%);
+const Tooltip = styled.div<{ visible: boolean; top: number; left: number }>`
   padding: 8px 12px;
   background: rgba(0, 0, 0, 0.9);
   color: white;
   border-radius: 6px;
   font-size: 0.9em;
   white-space: pre-line;
-  z-index: 9999;
+  z-index: 99999;
   pointer-events: none;
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
   opacity: ${({ visible }) => (visible ? 1 : 0)};
@@ -149,6 +145,12 @@ const Tooltip = styled.div<{ visible: boolean }>`
   transition: opacity 0.2s ease, visibility 0.2s ease;
   max-width: 300px;
   text-align: center;
+
+  // for portal style
+  position: absolute;
+  top: ${({ top }) => top}px;
+  left: ${({ left }) => left}px;
+  transform: translate(-50%, 0);
 `;
 
 const Label = styled.span`

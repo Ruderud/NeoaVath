@@ -1,8 +1,9 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import styled from '@emotion/styled';
 import type { CharacterData, MultiAccount, Group } from '../types/types';
 import { CharacterCard } from './CharacterCard/index';
 import { useFirebase } from '../context/FirebaseContext';
+import { useGroupInfo } from '../context/GroupInfoContext';
 
 const SearchContainer = styled.div`
   display: flex;
@@ -195,6 +196,25 @@ export function CharacterSearch({ isOpen, groupName, onCharacterSelect, onCharac
   const [activeTab, setActiveTab] = useState<string>('');
   const [isSearching, setIsSearching] = useState(false);
   const { readData } = useFirebase();
+  const { group } = useGroupInfo();
+
+  const findCharacterParties = useCallback(
+    (character: CharacterData) => {
+      const characterParties = group?.dungeons.flatMap((dungeon) =>
+        dungeon.parties
+          .filter((party) => party.slots.some((slot) => slot !== 'empty' && slot.key === character.key))
+          .map((party) => ({
+            dungeonName: dungeon.name,
+            partyTitle: party.title,
+          })),
+      );
+
+      if (characterParties?.length === 0) return '';
+
+      return characterParties?.map(({ dungeonName, partyTitle }) => `${dungeonName} - ${partyTitle}`).join('\n');
+    },
+    [group],
+  );
 
   // 그룹 설정에서 다계정 정보 로드
   useEffect(() => {
@@ -362,7 +382,13 @@ export function CharacterSearch({ isOpen, groupName, onCharacterSelect, onCharac
           <LoadingMessage>검색중...</LoadingMessage>
         ) : Object.keys(searchResults).length > 0 ? (
           searchResults[activeTab]?.map((character) => (
-            <CharacterCard key={character.key} character={character} draggable onDragStart={(e) => handleDragStart(e, character)} />
+            <CharacterCard
+              key={character.key}
+              character={character}
+              draggable
+              onDragStart={(e) => handleDragStart(e, character)}
+              helperText={findCharacterParties(character)}
+            />
           ))
         ) : (
           <NoResultsMessage>{searchType === 'multi-account' ? '다계정을 선택하고 검색해주세요' : '검색 결과가 없습니다'}</NoResultsMessage>

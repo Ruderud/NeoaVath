@@ -10,6 +10,7 @@ import GroupPage from './pages/GroupPage';
 import GroupSettingPage from './pages/GroupSettingPage';
 import AutoGeneratePage from './pages/AutoGeneratePage';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+import { GroupInfoProvider } from './context/GroupInfoContext';
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -24,20 +25,22 @@ export function App() {
   return (
     <QueryClientProvider client={queryClient}>
       <GroupAuthProvider>
-        <CharacterDetailProvider>
-          <DialogOverlayProvider>
-            <ErrorBoundary fallbackRender={({ error }) => <div>Error: {error.message}</div>}>
-              <Routes>
-                <Route path="/" element={<Intro />} />
-                <Route path="/login" element={<Login />} />
-                <Route path="/create" element={<CreateGroup />} />
-                <Route path="/group/:groupName" element={<GroupPage />} />
-                <Route path="/group/:groupName/setting" element={<GroupSettingPage />} />
-                <Route path="/group/:groupName/auto-generate" element={<AutoGeneratePage />} />
-              </Routes>
-            </ErrorBoundary>
-          </DialogOverlayProvider>
-        </CharacterDetailProvider>
+        <GroupInfoProvider>
+          <CharacterDetailProvider>
+            <DialogOverlayProvider>
+              <ErrorBoundary fallbackRender={({ error }) => <div>Error: {error.message}</div>}>
+                <Routes>
+                  <Route path="/" element={<Intro />} />
+                  <Route path="/login" element={<Login />} />
+                  <Route path="/create" element={<CreateGroup />} />
+                  <Route path="/group/:groupName" element={<GroupPage />} />
+                  <Route path="/group/:groupName/setting" element={<GroupSettingPage />} />
+                  <Route path="/group/:groupName/auto-generate" element={<AutoGeneratePage />} />
+                </Routes>
+              </ErrorBoundary>
+            </DialogOverlayProvider>
+          </CharacterDetailProvider>
+        </GroupInfoProvider>
       </GroupAuthProvider>
     </QueryClientProvider>
   );
