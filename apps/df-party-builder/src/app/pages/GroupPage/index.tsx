@@ -72,6 +72,27 @@ export function GroupPage() {
   const [lastSavedTime, setLastSavedTime] = useState<string>('');
   const [isSaving, setIsSaving] = useState(false);
 
+  // 자동저장 설정을 로컬스토리지에서 불러오기
+  useEffect(() => {
+    if (!groupName) return;
+
+    const savedAutoSaveSetting = localStorage.getItem(`autoSave_${groupName}`);
+    if (savedAutoSaveSetting !== null) {
+      setIsAutoSaveEnabled(JSON.parse(savedAutoSaveSetting));
+    }
+  }, [groupName]);
+
+  // 자동저장 설정이 변경될 때 로컬스토리지에 저장
+  const handleToggleAutoSave = useCallback(
+    (newValue: boolean) => {
+      setIsAutoSaveEnabled(newValue);
+      if (groupName) {
+        localStorage.setItem(`autoSave_${groupName}`, JSON.stringify(newValue));
+      }
+    },
+    [groupName],
+  );
+
   // Drawer 토글 함수
   const handleToggleDrawer = useCallback(() => {
     setIsDrawerOpen((prev) => !prev);
@@ -888,7 +909,7 @@ export function GroupPage() {
         isAutoSaveEnabled={isAutoSaveEnabled}
         isSaving={isSaving}
         lastSavedTime={lastSavedTime}
-        onToggleAutoSave={() => setIsAutoSaveEnabled(!isAutoSaveEnabled)}
+        onToggleAutoSave={() => handleToggleAutoSave(!isAutoSaveEnabled)}
         onManualSave={handleManualSave}
       />
     </>
