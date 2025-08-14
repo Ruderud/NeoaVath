@@ -77,7 +77,7 @@ const DeleteButton = styled.button`
   }
 `;
 
-const Image = styled.div`
+const ImageContainer = styled.div`
   width: 100%;
   border-radius: 4px;
   overflow: hidden;
@@ -156,7 +156,7 @@ export const CharacterCard = {
   Container,
   DetailButton,
   DeleteButton,
-  Image,
+  ImageContainer,
   Info,
   MainInfo,
   Tooltip,

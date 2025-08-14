@@ -74,7 +74,11 @@ export function GroupPage() {
 
   const handleUpdateGroupCharacters = async () => {
     const lastDundamUpdatedAt = group?.lastDundamUpdatedAt;
-    if (lastDundamUpdatedAt && new Date(lastDundamUpdatedAt).getTime() + DUNDAM_UPDATE_INTERVAL > Date.now()) {
+
+    // 로컬 개발 환경에서는 시간 제한 없음
+    if (process.env.NODE_ENV === 'development') {
+      console.debug('!!DEBUG 개발 환경: 업데이트 시간 제한 비활성화');
+    } else if (lastDundamUpdatedAt && new Date(lastDundamUpdatedAt).getTime() + DUNDAM_UPDATE_INTERVAL > Date.now()) {
       return alert('그룹 전체 업데이트는 3분에 한번만 가능합니다.');
     }
 

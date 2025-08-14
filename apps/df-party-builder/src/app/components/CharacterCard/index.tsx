@@ -10,7 +10,6 @@ type CharacterCardProps = React.HTMLAttributes<HTMLDivElement> & {
   width?: number;
   height?: number;
   onDelete?: () => void;
-  onDragStart?: (e: React.DragEvent<HTMLDivElement>, character: CharacterData) => void;
 };
 
 export function CharacterCard(props: CharacterCardProps) {
@@ -43,6 +42,7 @@ export function CharacterCard(props: CharacterCardProps) {
 
   return (
     <StyledComponents.Container {...restCardProps} width={width} height={height} onMouseEnter={handleMouseEnter} onMouseLeave={handleMouseLeave}>
+      {/* icon button Section */}
       <StyledComponents.DetailButton onClick={handleDetailClick}>
         <InfoIcon size={14} />
       </StyledComponents.DetailButton>
@@ -51,13 +51,17 @@ export function CharacterCard(props: CharacterCardProps) {
           <X size={14} />
         </StyledComponents.DeleteButton>
       )}
-      <StyledComponents.Image>
+
+      {/* image Section */}
+      <StyledComponents.ImageContainer>
         <img
           src={`https://img-api.neople.co.kr/df/servers/${character.server}/characters/${character.key}?zoom=1`}
           alt={`${character.name} 캐릭터 이미지`}
           draggable="false"
         />
-      </StyledComponents.Image>
+      </StyledComponents.ImageContainer>
+
+      {/* info Section */}
       <StyledComponents.Info>
         <StyledComponents.MainInfo>
           <div className="level">명성 {character.level}</div>
@@ -70,6 +74,8 @@ export function CharacterCard(props: CharacterCardProps) {
           <div className="score">랭킹 {character.rankDamage}</div>
         ) : null}
       </StyledComponents.Info>
+
+      {/* tooltip Section - card center popup */}
       {helperText && <StyledComponents.Tooltip visible={isTooltipVisible}>{helperText}</StyledComponents.Tooltip>}
     </StyledComponents.Container>
   );

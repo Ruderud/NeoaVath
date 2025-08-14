@@ -362,7 +362,7 @@ export function CharacterSearch({ isOpen, groupName, onCharacterSelect, onCharac
           <LoadingMessage>검색중...</LoadingMessage>
         ) : Object.keys(searchResults).length > 0 ? (
           searchResults[activeTab]?.map((character) => (
-            <CharacterCard key={character.key} character={character} onDragStart={handleDragStart} helperText={'123'} />
+            <CharacterCard key={character.key} character={character} draggable onDragStart={(e) => handleDragStart(e, character)} />
           ))
         ) : (
           <NoResultsMessage>{searchType === 'multi-account' ? '다계정을 선택하고 검색해주세요' : '검색 결과가 없습니다'}</NoResultsMessage>

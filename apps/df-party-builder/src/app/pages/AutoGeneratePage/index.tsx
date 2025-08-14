@@ -378,7 +378,7 @@ ${characterInfo}
                     >
                       {selectedCharacters.map((character) => (
                         <div key={character.key} style={{ position: 'relative', flexShrink: 0 }}>
-                          <CharacterCard character={character} onDragStart={handleCharacterDragStart} width={160} height={280} />
+                          <CharacterCard draggable character={character} onDragStart={(e) => handleCharacterDragStart(e, character)} width={160} height={280} />
                           <button
                             onClick={() => handleCharacterRemove(character.key)}
                             style={{
