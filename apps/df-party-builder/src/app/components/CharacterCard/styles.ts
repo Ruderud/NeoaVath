@@ -130,7 +130,7 @@ const MainInfo = styled.div`
   }
 `;
 
-const Tooltip = styled.div<{ visible: boolean; top: number; left: number }>`
+const Tooltip = styled.div<{ visible: boolean; top?: number; left?: number }>`
   padding: 8px 12px;
   background: rgba(0, 0, 0, 0.9);
   color: white;
@@ -148,8 +148,8 @@ const Tooltip = styled.div<{ visible: boolean; top: number; left: number }>`
 
   // for portal style
   position: absolute;
-  top: ${({ top }) => top}px;
-  left: ${({ left }) => left}px;
+  top: ${({ top }) => top ?? 0}px;
+  left: ${({ left }) => left ?? 0}px;
   transform: translate(-50%, 0);
 `;
 
