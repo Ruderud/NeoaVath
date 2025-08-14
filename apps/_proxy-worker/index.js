@@ -179,9 +179,12 @@ async function searchCharacter(name, type, userAgent, rawData = false) {
       skillDamage: char.skillDamage,
       critical: char.cri,
       buffScore: char.buffScore,
+      buffScore3: char?.buffScore3,
+      buffScore4: char?.buffScore4,
       switching: char.switching || '',
-      ozma: char.ozma || '',
-      bakal: char.bakal || 0,
+      rankDamage: char.ozma || '',
+      raidClearCount: char?.bakal || 0,
+      advenRaidClearCount: char?.advenBakal || 0,
       key: char.key,
     }));
 
