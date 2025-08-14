@@ -386,9 +386,11 @@ export function GroupPage() {
   const handlePartyCardDragOver = (e: React.DragEvent) => {
     e.preventDefault();
     const target = e.currentTarget as HTMLDivElement;
-    const type = e.dataTransfer.types.includes('party') ? 'party' : 'character';
 
-    if (type === 'party') {
+    // 파티 드래그인지 명확하게 체크
+    const isPartyDrag = e.dataTransfer.types.includes('party');
+
+    if (isPartyDrag) {
       target.classList.add('drag-over');
     }
   };
@@ -403,25 +405,50 @@ export function GroupPage() {
     const target = e.currentTarget as HTMLDivElement;
     target.classList.remove('drag-over');
 
+    // 파티 드래그인지 우선 확인 (party 타입이 있으면 파티 드래그로 처리)
+    const isPartyDrag = e.dataTransfer.types.includes('party');
     const type = e.dataTransfer.getData('type');
 
-    if (type === 'party') {
+    if (isPartyDrag && type === 'party') {
       const partyData = e.dataTransfer.getData('party');
       if (!partyData) return;
 
       try {
         const sourceParty = JSON.parse(partyData) as Party;
 
-        const newParties = [...(dungeons.find((dungeon) => dungeon.id === groupName)?.parties || [])];
-        const sourceIndex = newParties.findIndex((p) => p.id === sourceParty.id);
-        const targetIndex = newParties.findIndex((p) => p.id === targetParty.id);
+        // 소스 파티와 타겟 파티가 속한 dungeon 찾기
+        const sourceDungeon = dungeons.find((dungeon) => dungeon.parties.some((party) => party.id === sourceParty.id));
+        const targetDungeon = dungeons.find((dungeon) => dungeon.parties.some((party) => party.id === targetParty.id));
 
-        if (sourceIndex !== -1 && targetIndex !== -1) {
-          [newParties[sourceIndex], newParties[targetIndex]] = [newParties[targetIndex], newParties[sourceIndex]];
-          handlePartyOrderChange(newParties);
+        if (!sourceDungeon || !targetDungeon) {
+          console.error('!!DEBUG sourceDungeon 또는 targetDungeon을 찾을 수 없음', { sourceParty, targetParty });
+          return;
+        }
+
+        // 같은 dungeon 내에서만 순서 변경 가능
+        if (sourceDungeon.id === targetDungeon.id) {
+          const newParties = [...sourceDungeon.parties];
+          const sourceIndex = newParties.findIndex((p) => p.id === sourceParty.id);
+          const targetIndex = newParties.findIndex((p) => p.id === targetParty.id);
+
+          if (sourceIndex !== -1 && targetIndex !== -1) {
+            [newParties[sourceIndex], newParties[targetIndex]] = [newParties[targetIndex], newParties[sourceIndex]];
+
+            setDungeons((prev) => prev.map((dungeon) => (dungeon.id === sourceDungeon.id ? { ...dungeon, parties: newParties } : dungeon)));
+
+            // 데이터 저장
+            if (sourceDungeon.id) {
+              savePartyDataThrottled(sourceDungeon.id, dungeons);
+            }
+          }
+        } else {
+          console.debug('!!DEBUG 다른 dungeon 간 파티 이동은 지원하지 않음', {
+            sourceDungeon: sourceDungeon.id,
+            targetDungeon: targetDungeon.id,
+          });
         }
       } catch (error) {
-        console.error('파티 데이터 파싱 실패:', error);
+        console.error('!!DEBUG 파티 데이터 파싱 실패:', error);
       }
     }
   };
@@ -551,10 +578,6 @@ export function GroupPage() {
     setShowAddGroupInput(false);
   };
 
-  const handleCharacterDetailClose = () => {
-    // 이 함수는 더 이상 필요하지 않음 (Context API에서 처리)
-  };
-
   const handleDungeonNameChange = (dungeonId: string, newName: string) => {
     setDungeons((prev) => prev.map((dungeon) => (dungeon.id === dungeonId ? { ...dungeon, name: newName } : dungeon)));
   };
@@ -610,6 +633,11 @@ export function GroupPage() {
   );
 
   const handleDungeonDragStart = (e: React.DragEvent<HTMLDivElement>, dungeon: Dungeon) => {
+    // 파티 드래그인 경우 dungeon 드래그를 무시
+    if (e.dataTransfer.types.includes('party')) {
+      return;
+    }
+
     e.dataTransfer.setData('dungeon', JSON.stringify(dungeon));
     e.dataTransfer.setData('type', 'dungeon');
     e.currentTarget.classList.add('dragging');
@@ -622,6 +650,12 @@ export function GroupPage() {
   const handleDungeonDragOver = (e: React.DragEvent) => {
     e.preventDefault();
     const target = e.currentTarget as HTMLDivElement;
+
+    // 파티 드래그인 경우 dungeon 드래그 오버를 무시
+    if (e.dataTransfer.types.includes('party')) {
+      return;
+    }
+
     const type = e.dataTransfer.types.includes('dungeon') ? 'dungeon' : 'character';
 
     if (type === 'dungeon') {
@@ -639,8 +673,11 @@ export function GroupPage() {
     const target = e.currentTarget as HTMLDivElement;
     target.classList.remove('drag-over');
 
+    // 파티 드래그인지 우선 확인 (party 타입이 있으면 파티 드래그로 처리하지 않음)
+    const isPartyDrag = e.dataTransfer.types.includes('party');
     const type = e.dataTransfer.getData('type');
-    if (type !== 'dungeon') return;
+
+    if (isPartyDrag || type !== 'dungeon') return;
 
     const dungeonData = e.dataTransfer.getData('dungeon');
     if (!dungeonData) return;
