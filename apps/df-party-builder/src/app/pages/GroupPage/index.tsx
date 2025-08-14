@@ -12,6 +12,7 @@ import { DungeonColumn } from '../../components/DungeonColumn';
 import { PartyModal } from '../../components/PartyModal';
 import { CharacterDetailModal } from '../../components/CharacterDetailModal';
 import { DraggableCharacterSearch } from '../../components/DraggableCharacterSearch';
+import { SaveFab } from '../../components/SaveFab';
 import { v4 as uuidv4 } from 'uuid';
 import {
   PageContainer,
@@ -67,6 +68,9 @@ export function GroupPage() {
   const [toastMessage, setToastMessage] = useState('');
   const [isToastVisible, setIsToastVisible] = useState(false);
   const [isDraggableSearchOpen, setIsDraggableSearchOpen] = useState(false);
+  const [isAutoSaveEnabled, setIsAutoSaveEnabled] = useState(true);
+  const [lastSavedTime, setLastSavedTime] = useState<string>('');
+  const [isSaving, setIsSaving] = useState(false);
 
   // Drawer 토글 함수
   const handleToggleDrawer = useCallback(() => {
@@ -205,9 +209,16 @@ export function GroupPage() {
   const savePartyDataDebounced = useCallback(
     async (groupName: string, dungeons: Dungeon[]) => {
       try {
+        setIsSaving(true);
         await writeData(`groups/${groupName}/dungeons`, dungeons);
+        const now = new Date();
+        const formattedTime = now.toISOString().slice(0, 19).replace('T', ' ');
+        setLastSavedTime(formattedTime);
+        console.log('!!DEBUG 자동저장 완료:', formattedTime);
+        setTimeout(() => setIsSaving(false), 1000);
       } catch (error) {
         console.error('던전 데이터 저장 실패:', error);
+        setIsSaving(false);
       }
     },
     [writeData],
@@ -217,17 +228,60 @@ export function GroupPage() {
   const savePartyDataThrottled = useCallback(
     throttle(async (groupName: string, dungeons: Dungeon[]) => {
       try {
+        setIsSaving(true);
         await writeData(`groups/${groupName}/dungeons`, dungeons);
+        const now = new Date();
+        const formattedTime = now.toISOString().slice(0, 19).replace('T', ' ');
+        setLastSavedTime(formattedTime);
+        console.log('!!DEBUG 자동저장 완료:', formattedTime);
+        setTimeout(() => setIsSaving(false), 1000);
       } catch (error) {
         console.error('던전 데이터 저장 실패:', error);
+        setIsSaving(false);
       }
     }, 2000),
     [writeData],
   );
 
+  // 수동 저장 함수
+  const handleManualSave = useCallback(async () => {
+    if (!groupName || !dungeons.length) return;
+
+    const validatedDungeons = dungeons.map((dungeon) => ({
+      ...dungeon,
+      parties: dungeon.parties.map((party) => ({
+        ...party,
+        slots:
+          party.slots?.length === 4
+            ? (party.slots.map((slot) => (slot === null ? 'empty' : slot)) as [PartySlot, PartySlot, PartySlot, PartySlot])
+            : (Array(4).fill('empty') as [PartySlot, PartySlot, PartySlot, PartySlot]),
+      })),
+    }));
+
+    try {
+      setIsSaving(true);
+      await writeData(`groups/${groupName}/dungeons`, validatedDungeons);
+      const now = new Date();
+      const formattedTime = now.toISOString().slice(0, 19).replace('T', ' ');
+      setLastSavedTime(formattedTime);
+      sessionStorage.setItem(`lastSavedDungeons_${groupName}`, JSON.stringify(validatedDungeons));
+      setToastMessage('저장되었습니다.');
+      setIsToastVisible(true);
+      setTimeout(() => setIsToastVisible(false), 2000);
+      console.log('!!DEBUG 수동저장 완료:', formattedTime);
+      setTimeout(() => setIsSaving(false), 1000);
+    } catch (error) {
+      console.error('수동 저장 실패:', error);
+      setToastMessage('저장에 실패했습니다.');
+      setIsToastVisible(true);
+      setTimeout(() => setIsToastVisible(false), 2000);
+      setIsSaving(false);
+    }
+  }, [groupName, dungeons, writeData]);
+
   // 파티 데이터 변경 감지 및 저장
   useEffect(() => {
-    if (!groupName || !dungeons.length) return;
+    if (!groupName || !dungeons.length || !isAutoSaveEnabled) return;
 
     // 파티 데이터 저장 전 slots 배열 검증 및 수정
     const validatedDungeons = dungeons.map((dungeon) => ({
@@ -256,7 +310,7 @@ export function GroupPage() {
         savePartyDataDebounced(groupName, validatedDungeons);
       }
     }
-  }, [dungeons, groupName, savePartyDataDebounced, savePartyDataThrottled]);
+  }, [dungeons, groupName, isAutoSaveEnabled, savePartyDataDebounced, savePartyDataThrottled]);
 
   // 파티 데이터 초기 로드 및 리얼타임 구독
   useEffect(() => {
@@ -738,7 +792,7 @@ export function GroupPage() {
       />
       <PageContainer drawerOpen={isDrawerOpen}>
         <MainContent style={{ backgroundColor: '#f5f5f5' }} data-main-content>
-          <Section>
+          <Section style={{ height: 'fit-content', minHeight: 'auto' }}>
             <SectionTitle>파티 구성</SectionTitle>
 
             <KanbanBoard>
@@ -829,6 +883,14 @@ export function GroupPage() {
         onCharacterDragStart={handleCharacterDragStart}
       />
       <Toast message={toastMessage} isVisible={isToastVisible} />
+
+      <SaveFab
+        isAutoSaveEnabled={isAutoSaveEnabled}
+        isSaving={isSaving}
+        lastSavedTime={lastSavedTime}
+        onToggleAutoSave={() => setIsAutoSaveEnabled(!isAutoSaveEnabled)}
+        onManualSave={handleManualSave}
+      />
     </>
   );
 }
