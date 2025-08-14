@@ -826,6 +826,7 @@ export function GroupPage() {
                   isMobile={isMobile}
                   expandedPartyId={expandedPartyId}
                   groupConfig={group?.config || { id: '', name: '', createdAt: '', updatedAt: '', tags: [], multiAccounts: [] }}
+                  multiAccounts={group?.config?.multiAccounts || []}
                   onTogglePartyExpand={togglePartyExpand}
                   onPartyTitleChange={handlePartyTitleChange}
                   onPartyMemoChange={handlePartyMemoChange}

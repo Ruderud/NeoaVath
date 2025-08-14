@@ -1,8 +1,9 @@
 import { useState } from 'react';
-import { Plus, Pencil, X } from 'lucide-react';
+import { Plus, Pencil, X, BarChart3 } from 'lucide-react';
 import styled from '@emotion/styled';
-import type { Party, CharacterData, PartySlot, GroupConfig } from '../../types/types';
+import type { Party, CharacterData, PartySlot, GroupConfig, MultiAccount } from '../../types/types';
 import { PartyCard } from '../PartyCard';
+import { AdventureOrderDialog } from '../AdventureOrderDialog';
 
 export type DungeonColumnProps = {
   id: string;
@@ -11,6 +12,7 @@ export type DungeonColumnProps = {
   isMobile: boolean;
   expandedPartyId: string | null;
   groupConfig: GroupConfig;
+  multiAccounts?: MultiAccount[];
   onTogglePartyExpand: (partyId: string) => void;
   onPartyTitleChange: (partyId: string, newTitle: string) => void;
   onPartyMemoChange: (partyId: string, newMemo: string) => void;
@@ -43,6 +45,7 @@ export function DungeonColumn({
   isMobile,
   expandedPartyId,
   groupConfig,
+  multiAccounts,
   onTogglePartyExpand,
   onPartyTitleChange,
   onPartyMemoChange,
@@ -69,6 +72,7 @@ export function DungeonColumn({
 }: DungeonColumnProps) {
   const [isEditing, setIsEditing] = useState(false);
   const [editedName, setEditedName] = useState(name);
+  const [isAdventureOrderDialogOpen, setIsAdventureOrderDialogOpen] = useState(false);
 
   const handleNameSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -92,6 +96,9 @@ export function DungeonColumn({
               <EditButton onClick={() => setIsEditing(true)}>
                 <Pencil size={16} />
               </EditButton>
+              <AdventureOrderButton onClick={() => setIsAdventureOrderDialogOpen(true)}>
+                <BarChart3 size={16} />
+              </AdventureOrderButton>
             </>
           )}
         </div>
@@ -107,6 +114,7 @@ export function DungeonColumn({
               key={party.id}
               party={party}
               isMobile={isMobile}
+              groupConfig={groupConfig}
               onTitleChange={(newTitle) => onPartyTitleChange(party.id, newTitle)}
               onMemoChange={(newMemo) => onPartyMemoChange(party.id, newMemo)}
               onDragStart={(e) => onPartyDragStart(e, party)}
@@ -128,6 +136,13 @@ export function DungeonColumn({
       <AddPartyButton onClick={() => onAddParty(id)}>
         <Plus size={20} />
       </AddPartyButton>
+
+      <AdventureOrderDialog
+        isOpen={isAdventureOrderDialogOpen}
+        onClose={() => setIsAdventureOrderDialogOpen(false)}
+        parties={parties}
+        multiAccounts={multiAccounts}
+      />
     </Column>
   );
 }
@@ -183,6 +198,22 @@ const EditButton = styled.button`
 
   &:hover {
     color: #333;
+  }
+`;
+
+const AdventureOrderButton = styled.button`
+  background: none;
+  border: none;
+  color: #666;
+  cursor: pointer;
+  padding: 4px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: color 0.2s ease;
+
+  &:hover {
+    color: #2196f3;
   }
 `;
 
