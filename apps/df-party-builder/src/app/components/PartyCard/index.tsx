@@ -190,7 +190,6 @@ export function PartyCard({
                     character={slot as CharacterData}
                     onDragStart={!isMobile ? (e) => onCharacterDragStart(e, index, slot) : undefined}
                     onDelete={() => onCharacterDelete(party.id, index)}
-                    helperText={`${slot.name} 캐릭터 정보`}
                   />
                 ) : (
                   <div className="empty-slot">빈 슬롯</div>
