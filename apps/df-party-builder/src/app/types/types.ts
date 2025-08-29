@@ -67,7 +67,28 @@ export type Party = {
 
 export type PartySlot = CharacterData | 'empty';
 
-export type CharacterData = {
+export type BufferCharacterData = {
+  job: string;
+  name: string;
+  server: string;
+  adventureName: string;
+  level: string;
+  baseJob: string;
+  setPoint: string;
+  critical: string;
+  buffScore: string;
+  buffScore3?: string;
+  buffScore4?: string;
+  skillDamage?: string;
+  switching: string;
+  rankDamage?: string;
+  raidClearCount: number;
+  advenRaidClearCount: number;
+  key: string;
+  adventure: string;
+};
+
+export type DamageCharacterData = {
   job: string;
   name: string;
   server: string;
@@ -77,16 +98,15 @@ export type CharacterData = {
   setPoint: string;
   skillDamage: string;
   critical: string;
-  buffScore: string;
-  buffScore3?: string;
-  buffScore4?: string;
-  switching: string;
   rankDamage: string;
+  switching: string;
   raidClearCount: number;
   advenRaidClearCount: number;
   key: string;
   adventure: string;
 };
+
+export type CharacterData = BufferCharacterData | DamageCharacterData;
 
 export type ChipColor = {
   background: string;
