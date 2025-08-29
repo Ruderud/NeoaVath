@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Save, Settings, Check } from 'lucide-react';
+import { Save, Settings, Check, Undo2, Redo2 } from 'lucide-react';
 
 type SaveFabProps = {
   isAutoSaveEnabled: boolean;
@@ -7,9 +7,13 @@ type SaveFabProps = {
   lastSavedTime: string;
   onToggleAutoSave: () => void;
   onManualSave: () => void;
+  canUndo: boolean;
+  canRedo: boolean;
+  onUndo: () => void;
+  onRedo: () => void;
 };
 
-export function SaveFab({ isAutoSaveEnabled, isSaving, lastSavedTime, onToggleAutoSave, onManualSave }: SaveFabProps) {
+export function SaveFab({ isAutoSaveEnabled, isSaving, lastSavedTime, onToggleAutoSave, onManualSave, canUndo, canRedo, onUndo, onRedo }: SaveFabProps) {
   const [isSaveMenuOpen, setIsSaveMenuOpen] = useState(false);
   const [isSaveSettingsOpen, setIsSaveSettingsOpen] = useState(false);
 
@@ -185,6 +189,80 @@ export function SaveFab({ isAutoSaveEnabled, isSaving, lastSavedTime, onToggleAu
           }}
         >
           <Save size={24} />
+        </button>
+      </div>
+
+      {/* Undo/Redo 버튼들 */}
+      <div
+        style={{
+          position: 'fixed',
+          bottom: '20px',
+          right: '90px',
+          zIndex: 1000,
+          display: 'flex',
+          gap: '8px',
+        }}
+      >
+        {/* Undo 버튼 */}
+        <button
+          onClick={onUndo}
+          disabled={!canUndo}
+          style={{
+            width: '48px',
+            height: '48px',
+            borderRadius: '50%',
+            backgroundColor: canUndo ? '#6c757d' : '#ccc',
+            border: 'none',
+            color: 'white',
+            cursor: canUndo ? 'pointer' : 'not-allowed',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            boxShadow: '0 4px 12px rgba(0, 0, 0, 0.15)',
+            transition: 'all 0.2s ease',
+          }}
+          onMouseEnter={(e) => {
+            if (canUndo) {
+              e.currentTarget.style.transform = 'scale(1.1)';
+            }
+          }}
+          onMouseLeave={(e) => {
+            e.currentTarget.style.transform = 'scale(1)';
+          }}
+          title="실행 취소 (Ctrl+Z)"
+        >
+          <Undo2 size={20} />
+        </button>
+
+        {/* Redo 버튼 */}
+        <button
+          onClick={onRedo}
+          disabled={!canRedo}
+          style={{
+            width: '48px',
+            height: '48px',
+            borderRadius: '50%',
+            backgroundColor: canRedo ? '#6c757d' : '#ccc',
+            border: 'none',
+            color: 'white',
+            cursor: canRedo ? 'pointer' : 'not-allowed',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            boxShadow: '0 4px 12px rgba(0, 0, 0, 0.15)',
+            transition: 'all 0.2s ease',
+          }}
+          onMouseEnter={(e) => {
+            if (canRedo) {
+              e.currentTarget.style.transform = 'scale(1.1)';
+            }
+          }}
+          onMouseLeave={(e) => {
+            e.currentTarget.style.transform = 'scale(1)';
+          }}
+          title="다시 실행 (Ctrl+Y)"
+        >
+          <Redo2 size={20} />
         </button>
       </div>
 

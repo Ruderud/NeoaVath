@@ -36,6 +36,7 @@ export type DungeonColumnProps = {
   onDragOver: (e: React.DragEvent) => void;
   onDragLeave: (e: React.DragEvent) => void;
   onDrop: (e: React.DragEvent) => void;
+  onTextInputBlur?: () => void;
 };
 
 export function DungeonColumn({
@@ -69,6 +70,7 @@ export function DungeonColumn({
   onDragOver,
   onDragLeave,
   onDrop,
+  onTextInputBlur,
 }: DungeonColumnProps) {
   const [isEditing, setIsEditing] = useState(false);
   const [editedName, setEditedName] = useState(name);
@@ -80,6 +82,7 @@ export function DungeonColumn({
       onDungeonNameChange(id, editedName.trim());
     }
     setIsEditing(false);
+    onTextInputBlur?.();
   };
 
   return (
@@ -128,6 +131,7 @@ export function DungeonColumn({
               onCharacterDrop={(e, targetPartyId, targetSlotIndex) => onCharacterDrop(e, id, targetPartyId, targetSlotIndex)}
               onCharacterDelete={onCharacterDelete}
               onPartyDelete={onPartyDelete}
+              onTextInputBlur={onTextInputBlur}
             />
           ))}
         </ColumnContent>

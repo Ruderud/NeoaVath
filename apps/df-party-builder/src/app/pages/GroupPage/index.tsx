@@ -13,6 +13,7 @@ import { PartyModal } from '../../components/PartyModal';
 import { CharacterDetailModal } from '../../components/CharacterDetailModal';
 import { DraggableCharacterSearch } from '../../components/DraggableCharacterSearch';
 import { SaveFab } from '../../components/SaveFab';
+import { useUndoRedo } from '../../hooks/useUndoRedo';
 import { v4 as uuidv4 } from 'uuid';
 import {
   PageContainer,
@@ -73,6 +74,9 @@ export function GroupPage() {
   const [isSaving, setIsSaving] = useState(false);
   const [isUpdating, setIsUpdating] = useState(false);
   const [updateProgress, setUpdateProgress] = useState({ current: 0, total: 0 });
+
+  // Undo/Redo hook 사용
+  const { canUndo, canRedo, saveSnapshot, undo, redo, clearHistory } = useUndoRedo(groupName || '', 30);
 
   // 자동저장 설정을 로컬스토리지에서 불러오기
   useEffect(() => {
@@ -223,6 +227,74 @@ export function GroupPage() {
     setDungeons(updatedGroup.dungeons);
   };
 
+  // Undo 처리 함수
+  const handleUndo = useCallback(() => {
+    if (!canUndo) return;
+
+    const previousDungeons = undo();
+    if (previousDungeons) {
+      // undo/redo 플래그 설정
+      sessionStorage.setItem(`undoRedo_${groupName}_isUndoRedo`, 'true');
+      setDungeons(previousDungeons);
+      console.log('!!DEBUG Undo 실행');
+    }
+  }, [canUndo, undo, groupName]);
+
+  // Redo 처리 함수
+  const handleRedo = useCallback(() => {
+    if (!canRedo) return;
+
+    const nextDungeons = redo();
+    if (nextDungeons) {
+      // undo/redo 플래그 설정
+      sessionStorage.setItem(`undoRedo_${groupName}_isUndoRedo`, 'true');
+      setDungeons(nextDungeons);
+      console.log('!!DEBUG Redo 실행');
+    }
+  }, [canRedo, redo, groupName]);
+
+  // 자동저장이 꺼져있을 때 텍스트 입력 blur 시 스냅샷 저장
+  const handleTextInputBlur = useCallback(() => {
+    if (!isAutoSaveEnabled && dungeons.length > 0) {
+      const validatedDungeons = dungeons.map((dungeon) => ({
+        ...dungeon,
+        parties: dungeon.parties.map((party) => ({
+          ...party,
+          slots:
+            party.slots?.length === 4
+              ? (party.slots.map((slot) => (slot === null ? 'empty' : slot)) as [PartySlot, PartySlot, PartySlot, PartySlot])
+              : (Array(4).fill('empty') as [PartySlot, PartySlot, PartySlot, PartySlot]),
+        })),
+      }));
+      // undo/redo가 아닌 경우에만 스냅샷 저장
+      const isUndoRedo = sessionStorage.getItem(`undoRedo_${groupName}_isUndoRedo`);
+      if (!isUndoRedo) {
+        saveSnapshot(validatedDungeons);
+      } else {
+        sessionStorage.removeItem(`undoRedo_${groupName}_isUndoRedo`);
+      }
+    }
+  }, [isAutoSaveEnabled, dungeons, saveSnapshot, groupName]);
+
+  // 키보드 단축키 처리
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if ((e.ctrlKey || e.metaKey) && e.key === 'z' && !e.shiftKey) {
+        e.preventDefault();
+        handleUndo();
+      } else if ((e.ctrlKey || e.metaKey) && e.key === 'y') {
+        e.preventDefault();
+        handleRedo();
+      } else if ((e.ctrlKey || e.metaKey) && e.key === 'z' && e.shiftKey) {
+        e.preventDefault();
+        handleRedo();
+      }
+    };
+
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [handleUndo, handleRedo]);
+
   // 모바일 여부 감지
   useEffect(() => {
     const handleResize = () => {
@@ -340,7 +412,7 @@ export function GroupPage() {
 
   // 파티 데이터 변경 감지 및 저장
   useEffect(() => {
-    if (!groupName || !dungeons.length || !isAutoSaveEnabled) return;
+    if (!groupName || !dungeons.length) return;
 
     // 파티 데이터 저장 전 slots 배열 검증 및 수정
     const validatedDungeons = dungeons.map((dungeon) => ({
@@ -361,15 +433,26 @@ export function GroupPage() {
     if (lastSavedData !== currentData) {
       sessionStorage.setItem(`lastSavedDungeons_${groupName}`, currentData);
 
-      // 드래그 앤 드롭으로 인한 변경인 경우 throttle 사용
-      if (document.querySelector('.dragging')) {
-        savePartyDataThrottled(groupName, validatedDungeons);
+      // 자동저장이 켜져있을 때만 파이어베이스에 저장
+      if (isAutoSaveEnabled) {
+        // 드래그 앤 드롭으로 인한 변경인 경우 throttle 사용
+        if (document.querySelector('.dragging')) {
+          savePartyDataThrottled(groupName, validatedDungeons);
+        } else {
+          // 일반적인 변경(텍스트 입력 등)의 경우 debounce 사용
+          savePartyDataDebounced(groupName, validatedDungeons);
+        }
+      }
+
+      // 스냅샷 저장 (자동저장 설정과 관계없이, undo/redo가 아닌 경우에만)
+      const isUndoRedo = sessionStorage.getItem(`undoRedo_${groupName}_isUndoRedo`);
+      if (!isUndoRedo) {
+        saveSnapshot(validatedDungeons);
       } else {
-        // 일반적인 변경(텍스트 입력 등)의 경우 debounce 사용
-        savePartyDataDebounced(groupName, validatedDungeons);
+        sessionStorage.removeItem(`undoRedo_${groupName}_isUndoRedo`);
       }
     }
-  }, [dungeons, groupName, isAutoSaveEnabled, savePartyDataDebounced, savePartyDataThrottled]);
+  }, [dungeons, groupName, isAutoSaveEnabled, savePartyDataDebounced, savePartyDataThrottled, saveSnapshot]);
 
   // 파티 데이터 초기 로드 및 리얼타임 구독
   useEffect(() => {
@@ -404,6 +487,13 @@ export function GroupPage() {
 
           setDungeons(validatedDungeons);
           sessionStorage.setItem(`lastSavedDungeons_${groupName}`, JSON.stringify(validatedDungeons));
+          // 초기 로드 시 스냅샷 저장 (undo/redo가 아닌 경우에만)
+          const isUndoRedo = sessionStorage.getItem(`undoRedo_${groupName}_isUndoRedo`);
+          if (!isUndoRedo) {
+            saveSnapshot(validatedDungeons);
+          } else {
+            sessionStorage.removeItem(`undoRedo_${groupName}_isUndoRedo`);
+          }
         } else {
           setDungeons([]);
         }
@@ -433,6 +523,13 @@ export function GroupPage() {
 
         setDungeons(validatedDungeons);
         sessionStorage.setItem(`lastSavedDungeons_${groupName}`, JSON.stringify(validatedDungeons));
+        // 리얼타임 업데이트 시 스냅샷 저장 (undo/redo가 아닌 경우에만)
+        const isUndoRedo = sessionStorage.getItem(`undoRedo_${groupName}_isUndoRedo`);
+        if (!isUndoRedo) {
+          saveSnapshot(validatedDungeons);
+        } else {
+          sessionStorage.removeItem(`undoRedo_${groupName}_isUndoRedo`);
+        }
       }
     });
 
@@ -620,7 +717,9 @@ export function GroupPage() {
         } else {
           // 다른 파티로 이동하는 경우
           const newSlots = [...targetParty.slots];
-          newSlots[targetSlotIndex] = character;
+          if (character) {
+            newSlots[targetSlotIndex] = character;
+          }
           targetParty.slots = newSlots as [PartySlot, PartySlot, PartySlot, PartySlot];
 
           // 원래 파티에서 제거
@@ -890,6 +989,7 @@ export function GroupPage() {
                   onDragOver={handleDungeonDragOver}
                   onDragLeave={handleDungeonDragLeave}
                   onDrop={(e) => handleDungeonDrop(e, dungeon)}
+                  onTextInputBlur={handleTextInputBlur}
                 />
               ))}
               <AddDungeonColumn>
@@ -952,6 +1052,10 @@ export function GroupPage() {
         lastSavedTime={lastSavedTime}
         onToggleAutoSave={() => handleToggleAutoSave(!isAutoSaveEnabled)}
         onManualSave={handleManualSave}
+        canUndo={canUndo}
+        canRedo={canRedo}
+        onUndo={handleUndo}
+        onRedo={handleRedo}
       />
     </>
   );

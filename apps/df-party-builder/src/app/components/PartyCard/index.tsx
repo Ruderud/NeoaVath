@@ -43,6 +43,7 @@ type PartyCardProps = {
   onPartyDelete: (partyId: string) => void;
   onDungeonSelect?: (partyId: string, dungeon: string) => void;
   onTagSelect?: (partyId: string, tagId: string) => void;
+  onTextInputBlur?: () => void;
 };
 
 export function PartyCard({
@@ -64,6 +65,7 @@ export function PartyCard({
   onPartyDelete,
   onDungeonSelect,
   onTagSelect,
+  onTextInputBlur,
 }: PartyCardProps) {
   const [isEditing, setIsEditing] = useState(false);
   const [editedTitle, setEditedTitle] = useState(party.title);
@@ -118,6 +120,7 @@ export function PartyCard({
       onTitleChange(editedTitle.trim());
     }
     setIsEditing(false);
+    onTextInputBlur?.();
   };
 
   const handlePartyDelete = (e: React.MouseEvent) => {
@@ -203,7 +206,7 @@ export function PartyCard({
               </PartySlotCard>
             ))}
           </PartySlotsContainer>
-          <PartyMemo isMobile={isMobile} value={party.memo} onChange={(e) => onMemoChange(e.target.value)} placeholder="파티 메모" />
+          <PartyMemo isMobile={isMobile} value={party.memo} onChange={(e) => onMemoChange(e.target.value)} onBlur={onTextInputBlur} placeholder="파티 메모" />
         </PartyCardDetails>
       ) : (
         <PartyCardContent>
