@@ -6,6 +6,7 @@ import { useCharacterDetail } from '../../context/CharacterDetailContext';
 import { CharacterCard as StyledComponents } from './styles';
 import { getCharacterColor } from '../../consts/character-colors';
 import { calculateSynergyDamagePotential } from '../../utils/partyDamagePotential';
+import { PositionIcon } from '../PositionIcon';
 
 type CharacterCardProps = React.HTMLAttributes<HTMLDivElement> & {
   character: CharacterData;
@@ -58,6 +59,9 @@ export function CharacterCard(props: CharacterCardProps) {
         onMouseLeave={handleMouseLeave}
       >
         {/* icon button Section */}
+        <StyledComponents.PositionIconContainer>
+          <PositionIcon position={character.position} size={12} />
+        </StyledComponents.PositionIconContainer>
         <StyledComponents.DetailButton onClick={handleDetailClick}>
           <InfoIcon size={14} />
         </StyledComponents.DetailButton>

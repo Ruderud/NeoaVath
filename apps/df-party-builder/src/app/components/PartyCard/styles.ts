@@ -61,7 +61,7 @@ export const PartyCharacterPreview = styled.div<{ characterColor?: string }>`
   .character-info {
     display: flex;
     align-items: center;
-    gap: 8px;
+    gap: 6px;
   }
 
   .name {

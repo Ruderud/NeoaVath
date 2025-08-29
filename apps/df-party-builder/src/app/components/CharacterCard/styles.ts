@@ -49,6 +49,13 @@ const DetailButton = styled.button`
   }
 `;
 
+const PositionIconContainer = styled.div`
+  position: absolute;
+  top: 4px;
+  left: 4px;
+  z-index: 2;
+`;
+
 const DeleteButton = styled.button`
   position: absolute;
   top: 8px;
@@ -163,6 +170,7 @@ export const CharacterCard = {
   Container,
   DetailButton,
   DeleteButton,
+  PositionIconContainer,
   ImageContainer,
   Info,
   MainInfo,

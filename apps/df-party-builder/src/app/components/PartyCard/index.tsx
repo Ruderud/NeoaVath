@@ -5,6 +5,7 @@ import type { Party, CharacterData, PartySlot, GroupConfig, BufferCharacterData 
 import { CharacterCard } from '../CharacterCard/index';
 import { calculatePartyDamagePotential, formatDamagePotential } from '../../utils/partyDamagePotential';
 import { getCharacterColor } from '../../consts/character-colors';
+import { PositionIcon } from '../PositionIcon';
 import {
   PartyCardContainer,
   PartyCardHeader,
@@ -216,6 +217,7 @@ export function PartyCard({
             return (
               <PartyCharacterPreview key={index} characterColor={characterColor.gradient}>
                 <div className="character-info">
+                  <PositionIcon position={character.position} size={14} />
                   <span className="name">{character.name}</span>
                   <span className="level">명성 {character.level}</span>
                 </div>
