@@ -141,6 +141,18 @@ async function searchCharacter(name, type, userAgent, rawData = false) {
       throw new Error('던담 API 응답 구조가 올바르지 않습니다.');
     }
 
+    const checkPosition = (char) => {
+      if (char.buffScore) {
+        return '버퍼';
+      } else {
+        if (char.setname === '무리 사냥의 길잡이') {
+          return '시너지';
+        } else {
+          return '딜러';
+        }
+      }
+    };
+
     if (rawData) {
       return {
         rawData: data,
@@ -163,6 +175,7 @@ async function searchCharacter(name, type, userAgent, rawData = false) {
           raidClearCount: char?.bakal || 0,
           advenRaidClearCount: char?.advenBakal || 0,
           key: char.key,
+          position: checkPosition(char),
         })),
         total: data.characters.length,
       };
@@ -188,6 +201,7 @@ async function searchCharacter(name, type, userAgent, rawData = false) {
       raidClearCount: char?.bakal || 0,
       advenRaidClearCount: char?.advenBakal || 0,
       key: char.key,
+      position: checkPosition(char),
     }));
 
     return {
