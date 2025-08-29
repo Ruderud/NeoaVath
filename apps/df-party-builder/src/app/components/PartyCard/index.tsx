@@ -173,12 +173,12 @@ export function PartyCard({
 
       {isExpanded ? (
         <PartyCardDetails>
-          <DamagePotentialDisplay
+          <CollapsedDamagePotential
             isCalculable={damagePotentialResult.isCalculable}
             data-tooltip={`${calculationFormula}\n버프력은 해당 파티에서 가장 큰 버프력 1인만 사용합니다.`}
           >
             {damagePotentialText.replace(' (억×만)', '')}
-          </DamagePotentialDisplay>
+          </CollapsedDamagePotential>
           <PartySlotsContainer isMobile={isMobile}>
             {party.slots.map((slot, index) => (
               <PartySlotCard
@@ -207,6 +207,12 @@ export function PartyCard({
         </PartyCardDetails>
       ) : (
         <PartyCardContent>
+          <CollapsedDamagePotential
+            isCalculable={damagePotentialResult.isCalculable}
+            data-tooltip={`${calculationFormula}\n버프력은 해당 파티에서 가장 큰 버프력 1인만 사용합니다.`}
+          >
+            {damagePotentialText.replace(' (억×만)', '')}
+          </CollapsedDamagePotential>
           {party.slots.map((slot, index) => {
             if (slot === 'empty') return null;
             const character = slot as CharacterData;
@@ -316,35 +322,35 @@ const TitleInput = styled.input`
   }
 `;
 
-const DamagePotentialDisplay = styled.div<{ isCalculable: boolean }>`
-  padding: 8px 12px;
-  margin-bottom: 12px;
-  border-radius: 6px;
-  font-size: 0.9rem;
+const CollapsedDamagePotential = styled.div`
+  padding: 4px 8px;
+  margin-bottom: 8px;
+  border-radius: 4px;
+  font-size: 0.8rem;
   font-weight: 600;
   text-align: center;
-  background: ${({ isCalculable }) => (isCalculable ? '#e8f5e8' : '#fff3cd')};
-  color: ${({ isCalculable }) => (isCalculable ? '#2e7d32' : '#856404')};
-  border: 1px solid ${({ isCalculable }) => (isCalculable ? '#c8e6c9' : '#ffeaa7')};
+  background: ${({ isCalculable }: { isCalculable: boolean }) => (isCalculable ? '#e8f5e8' : '#fff3cd')};
+  color: ${({ isCalculable }: { isCalculable: boolean }) => (isCalculable ? '#2e7d32' : '#856404')};
+  border: 1px solid ${({ isCalculable }: { isCalculable: boolean }) => (isCalculable ? '#c8e6c9' : '#ffeaa7')};
   cursor: help;
   position: relative;
 
   &:hover::after {
     content: attr(data-tooltip);
     position: absolute;
-    bottom: -50px;
+    bottom: -40px;
     left: 50%;
     transform: translateX(-50%);
     background: rgba(0, 0, 0, 0.9);
     color: white;
-    padding: 10px 12px;
-    border-radius: 6px;
-    font-size: 0.8rem;
+    padding: 8px 10px;
+    border-radius: 4px;
+    font-size: 0.7rem;
     font-weight: normal;
     white-space: pre-line;
     z-index: 1000;
     pointer-events: none;
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.3);
     text-align: center;
     min-width: max-content;
   }
