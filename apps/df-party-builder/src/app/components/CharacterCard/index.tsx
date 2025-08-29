@@ -4,6 +4,7 @@ import { Info as InfoIcon, X } from 'lucide-react';
 import type { BufferCharacterData, CharacterData } from '../../types/types';
 import { useCharacterDetail } from '../../context/CharacterDetailContext';
 import { CharacterCard as StyledComponents } from './styles';
+import { getCharacterColor } from '../../consts/character-colors';
 import { calculateSynergyDamagePotential } from '../../utils/partyDamagePotential';
 
 type CharacterCardProps = React.HTMLAttributes<HTMLDivElement> & {
@@ -17,6 +18,7 @@ type CharacterCardProps = React.HTMLAttributes<HTMLDivElement> & {
 export function CharacterCard(props: CharacterCardProps) {
   const { character, helperText, width, height, onDelete, ...restCardProps } = props;
   const showMultipleBuffScore = character.position === '버퍼' && Boolean(character.buffScore && character.buffScore3 && character.buffScore4);
+  const characterColor = getCharacterColor(character.position);
   const { showCharacterDetail } = useCharacterDetail();
   const [tooltipPosition, setTooltipPosition] = useState<{ top: number; left: number } | null>(null);
   const isTooltipVisible = Boolean(tooltipPosition);
@@ -51,7 +53,7 @@ export function CharacterCard(props: CharacterCardProps) {
         {...restCardProps}
         width={width}
         height={height}
-        isBuffer={character.position === '버퍼'}
+        characterColor={characterColor.gradient}
         onMouseEnter={handleMouseEnter}
         onMouseLeave={handleMouseLeave}
       >

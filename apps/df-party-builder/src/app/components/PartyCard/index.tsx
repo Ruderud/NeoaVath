@@ -4,6 +4,7 @@ import { Pencil, X, ChevronUp, ChevronDown } from 'lucide-react';
 import type { Party, CharacterData, PartySlot, GroupConfig, BufferCharacterData } from '../../types/types';
 import { CharacterCard } from '../CharacterCard/index';
 import { calculatePartyDamagePotential, formatDamagePotential } from '../../utils/partyDamagePotential';
+import { getCharacterColor } from '../../consts/character-colors';
 import {
   PartyCardContainer,
   PartyCardHeader,
@@ -210,8 +211,10 @@ export function PartyCard({
             const character = slot as CharacterData;
             if (!character?.name) return null;
 
+            const characterColor = getCharacterColor(character.position);
+
             return (
-              <PartyCharacterPreview key={index} isBuffer={isBufferCharacter(character)}>
+              <PartyCharacterPreview key={index} characterColor={characterColor.gradient}>
                 <div className="character-info">
                   <span className="name">{character.name}</span>
                   <span className="level">명성 {character.level}</span>

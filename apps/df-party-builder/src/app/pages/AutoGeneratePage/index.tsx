@@ -2,6 +2,7 @@ import { useState, useCallback } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useFirebase } from '../../context/FirebaseContext';
 import { CharacterData, Party, PartySlot } from '../../types/types';
+import { getCharacterColor } from '../../consts/character-colors';
 import { callGeminiAPI } from '../../api/gemini';
 import { getDundamData } from '../../api/dundam';
 import { Plus, Trash2, ArrowLeft, Settings, Users, Target } from 'lucide-react';

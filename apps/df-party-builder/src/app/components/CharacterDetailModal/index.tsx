@@ -2,6 +2,7 @@ import { X } from 'lucide-react';
 import styled from '@emotion/styled';
 import { useCharacterDetail } from '../../context/CharacterDetailContext';
 import { DundamIcon } from '../Drawer/styles';
+import { getCharacterColor } from '../../consts/character-colors';
 
 export function CharacterDetailModal() {
   const { isOpen, selectedCharacter, hideCharacterDetail } = useCharacterDetail();
@@ -17,9 +18,11 @@ export function CharacterDetailModal() {
 
   if (!isOpen || !selectedCharacter) return null;
 
+  const characterColor = getCharacterColor(selectedCharacter.position);
+
   return (
     <ModalOverlay onClick={hideCharacterDetail}>
-      <ModalContent onClick={(e) => e.stopPropagation()}>
+      <ModalContent onClick={(e) => e.stopPropagation()} characterColor={characterColor.gradient}>
         <ModalHeader>
           <ModalTitle>캐릭터 정보</ModalTitle>
           <CloseButton onClick={hideCharacterDetail}>
@@ -98,8 +101,8 @@ const ModalOverlay = styled.div`
   z-index: 9999;
 `;
 
-const ModalContent = styled.div`
-  background: white;
+const ModalContent = styled.div<{ characterColor?: string }>`
+  background: ${({ characterColor }) => characterColor || 'white'};
   border-radius: 12px;
   width: 90%;
   max-width: 500px;
