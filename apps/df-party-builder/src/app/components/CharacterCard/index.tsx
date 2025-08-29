@@ -1,7 +1,7 @@
 import { useState, useRef } from 'react';
 import { createPortal } from 'react-dom';
 import { Info as InfoIcon, X } from 'lucide-react';
-import type { BufferCharacterData, CharacterData } from '../../types/types';
+import type { CharacterData } from '../../types/types';
 import { useCharacterDetail } from '../../context/CharacterDetailContext';
 import { CharacterCard as StyledComponents } from './styles';
 import { getCharacterColor } from '../../consts/character-colors';

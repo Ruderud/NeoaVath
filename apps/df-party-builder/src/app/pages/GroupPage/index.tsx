@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useRef } from 'react';
 import { useParams } from 'react-router-dom';
 import { useErrorBoundary } from 'react-error-boundary';
 import { PasswordDialog } from '../../components/PasswordDialog';
@@ -6,7 +6,7 @@ import { useFirebase } from '../../context/FirebaseContext';
 import { throttle } from 'es-toolkit';
 import { getLocalStorageItem, setLocalStorageItem } from '../../utils/localStorage';
 import { Party, PartySlot, CharacterData, Group, Dungeon } from '../../types/types';
-import { Plus } from 'lucide-react';
+import { Plus, Download, Upload } from 'lucide-react';
 import { Drawer } from '../../components/Drawer';
 import { DungeonColumn } from '../../components/DungeonColumn';
 import { PartyModal } from '../../components/PartyModal';
@@ -74,6 +74,7 @@ export function GroupPage() {
   const [isSaving, setIsSaving] = useState(false);
   const [isUpdating, setIsUpdating] = useState(false);
   const [updateProgress, setUpdateProgress] = useState({ current: 0, total: 0 });
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
   // Undo/Redo hook 사용
   const { canUndo, canRedo, saveSnapshot, undo, redo, clearHistory } = useUndoRedo(groupName || '', 30);
@@ -409,6 +410,100 @@ export function GroupPage() {
       setIsSaving(false);
     }
   }, [groupName, dungeons, writeData]);
+
+  // Export 함수
+  const handleExport = useCallback(() => {
+    if (!group || !dungeons.length) {
+      setToastMessage('내보낼 데이터가 없습니다.');
+      setIsToastVisible(true);
+      setTimeout(() => setIsToastVisible(false), 2000);
+      return;
+    }
+
+    try {
+      const exportData = {
+        group,
+        dungeons,
+        exportDate: new Date().toISOString(),
+        version: '1.0.0',
+      };
+
+      const blob = new Blob([JSON.stringify(exportData, null, 2)], { type: 'application/json' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `df-party-builder-${groupName}-${new Date().toISOString().slice(0, 10)}.json`;
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      URL.revokeObjectURL(url);
+
+      setToastMessage('데이터가 내보내졌습니다.');
+      setIsToastVisible(true);
+      setTimeout(() => setIsToastVisible(false), 2000);
+      console.log('!!DEBUG 데이터 내보내기 완료:', groupName);
+    } catch (error) {
+      console.error('!!DEBUG 데이터 내보내기 실패:', error);
+      setToastMessage('데이터 내보내기에 실패했습니다.');
+      setIsToastVisible(true);
+      setTimeout(() => setIsToastVisible(false), 2000);
+    }
+  }, [group, dungeons, groupName]);
+
+  // Import 함수
+  const handleImport = useCallback(() => {
+    if (fileInputRef.current) {
+      fileInputRef.current.click();
+    }
+  }, []);
+
+  // 파일 선택 처리
+  const handleFileSelect = useCallback(
+    (event: React.ChangeEvent<HTMLInputElement>) => {
+      const file = event.target.files?.[0];
+      if (!file) return;
+
+      const reader = new FileReader();
+      reader.onload = (e) => {
+        try {
+          const content = e.target?.result as string;
+          const importData = JSON.parse(content);
+
+          // 데이터 유효성 검사
+          if (!importData.group || !importData.dungeons) {
+            throw new Error('잘못된 파일 형식입니다.');
+          }
+
+          // 그룹 정보 업데이트
+          setGroup(importData.group);
+          setDungeons(importData.dungeons);
+
+          // 세션 스토리지 업데이트
+          if (groupName) {
+            sessionStorage.setItem(`lastSavedDungeons_${groupName}`, JSON.stringify(importData.dungeons));
+          }
+
+          setToastMessage('데이터가 가져와졌습니다.');
+          setIsToastVisible(true);
+          setTimeout(() => setIsToastVisible(false), 2000);
+          console.log('!!DEBUG 데이터 가져오기 완료:', groupName);
+
+          // 파일 input 초기화
+          if (fileInputRef.current) {
+            fileInputRef.current.value = '';
+          }
+        } catch (error) {
+          console.error('!!DEBUG 데이터 가져오기 실패:', error);
+          setToastMessage('데이터 가져오기에 실패했습니다. 파일 형식을 확인해주세요.');
+          setIsToastVisible(true);
+          setTimeout(() => setIsToastVisible(false), 3000);
+        }
+      };
+
+      reader.readAsText(file);
+    },
+    [groupName],
+  );
 
   // 파티 데이터 변경 감지 및 저장
   useEffect(() => {
@@ -1056,7 +1151,12 @@ export function GroupPage() {
         canRedo={canRedo}
         onUndo={handleUndo}
         onRedo={handleRedo}
+        onExport={handleExport}
+        onImport={handleImport}
       />
+
+      {/* 숨겨진 파일 input */}
+      <input ref={fileInputRef} type="file" accept=".json" onChange={handleFileSelect} style={{ display: 'none' }} />
     </>
   );
 }

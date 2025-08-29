@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Save, Settings, Check, Undo2, Redo2 } from 'lucide-react';
+import { Save, Settings, Check, Undo2, Redo2, Download, Upload } from 'lucide-react';
 
 type SaveFabProps = {
   isAutoSaveEnabled: boolean;
@@ -11,9 +11,23 @@ type SaveFabProps = {
   canRedo: boolean;
   onUndo: () => void;
   onRedo: () => void;
+  onExport: () => void;
+  onImport: () => void;
 };
 
-export function SaveFab({ isAutoSaveEnabled, isSaving, lastSavedTime, onToggleAutoSave, onManualSave, canUndo, canRedo, onUndo, onRedo }: SaveFabProps) {
+export function SaveFab({
+  isAutoSaveEnabled,
+  isSaving,
+  lastSavedTime,
+  onToggleAutoSave,
+  onManualSave,
+  canUndo,
+  canRedo,
+  onUndo,
+  onRedo,
+  onExport,
+  onImport,
+}: SaveFabProps) {
   const [isSaveMenuOpen, setIsSaveMenuOpen] = useState(false);
   const [isSaveSettingsOpen, setIsSaveSettingsOpen] = useState(false);
 
@@ -111,6 +125,62 @@ export function SaveFab({ isAutoSaveEnabled, isSaving, lastSavedTime, onToggleAu
               }}
             >
               <Settings size={20} />
+            </button>
+
+            {/* Export 버튼 */}
+            <button
+              onClick={onExport}
+              style={{
+                width: '48px',
+                height: '48px',
+                borderRadius: '50%',
+                backgroundColor: '#28a745',
+                border: 'none',
+                color: 'white',
+                cursor: 'pointer',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                boxShadow: '0 4px 12px rgba(0, 0, 0, 0.15)',
+                transition: 'all 0.2s ease',
+              }}
+              onMouseEnter={(e) => {
+                e.currentTarget.style.transform = 'scale(1.1)';
+              }}
+              onMouseLeave={(e) => {
+                e.currentTarget.style.transform = 'scale(1)';
+              }}
+              title="데이터 내보내기"
+            >
+              <Download size={20} />
+            </button>
+
+            {/* Import 버튼 */}
+            <button
+              onClick={onImport}
+              style={{
+                width: '48px',
+                height: '48px',
+                borderRadius: '50%',
+                backgroundColor: '#ffc107',
+                border: 'none',
+                color: 'white',
+                cursor: 'pointer',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                boxShadow: '0 4px 12px rgba(0, 0, 0, 0.15)',
+                transition: 'all 0.2s ease',
+              }}
+              onMouseEnter={(e) => {
+                e.currentTarget.style.transform = 'scale(1.1)';
+              }}
+              onMouseLeave={(e) => {
+                e.currentTarget.style.transform = 'scale(1)';
+              }}
+              title="데이터 가져오기"
+            >
+              <Upload size={20} />
             </button>
 
             {/* 수동 저장 버튼 */}
