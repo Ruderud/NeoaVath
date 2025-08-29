@@ -71,6 +71,8 @@ export function GroupPage() {
   const [isAutoSaveEnabled, setIsAutoSaveEnabled] = useState(true);
   const [lastSavedTime, setLastSavedTime] = useState<string>('');
   const [isSaving, setIsSaving] = useState(false);
+  const [isUpdating, setIsUpdating] = useState(false);
+  const [updateProgress, setUpdateProgress] = useState({ current: 0, total: 0 });
 
   // 자동저장 설정을 로컬스토리지에서 불러오기
   useEffect(() => {
@@ -97,6 +99,9 @@ export function GroupPage() {
   const handleToggleDrawer = useCallback(() => {
     setIsDrawerOpen((prev) => !prev);
   }, []);
+
+  const FETCH_OFFSET = 1500; // 1.5초 간격
+  const BATCH_SIZE = 3; // 한 번에 처리할 모험단 수
 
   const handleUpdateGroupCharacters = async () => {
     const lastDundamUpdatedAt = group?.lastDundamUpdatedAt;
@@ -126,10 +131,23 @@ export function GroupPage() {
       characters: [...new Set(characters.map((char) => char.name))],
     }));
 
-    const updatedAdventures = await Promise.all(
-      needUpdateAdventures.map(async ({ adventureName }) => {
+    // 업데이트 시작
+    setIsUpdating(true);
+    setUpdateProgress({ current: 0, total: needUpdateAdventures.length });
+
+    const updatedAdventures: Array<{ adventureName: string; characters: CharacterData[] }> = [];
+
+    // 배치 단위로 처리
+    for (let i = 0; i < needUpdateAdventures.length; i += BATCH_SIZE) {
+      const batch = needUpdateAdventures.slice(i, i + BATCH_SIZE);
+      console.debug(`!!DEBUG 배치 처리 시작: ${i / BATCH_SIZE + 1}번째 배치 (${batch.length}개 모험단)`);
+
+      // 현재 배치의 모험단들을 병렬로 처리
+      const batchPromises = batch.map(async ({ adventureName }) => {
         try {
+          console.debug(`!!DEBUG 모험단 업데이트 시작: ${adventureName}`);
           const data = await getDundamData({ name: adventureName, type: 'adventure' });
+          console.debug(`!!DEBUG 모험단 업데이트 완료: ${adventureName}`);
           return {
             adventureName,
             characters: data.characters,
@@ -142,8 +160,28 @@ export function GroupPage() {
             characters: [],
           };
         }
-      }),
-    );
+      });
+
+      // 현재 배치의 모든 모험단이 완료될 때까지 대기
+      const batchResults = await Promise.all(batchPromises);
+      updatedAdventures.push(...batchResults);
+
+      // 진행률 업데이트
+      const currentProgress = Math.min(i + BATCH_SIZE, needUpdateAdventures.length);
+      setUpdateProgress({ current: currentProgress, total: needUpdateAdventures.length });
+
+      console.debug(`!!DEBUG 배치 처리 완료: ${i / BATCH_SIZE + 1}번째 배치 (${currentProgress}/${needUpdateAdventures.length})`);
+
+      // 마지막 배치가 아닌 경우에만 대기
+      if (i + BATCH_SIZE < needUpdateAdventures.length) {
+        console.debug(`!!DEBUG ${FETCH_OFFSET}ms 대기 후 다음 배치 처리`);
+        await new Promise((resolve) => setTimeout(resolve, FETCH_OFFSET));
+      }
+    }
+
+    // 업데이트 완료
+    setIsUpdating(false);
+    setUpdateProgress({ current: 0, total: 0 });
 
     if (!group) return;
 
@@ -810,6 +848,8 @@ export function GroupPage() {
         onToggle={handleToggleDrawer}
         onUpdateGroupCharacters={handleUpdateGroupCharacters}
         onOpenCharacterSearch={() => setIsDraggableSearchOpen(true)}
+        isUpdating={isUpdating}
+        updateProgress={updateProgress}
       />
       <PageContainer drawerOpen={isDrawerOpen}>
         <MainContent style={{ backgroundColor: '#f5f5f5' }} data-main-content>

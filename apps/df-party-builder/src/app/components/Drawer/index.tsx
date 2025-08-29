@@ -25,9 +25,11 @@ type DrawerProps = {
   onToggle: () => void;
   onUpdateGroupCharacters: () => Promise<void>;
   onOpenCharacterSearch: () => void;
+  isUpdating?: boolean;
+  updateProgress?: { current: number; total: number };
 };
 
-export function Drawer({ open, onToggle, groupName, onUpdateGroupCharacters, onOpenCharacterSearch }: DrawerProps) {
+export function Drawer({ open, onToggle, groupName, onUpdateGroupCharacters, onOpenCharacterSearch, isUpdating, updateProgress }: DrawerProps) {
   const navigate = useNavigate();
   const location = useLocation();
   const [isMemoModalOpen, setIsMemoModalOpen] = useState(false);
@@ -134,9 +136,9 @@ export function Drawer({ open, onToggle, groupName, onUpdateGroupCharacters, onO
               </DrawerMenuButton>
 
               <div style={{ paddingLeft: '8px' }}>
-                <DrawerMenuButton onClick={handleSyncClick} disabled={isLoading || isSettingPage}>
+                <DrawerMenuButton onClick={handleSyncClick} disabled={isLoading || isSettingPage || isUpdating}>
                   <DundamIcon src="https://dundam.xyz/favicon.ico" alt="던담" />
-                  동기화
+                  {isUpdating && updateProgress ? `동기화 (${updateProgress.current}/${updateProgress.total})` : '동기화'}
                 </DrawerMenuButton>
 
                 <DrawerMenuButton onClick={onOpenCharacterSearch} disabled={isSettingPage}>
@@ -190,7 +192,12 @@ export function Drawer({ open, onToggle, groupName, onUpdateGroupCharacters, onO
         )}
       </DrawerContainer>
 
-      <LoadingOverlay isVisible={isLoading || isRetrying} message={isRetrying ? '재시도 중...' : '동기화 중...'} />
+      <LoadingOverlay
+        isVisible={isLoading || isRetrying || Boolean(isUpdating)}
+        message={
+          isRetrying ? '재시도 중...' : isUpdating && updateProgress ? `동기화 중... (${updateProgress.current}/${updateProgress.total})` : '동기화 중...'
+        }
+      />
       <ErrorOverlay
         isVisible={!!error}
         title={error?.title}
