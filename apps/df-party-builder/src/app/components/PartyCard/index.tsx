@@ -3,7 +3,7 @@ import styled from '@emotion/styled';
 import { Pencil, X, ChevronUp, ChevronDown } from 'lucide-react';
 import type { Party, CharacterData, PartySlot, GroupConfig, BufferCharacterData } from '../../types/types';
 import { CharacterCard } from '../CharacterCard/index';
-import { calculatePartyDamagePotential, formatDamagePotential } from '../../utils/partyDamagePotential';
+import { calculatePartyDamagePotential, formatDamagePotential, calculateSynergyDamagePotential } from '../../utils/partyDamagePotential';
 import { getCharacterColor } from '../../consts/character-colors';
 import { PositionIcon } from '../PositionIcon';
 import {
@@ -214,18 +214,71 @@ export function PartyCard({
 
             const characterColor = getCharacterColor(character.position);
 
+            // 버퍼의 경우 파티원 수에 따라 버프력 표시
+            const getBufferDisplayScore = (character: CharacterData) => {
+              if (!isBufferCharacter(character)) return null;
+
+              // 현재 파티의 파티원 수 계산 (빈 슬롯 제외)
+              const partyMemberCount = party.slots.filter((slot) => slot !== 'empty').length;
+
+              // buffScore3, buffScore4가 모두 있는 경우에만 파티원 수에 따라 표시
+              if (character.buffScore3 && character.buffScore4) {
+                if (partyMemberCount === 4 && character.buffScore4) {
+                  return `(4인) ${character.buffScore4}`;
+                } else if (partyMemberCount === 3 && character.buffScore3) {
+                  return `(3인) ${character.buffScore3}`;
+                } else if (character.buffScore) {
+                  return character.buffScore;
+                }
+              }
+
+              // buffScore3, buffScore4가 없는 경우 기본 buffScore만 표시
+              if (character.buffScore) {
+                return character.buffScore;
+              }
+
+              return null;
+            };
+
+            // 시너지의 경우 4인 데미지 우선 표시
+            const getSynergyDisplayScore = (character: CharacterData) => {
+              if (character.position !== '시너지') return null;
+              const synergyDamage = calculateSynergyDamagePotential(character);
+              if (synergyDamage) return `(4인) ${synergyDamage}`;
+              if (character.rankDamage) return `랭킹 ${character.rankDamage}`;
+              return null;
+            };
+
+            const displayScore =
+              getBufferDisplayScore(character) ||
+              getSynergyDisplayScore(character) ||
+              (!isBufferCharacter(character) && character.rankDamage ? `랭킹 ${character.rankDamage}` : null);
+
+            // 툴팁용 전체 정보 생성
+            const getTooltipText = (character: CharacterData) => {
+              const lines = [];
+              if (isBufferCharacter(character)) {
+                if (character.buffScore) lines.push(`(2인) ${character.buffScore}`);
+                if (character.buffScore3) lines.push(`(3인) ${character.buffScore3}`);
+                if (character.buffScore4) lines.push(`(4인) ${character.buffScore4}`);
+              } else if (character.position === '시너지') {
+                if (character.rankDamage) lines.push(`랭킹: ${character.rankDamage}`);
+                const synergyDamage = calculateSynergyDamagePotential(character);
+                if (synergyDamage) lines.push(`(4인) ${synergyDamage}`);
+              } else if (character.rankDamage) {
+                lines.push(`랭킹: ${character.rankDamage}`);
+              }
+              return lines.join('\n');
+            };
+
             return (
-              <PartyCharacterPreview key={index} characterColor={characterColor.gradient}>
+              <PartyCharacterPreview key={index} characterColor={characterColor.gradient} title={getTooltipText(character)}>
                 <div className="character-info">
                   <PositionIcon position={character.position} size={14} />
                   <span className="name">{character.name}</span>
                   <span className="level">명성 {character.level}</span>
                 </div>
-                {isBufferCharacter(character) && character.buffScore ? (
-                  <span className="score">버프력 {character.buffScore}</span>
-                ) : !isBufferCharacter(character) && character.rankDamage ? (
-                  <span className="score">랭킹 {character.rankDamage}</span>
-                ) : null}
+                {displayScore && <span className="score">{displayScore}</span>}
               </PartyCharacterPreview>
             );
           })}
