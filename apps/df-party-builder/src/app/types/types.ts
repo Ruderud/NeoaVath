@@ -75,6 +75,7 @@ export type BufferCharacterData = {
   level: string;
   baseJob: string;
   setPoint: string;
+  setName: string;
   critical: string;
   buffScore: string;
   buffScore3?: string;
@@ -86,6 +87,7 @@ export type BufferCharacterData = {
   advenRaidClearCount: number;
   key: string;
   adventure: string;
+  position: '버퍼';
 };
 
 export type DamageCharacterData = {
@@ -96,6 +98,7 @@ export type DamageCharacterData = {
   level: string;
   baseJob: string;
   setPoint: string;
+  setName: string;
   skillDamage: string;
   critical: string;
   rankDamage: string;
@@ -104,6 +107,7 @@ export type DamageCharacterData = {
   advenRaidClearCount: number;
   key: string;
   adventure: string;
+  position: '딜러' | '시너지';
 };
 
 export type CharacterData = BufferCharacterData | DamageCharacterData;

@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import styled from '@emotion/styled';
 import { Pencil, X, ChevronUp, ChevronDown } from 'lucide-react';
-import type { Party, CharacterData, PartySlot, GroupConfig } from '../../types/types';
+import type { Party, CharacterData, PartySlot, GroupConfig, BufferCharacterData } from '../../types/types';
 import { CharacterCard } from '../CharacterCard/index';
 import { calculatePartyDamagePotential, formatDamagePotential } from '../../utils/partyDamagePotential';
 import {
@@ -17,6 +17,10 @@ import {
   PartyTitle,
   DeletePartyButton,
 } from './styles';
+
+const isBufferCharacter = (character: CharacterData): character is BufferCharacterData => {
+  return 'buffScore' in character;
+};
 
 type PartyCardProps = {
   party: Party;
@@ -207,14 +211,14 @@ export function PartyCard({
             if (!character?.name) return null;
 
             return (
-              <PartyCharacterPreview key={index}>
+              <PartyCharacterPreview key={index} isBuffer={isBufferCharacter(character)}>
                 <div className="character-info">
                   <span className="name">{character.name}</span>
                   <span className="level">명성 {character.level}</span>
                 </div>
-                {character.buffScore ? (
+                {isBufferCharacter(character) && character.buffScore ? (
                   <span className="score">버프력 {character.buffScore}</span>
-                ) : character.rankDamage ? (
+                ) : !isBufferCharacter(character) && character.rankDamage ? (
                   <span className="score">랭킹 {character.rankDamage}</span>
                 ) : null}
               </PartyCharacterPreview>

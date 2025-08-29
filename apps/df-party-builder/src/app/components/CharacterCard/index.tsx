@@ -4,6 +4,7 @@ import { Info as InfoIcon, X } from 'lucide-react';
 import type { BufferCharacterData, CharacterData } from '../../types/types';
 import { useCharacterDetail } from '../../context/CharacterDetailContext';
 import { CharacterCard as StyledComponents } from './styles';
+import { calculateSynergyDamagePotential } from '../../utils/partyDamagePotential';
 
 type CharacterCardProps = React.HTMLAttributes<HTMLDivElement> & {
   character: CharacterData;
@@ -13,13 +14,9 @@ type CharacterCardProps = React.HTMLAttributes<HTMLDivElement> & {
   onDelete?: () => void;
 };
 
-const isBufferCharacter = (character: CharacterData): character is BufferCharacterData => {
-  return 'buffScore' in character;
-};
-
 export function CharacterCard(props: CharacterCardProps) {
   const { character, helperText, width, height, onDelete, ...restCardProps } = props;
-  const showMultipleBuffScore = isBufferCharacter(character) && Boolean(character.buffScore && character.buffScore3 && character.buffScore4);
+  const showMultipleBuffScore = character.position === '버퍼' && Boolean(character.buffScore && character.buffScore3 && character.buffScore4);
   const { showCharacterDetail } = useCharacterDetail();
   const [tooltipPosition, setTooltipPosition] = useState<{ top: number; left: number } | null>(null);
   const isTooltipVisible = Boolean(tooltipPosition);
@@ -54,6 +51,7 @@ export function CharacterCard(props: CharacterCardProps) {
         {...restCardProps}
         width={width}
         height={height}
+        isBuffer={character.position === '버퍼'}
         onMouseEnter={handleMouseEnter}
         onMouseLeave={handleMouseLeave}
       >
@@ -84,15 +82,16 @@ export function CharacterCard(props: CharacterCardProps) {
             <div className="adventure">{character.adventureName}</div>
 
             {/* buff score Section - 븝퍼제외 */}
-            {isBufferCharacter(character) && !showMultipleBuffScore && character.buffScore ? <div className="score">{character.buffScore}</div> : null}
+            {character.position === '버퍼' && !showMultipleBuffScore && character.buffScore ? <div className="score">{character.buffScore}</div> : null}
 
             {/* buff score Section - 븝퍼 */}
-            {isBufferCharacter(character) && showMultipleBuffScore && character.buffScore ? <div className="score">(2인) {character.buffScore}</div> : null}
-            {isBufferCharacter(character) && showMultipleBuffScore && character.buffScore3 ? <div className="score">(3인) {character.buffScore3}</div> : null}
-            {isBufferCharacter(character) && showMultipleBuffScore && character.buffScore4 ? <div className="score">(4인) {character.buffScore4}</div> : null}
+            {character.position === '버퍼' && showMultipleBuffScore && character.buffScore ? <div className="score">(2인) {character.buffScore}</div> : null}
+            {character.position === '버퍼' && showMultipleBuffScore && character.buffScore3 ? <div className="score">(3인) {character.buffScore3}</div> : null}
+            {character.position === '버퍼' && showMultipleBuffScore && character.buffScore4 ? <div className="score">(4인) {character.buffScore4}</div> : null}
 
             {/* rank damage Section */}
-            {!isBufferCharacter(character) && <div className="score">{character.rankDamage}</div>}
+            {character.position !== '버퍼' && <div className="score">{character.rankDamage}</div>}
+            {character.position === '시너지' && <div className="score">(4인) {calculateSynergyDamagePotential(character)}</div>}
           </StyledComponents.MainInfo>
         </StyledComponents.Info>
       </StyledComponents.Container>

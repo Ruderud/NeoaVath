@@ -47,13 +47,16 @@ export const PartyCardContent = styled.div`
   gap: 4px;
 `;
 
-export const PartyCharacterPreview = styled.div`
+export const PartyCharacterPreview = styled.div<{ isBuffer?: boolean }>`
   display: flex;
   align-items: center;
   justify-content: space-between;
   padding: 2px 4px;
   font-size: 0.9rem;
   color: #666;
+  background: ${({ isBuffer }) => (isBuffer ? '#f0f8ff' : '#fff5f5')};
+  border-radius: 4px;
+  margin: 1px 0;
 
   .character-info {
     display: flex;

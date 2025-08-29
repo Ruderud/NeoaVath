@@ -1,10 +1,10 @@
 import styled from '@emotion/styled';
 
-const Container = styled.div<{ width?: number; height?: number }>`
+const Container = styled.div<{ width?: number; height?: number; isBuffer?: boolean }>`
   padding: 8px;
   border: 1px solid #ddd;
   border-radius: 8px;
-  background: white;
+  background: ${({ isBuffer }) => (isBuffer ? '#f0f8ff' : '#fff5f5')};
   display: flex;
   flex-direction: column;
   align-items: center;

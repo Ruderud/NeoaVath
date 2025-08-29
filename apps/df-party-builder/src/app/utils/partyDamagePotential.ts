@@ -1,4 +1,4 @@
-import type { PartySlot } from '../types/types';
+import type { PartySlot, CharacterData } from '../types/types';
 
 type DamagePotentialResult = {
   value: number | null;
@@ -180,4 +180,42 @@ export function formatDamagePotential(result: DamagePotentialResult): string {
   }
 
   return `데미지 포텐셜: ${result.value.toLocaleString()}`;
+}
+
+/**
+ * 시너지 캐릭터의 데미지 포텐셜을 계산합니다.
+ * position이 "시너지"인 경우 1.14배로 계산합니다.
+ *
+ * @param character 캐릭터 데이터
+ * @returns 계산된 rankDamage 문자열
+ */
+export function calculateSynergyDamagePotential(character: CharacterData): string {
+  // DamageCharacterData 타입인지 확인하고 rankDamage가 있는지 확인
+  if (!character || !('rankDamage' in character) || !character.rankDamage) {
+    return '';
+  }
+
+  // 무리 시너지 계수 1.14
+  const SYNERGY_MULTIPLIER = 1.1481472487;
+
+  // position이 "시너지"인지 확인
+  if ('position' in character && character.position === '시너지') {
+    const rankDamageValue = parseRankDamage(character.rankDamage);
+    const synergyValue = Math.floor(rankDamageValue * SYNERGY_MULTIPLIER);
+
+    // 만 단위로 다시 변환하여 문자열로 반환
+    const billion = Math.floor(synergyValue / 10000);
+    const million = synergyValue % 10000;
+
+    if (billion > 0 && million > 0) {
+      return `${billion}억 ${million}만`;
+    } else if (billion > 0) {
+      return `${billion}억`;
+    } else {
+      return `${million}만`;
+    }
+  }
+
+  // 시너지가 아닌 경우 원래 값 반환
+  return character.rankDamage;
 }

@@ -5,7 +5,8 @@ import { DundamIcon } from '../Drawer/styles';
 
 export function CharacterDetailModal() {
   const { isOpen, selectedCharacter, hideCharacterDetail } = useCharacterDetail();
-  const showMultipleBuffScore = Boolean(selectedCharacter?.buffScore && selectedCharacter?.buffScore3 && selectedCharacter?.buffScore4);
+  const showMultipleBuffScore =
+    selectedCharacter?.position === '버퍼' && Boolean(selectedCharacter?.buffScore && selectedCharacter?.buffScore3 && selectedCharacter?.buffScore4);
 
   const handleDundamClick = () => {
     if (selectedCharacter) {
@@ -49,7 +50,7 @@ export function CharacterDetailModal() {
               <InfoLabel>명성</InfoLabel>
               <InfoValue>{selectedCharacter.level}</InfoValue>
             </InfoRow>
-            {selectedCharacter.buffScore && (
+            {selectedCharacter.position === '버퍼' && selectedCharacter.buffScore && (
               <InfoRow>
                 <InfoLabel>버프력</InfoLabel>
                 {!showMultipleBuffScore && <InfoValue>{selectedCharacter.buffScore}</InfoValue>}
