@@ -1,10 +1,18 @@
 import { X } from 'lucide-react';
 import styled from '@emotion/styled';
 import { useCharacterDetail } from '../../context/CharacterDetailContext';
+import { DundamIcon } from '../Drawer/styles';
 
 export function CharacterDetailModal() {
   const { isOpen, selectedCharacter, hideCharacterDetail } = useCharacterDetail();
   const showMultipleBuffScore = Boolean(selectedCharacter?.buffScore && selectedCharacter?.buffScore3 && selectedCharacter?.buffScore4);
+
+  const handleDundamClick = () => {
+    if (selectedCharacter) {
+      const dundamUrl = `https://dundam.xyz/character?server=${selectedCharacter.server}&key=${selectedCharacter.key}`;
+      window.open(dundamUrl, '_blank');
+    }
+  };
 
   if (!isOpen || !selectedCharacter) return null;
 
@@ -65,6 +73,12 @@ export function CharacterDetailModal() {
             )}
           </CharacterInfo>
         </ModalBody>
+        <ModalFooter>
+          <DundamButton onClick={handleDundamClick}>
+            <DundamIcon src="https://dundam.xyz/favicon.ico" alt="던담" />
+            던담 페이지 이동
+          </DundamButton>
+        </ModalFooter>
       </ModalContent>
     </ModalOverlay>
   );
@@ -167,4 +181,36 @@ const InfoValue = styled.div`
   flex: 1;
   font-weight: 500;
   color: #333;
+`;
+
+const ModalFooter = styled.div`
+  display: flex;
+  justify-content: center;
+  padding: 16px 24px;
+  border-top: 1px solid #e0e0e0;
+  background: #f8f9fa;
+  border-radius: 0 0 12px 12px;
+`;
+
+const DundamButton = styled.button`
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  background: #007bff;
+  color: white;
+  border: none;
+  border-radius: 8px;
+  padding: 12px 20px;
+  font-size: 0.9rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background-color 0.2s ease;
+
+  &:hover {
+    background: #0056b3;
+  }
+
+  &:active {
+    background: #004085;
+  }
 `;
