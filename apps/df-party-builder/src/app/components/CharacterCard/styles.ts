@@ -23,29 +23,30 @@ const Container = styled.div<{ width?: number; height?: number; characterColor?:
 
 const DetailButton = styled.button`
   position: absolute;
-  top: 8px;
-  left: 8px;
-  background: rgba(255, 255, 255, 0.9);
+  top: 4px;
+  right: 24px;
+  width: 16px;
+  height: 16px;
+  background: #2196f3;
   border: none;
-  border-radius: 50%;
-  width: 24px;
-  height: 24px;
+  border-radius: 3px;
+  cursor: pointer;
   display: flex;
   align-items: center;
   justify-content: center;
-  cursor: pointer;
   transition: all 0.2s ease;
-  z-index: 100;
+  z-index: 2;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.2);
 
   &:hover {
-    background: rgba(255, 255, 255, 1);
+    background: #1976d2;
     transform: scale(1.1);
   }
 
   svg {
-    width: 14px;
-    height: 14px;
-    color: #666;
+    width: 10px;
+    height: 10px;
+    color: white;
   }
 `;
 
@@ -58,29 +59,30 @@ const PositionIconContainer = styled.div`
 
 const DeleteButton = styled.button`
   position: absolute;
-  top: 8px;
-  right: 8px;
-  background: rgba(255, 255, 255, 0.9);
+  top: 4px;
+  right: 4px;
+  width: 16px;
+  height: 16px;
+  background: #f44336;
   border: none;
-  border-radius: 50%;
-  width: 24px;
-  height: 24px;
+  border-radius: 3px;
+  cursor: pointer;
   display: flex;
   align-items: center;
   justify-content: center;
-  cursor: pointer;
   transition: all 0.2s ease;
-  z-index: 100;
+  z-index: 2;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.2);
 
   &:hover {
-    background: rgba(255, 255, 255, 1);
+    background: #d32f2f;
     transform: scale(1.1);
   }
 
   svg {
-    width: 14px;
-    height: 14px;
-    color: black;
+    width: 10px;
+    height: 10px;
+    color: white;
   }
 `;
 
