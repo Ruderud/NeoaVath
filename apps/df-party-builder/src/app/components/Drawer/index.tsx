@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
-import { ChevronLeft, ChevronRight, FileText, Settings, Search, Home, Target } from 'lucide-react';
+import { ChevronLeft, ChevronRight, FileText, Settings, Search, Home, Target, FlaskConical } from 'lucide-react';
 import { useFirebase } from '../../context/FirebaseContext';
 import { DraggableMemo } from '../DraggableMemo';
 import { LoadingOverlay } from '../LoadingOverlay';
@@ -82,6 +82,10 @@ export function Drawer({ open, onToggle, groupName, onUpdateGroupCharacters, onO
     navigate(`/group/${groupName}/auto-generate`);
   };
 
+  const handleExperimentalClick = () => {
+    navigate(`/group/${groupName}/experimental`);
+  };
+
   const handleSyncClick = async () => {
     setIsLoading(true);
     setError(null);
@@ -157,6 +161,11 @@ export function Drawer({ open, onToggle, groupName, onUpdateGroupCharacters, onO
                 자동 조합 생성
               </DrawerMenuButton>
 
+              <DrawerMenuButton onClick={handleExperimentalClick} disabled={isSettingPage}>
+                <FlaskConical size={20} />
+                실험적 기능
+              </DrawerMenuButton>
+
               <DrawerButton onClick={handleGroupConfigClick} style={{ marginTop: 'auto' }}>
                 <Settings size={24} />
                 <span>그룹 설정</span>
@@ -184,6 +193,9 @@ export function Drawer({ open, onToggle, groupName, onUpdateGroupCharacters, onO
             </DrawerMenuButton>
             <DrawerMenuButton onClick={handleAutoGenerateClick} disabled={isSettingPage}>
               <Target size={20} />
+            </DrawerMenuButton>
+            <DrawerMenuButton onClick={handleExperimentalClick} disabled={isSettingPage}>
+              <FlaskConical size={20} />
             </DrawerMenuButton>
             <DrawerMenuButton onClick={handleGroupConfigClick} style={{ marginTop: 'auto' }}>
               <Settings size={20} />

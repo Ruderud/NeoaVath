@@ -11,6 +11,7 @@ import GroupSettingPage from './pages/GroupSettingPage';
 import AutoGeneratePage from './pages/AutoGeneratePage';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { GroupInfoProvider } from './context/GroupInfoContext';
+import { ExperimentalPage } from './pages/ExperimentalPage';
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -36,6 +37,7 @@ export function App() {
                   <Route path="/group/:groupName" element={<GroupPage />} />
                   <Route path="/group/:groupName/setting" element={<GroupSettingPage />} />
                   <Route path="/group/:groupName/auto-generate" element={<AutoGeneratePage />} />
+                  <Route path="/group/:groupName/experimental" element={<ExperimentalPage />} />
                 </Routes>
               </ErrorBoundary>
             </DialogOverlayProvider>
