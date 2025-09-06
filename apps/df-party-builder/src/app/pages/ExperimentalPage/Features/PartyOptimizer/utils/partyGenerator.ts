@@ -1,20 +1,46 @@
 import { CharacterData } from '../../../../../types/types';
+import { partyStorage, ProgressCallback } from './partyStorage';
+import { PartyWorkerManager } from './partyWorkerManager';
 
 /**
- * 개별 파티 타입 정의
+ * 개별 파티 타입 정의 (저장용 - 키만 저장)
  */
 export type Party = {
+  id: string;
+  characterKeys: string[]; // CharacterData['key'] 배열
+  size: number; // 파티 크기 (2, 3, 4)
+};
+
+/**
+ * 개별 파티 타입 정의 (사용용 - 전체 데이터 포함)
+ */
+export type PartyWithCharacters = {
   id: string;
   characters: CharacterData[];
   size: number; // 파티 크기 (2, 3, 4)
 };
 
 /**
- * 파티 조합 타입 정의 (여러 파티로 구성된 하나의 조합)
+ * 파티 조합 타입 정의 (저장용 - 키만 저장)
  */
 export type PartyCombination = {
   id: string;
   parties: Party[];
+  totalCharacters: number;
+  partyCount: number;
+  sizeDistribution: {
+    size2: number; // 2인 파티 개수
+    size3: number; // 3인 파티 개수
+    size4: number; // 4인 파티 개수
+  };
+};
+
+/**
+ * 파티 조합 타입 정의 (사용용 - 전체 데이터 포함)
+ */
+export type PartyCombinationWithCharacters = {
+  id: string;
+  parties: PartyWithCharacters[];
   totalCharacters: number;
   partyCount: number;
   sizeDistribution: {
@@ -40,7 +66,96 @@ export type PartyGenerationResult = {
 };
 
 /**
- * 캐릭터를 중복 없이 모두 사용하여 가능한 모든 파티 조합을 생성
+ * 캐릭터를 중복 없이 모두 사용하여 가능한 모든 파티 조합을 생성 (청크 단위)
+ * IndexedDB에 저장하여 메모리 효율성 확보
+ *
+ * @param characters - 파티에 사용할 캐릭터 배열
+ * @param chunkSize - 청크 크기 (기본값: 1000)
+ * @param progressCallback - 진행률 콜백
+ * @returns 파티 생성 결과 (요약 정보만)
+ */
+export async function generateAllPossiblePartiesAsync(
+  characters: CharacterData[],
+  chunkSize = 1000,
+  progressCallback?: ProgressCallback,
+  maxWorkers = 4,
+): Promise<PartyGenerationResult> {
+  if (characters.length < 2) {
+    return {
+      combinations: [],
+      totalCombinations: 0,
+      totalCharacters: characters.length,
+      combinationDistribution: {
+        total2Party: 0,
+        total3Party: 0,
+        total4Party: 0,
+        partyCountDistribution: {},
+      },
+    };
+  }
+
+  const totalCharacters = characters.length;
+
+  // 가능한 모든 파티 크기 조합을 생성
+  const partySizeCombinations = generatePartySizeCombinations(totalCharacters);
+  console.log('!!DEBUG 파티 크기 조합들:', partySizeCombinations);
+
+  // Web Worker Manager 생성
+  const workerManager = new PartyWorkerManager(maxWorkers);
+
+  try {
+    // 병렬로 조합 생성
+    await workerManager.generateCombinationsInParallel(
+      characters,
+      partySizeCombinations,
+      50000, // 각 Worker당 최대 조합 수
+      (progress, message) => {
+        if (progressCallback) {
+          progressCallback({
+            currentChunk: Math.floor(progress / 10),
+            totalChunks: 10,
+            combinationsInCurrentChunk: 0,
+            totalCombinationsSoFar: 0,
+            isComplete: false,
+          });
+        }
+      },
+    );
+
+    // 통계 정보 조회
+    const stats = await partyStorage.getStats();
+
+    // 진행률 콜백 호출 (완료)
+    if (progressCallback) {
+      progressCallback({
+        currentChunk: 10,
+        totalChunks: 10,
+        combinationsInCurrentChunk: 0,
+        totalCombinationsSoFar: stats.totalCombinations,
+        isComplete: true,
+      });
+    }
+
+    // 요약 정보만 반환 (실제 조합은 IndexedDB에 저장됨)
+    return {
+      combinations: [], // 실제 조합은 IndexedDB에 저장
+      totalCombinations: stats.totalCombinations,
+      totalCharacters,
+      combinationDistribution: {
+        total2Party: 0, // TODO: 통계 계산
+        total3Party: 0,
+        total4Party: 0,
+        partyCountDistribution: {},
+      },
+    };
+  } finally {
+    // Worker 정리
+    workerManager.terminate();
+  }
+}
+
+/**
+ * 캐릭터를 중복 없이 모두 사용하여 가능한 모든 파티 조합을 생성 (동기, 메모리 사용)
  * 예: 7명 -> [4명+3명], [3명+2명+2명] 등의 조합
  *
  * @param characters - 파티에 사용할 캐릭터 배열
@@ -145,12 +260,18 @@ function generatePartySizeCombinations(totalCharacters: number): number[][] {
  * @param startId - 시작 ID
  * @returns 생성된 파티 조합 배열
  */
-function generateCombinationsForSizes(characters: CharacterData[], sizeCombination: number[], startId: number): PartyCombination[] {
+function generateCombinationsForSizes(characters: CharacterData[], sizeCombination: number[], startId: number, maxCombinations = 100000): PartyCombination[] {
   const combinations: PartyCombination[] = [];
   let currentId = startId;
+  let generatedCount = 0;
 
-  // 재귀적으로 캐릭터를 파티에 할당
+  // 재귀적으로 캐릭터를 파티에 할당 (메모리 제한 추가)
   function assignCharacters(remainingChars: CharacterData[], currentParties: Party[], sizeIndex: number) {
+    // 메모리 제한 체크
+    if (generatedCount >= maxCombinations) {
+      return;
+    }
+
     // 모든 파티가 완성된 경우
     if (sizeIndex >= sizeCombination.length) {
       if (remainingChars.length === 0) {
@@ -168,20 +289,28 @@ function generateCombinationsForSizes(characters: CharacterData[], sizeCombinati
           partyCount: currentParties.length,
           sizeDistribution,
         });
+        generatedCount++;
       }
       return;
     }
 
     const targetSize = sizeCombination[sizeIndex];
 
-    // 현재 크기의 파티를 생성
-    generatePartiesOfSize(remainingChars, targetSize, 0).forEach((party) => {
-      const newRemainingChars = remainingChars.filter((char) => !party.characters.some((pChar) => pChar.key === char.key));
+    // 현재 크기의 파티를 생성 (메모리 제한 적용)
+    const parties = generatePartiesOfSize(remainingChars, targetSize, 0, Math.min(10000, maxCombinations - generatedCount));
+
+    for (const party of parties) {
+      // 메모리 제한 체크
+      if (generatedCount >= maxCombinations) {
+        break;
+      }
+
+      const newRemainingChars = remainingChars.filter((char) => !party.characterKeys.includes(char.key));
 
       currentParties.push(party);
       assignCharacters(newRemainingChars, currentParties, sizeIndex + 1);
       currentParties.pop(); // 백트래킹
-    });
+    }
   }
 
   assignCharacters(characters, [], 0);
@@ -189,26 +318,34 @@ function generateCombinationsForSizes(characters: CharacterData[], sizeCombinati
 }
 
 /**
- * 특정 크기의 파티들을 생성하는 헬퍼 함수
+ * 특정 크기의 파티들을 생성하는 헬퍼 함수 (키만 저장, 메모리 제한)
  *
  * @param characters - 사용할 캐릭터 배열
  * @param partySize - 파티 크기 (2, 3, 4)
  * @param startId - 시작 ID (사용하지 않음, 호환성을 위해 유지)
- * @returns 생성된 파티 배열
+ * @param maxCombinations - 최대 생성할 조합 수 (메모리 제한)
+ * @returns 생성된 파티 배열 (키만 포함)
  */
-function generatePartiesOfSize(characters: CharacterData[], partySize: number, startId: number): Party[] {
+function generatePartiesOfSize(characters: CharacterData[], partySize: number, startId: number, maxCombinations = 100000): Party[] {
   const parties: Party[] = [];
   let currentId = 1;
+  let generatedCount = 0;
 
-  // 재귀적으로 조합을 생성하는 함수
+  // 재귀적으로 조합을 생성하는 함수 (메모리 제한 추가)
   function generateCombinations(remainingChars: CharacterData[], currentParty: CharacterData[], startIndex: number) {
+    // 메모리 제한 체크
+    if (generatedCount >= maxCombinations) {
+      return;
+    }
+
     // 파티가 완성된 경우
     if (currentParty.length === partySize) {
       parties.push({
         id: `party-${currentId++}`,
-        characters: [...currentParty],
+        characterKeys: currentParty.map((char) => char.key), // 키만 저장
         size: partySize,
       });
+      generatedCount++;
       return;
     }
 
@@ -219,6 +356,11 @@ function generatePartiesOfSize(characters: CharacterData[], partySize: number, s
 
     // 다음 캐릭터를 선택하여 재귀 호출
     for (let i = startIndex; i < remainingChars.length; i++) {
+      // 메모리 제한 체크
+      if (generatedCount >= maxCombinations) {
+        break;
+      }
+
       currentParty.push(remainingChars[i]);
       generateCombinations(remainingChars, currentParty, i + 1);
       currentParty.pop(); // 백트래킹
@@ -253,13 +395,13 @@ export function logPartyGenerationResult(result: PartyGenerationResult): void {
   console.log(`  - 3인 파티 포함: ${result.combinationDistribution.total3Party}개`);
   console.log(`  - 4인 파티 포함: ${result.combinationDistribution.total4Party}개`);
 
-  // 처음 3개 조합만 상세 출력
+  // 처음 3개 조합만 상세 출력 (키만 표시)
   console.log('!!DEBUG 조합 상세 (처음 3개):');
   result.combinations.slice(0, 3).forEach((combination) => {
     console.log(`- ${combination.id}: ${combination.partyCount}개 파티`);
     combination.parties.forEach((party, index) => {
-      const characterNames = party.characters.map((c) => c.name).join(', ');
-      console.log(`  ${index + 1}. [${characterNames}] (${party.size}인)`);
+      const characterKeys = party.characterKeys.join(', ');
+      console.log(`  ${index + 1}. [${characterKeys}] (${party.size}인)`);
     });
   });
 
@@ -298,7 +440,7 @@ export function filterCombinationsByPartyCount(result: PartyGenerationResult, pa
  * @returns 포함 여부
  */
 export function isCharacterInParty(party: Party, characterKey: string): boolean {
-  return party.characters.some((char) => char.key === characterKey);
+  return party.characterKeys.includes(characterKey);
 }
 
 /**
@@ -320,8 +462,8 @@ export function isCharacterInCombination(combination: PartyCombination, characte
  * @returns 겹치는 캐릭터 존재 여부
  */
 export function hasOverlappingCharacters(party1: Party, party2: Party): boolean {
-  const keys1 = new Set(party1.characters.map((c) => c.key));
-  const keys2 = new Set(party2.characters.map((c) => c.key));
+  const keys1 = new Set(party1.characterKeys);
+  const keys2 = new Set(party2.characterKeys);
 
   for (const key of keys1) {
     if (keys2.has(key)) {
@@ -346,4 +488,50 @@ export function isCombinationValid(combination: PartyCombination): boolean {
     }
   }
   return true;
+}
+
+/**
+ * 키 배열을 캐릭터 배열로 변환하는 유틸리티 함수
+ *
+ * @param characterKeys - 캐릭터 키 배열
+ * @param characterMap - 캐릭터 맵
+ * @returns 캐릭터 배열
+ */
+export function keysToCharacters(characterKeys: string[], characterMap: Record<string, CharacterData>): CharacterData[] {
+  return characterKeys.map((key) => characterMap[key]).filter(Boolean);
+}
+
+/**
+ * Party를 PartyWithCharacters로 변환하는 유틸리티 함수
+ *
+ * @param party - 키만 포함된 파티
+ * @param characterMap - 캐릭터 맵
+ * @returns 전체 캐릭터 정보가 포함된 파티
+ */
+export function partyToPartyWithCharacters(party: Party, characterMap: Record<string, CharacterData>): PartyWithCharacters {
+  return {
+    id: party.id,
+    characters: keysToCharacters(party.characterKeys, characterMap),
+    size: party.size,
+  };
+}
+
+/**
+ * PartyCombination을 PartyCombinationWithCharacters로 변환하는 유틸리티 함수
+ *
+ * @param combination - 키만 포함된 조합
+ * @param characterMap - 캐릭터 맵
+ * @returns 전체 캐릭터 정보가 포함된 조합
+ */
+export function combinationToCombinationWithCharacters(
+  combination: PartyCombination,
+  characterMap: Record<string, CharacterData>,
+): PartyCombinationWithCharacters {
+  return {
+    id: combination.id,
+    parties: combination.parties.map((party) => partyToPartyWithCharacters(party, characterMap)),
+    totalCharacters: combination.totalCharacters,
+    partyCount: combination.partyCount,
+    sizeDistribution: combination.sizeDistribution,
+  };
 }
