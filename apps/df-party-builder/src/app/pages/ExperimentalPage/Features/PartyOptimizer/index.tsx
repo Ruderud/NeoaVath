@@ -1,10 +1,12 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { CharacterData } from '../../../../types/types';
 import { Users, Plus } from 'lucide-react';
 import { DraggableCharacterSearch } from '../../../../components/DraggableCharacterSearch';
 import { Toast } from '../../../../components/Toast';
 import { CharacterPreview } from '../../../../components/CharacterPreview';
 import { Section, SectionTitle } from '../../../GroupPage/styles';
+import { getLocalStorageItem, setLocalStorageItem, removeLocalStorageItem } from '../../../../utils/localStorage';
+import { generateAllPossibleParties, logPartyGenerationResult } from './utils/partyGenerator';
 import styled from '@emotion/styled';
 
 // 모험단별 그룹 스타일
@@ -45,6 +47,35 @@ const CharacterList = styled.div`
   gap: 4px;
 `;
 
+const ScrollableContainer = styled.div`
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  overflow-y: auto;
+  flex: 1;
+  padding-right: 8px;
+  max-height: calc(400px - 32px);
+
+  /* 스크롤바 스타일링 */
+  &::-webkit-scrollbar {
+    width: 6px;
+  }
+
+  &::-webkit-scrollbar-track {
+    background: #f1f1f1;
+    border-radius: 3px;
+  }
+
+  &::-webkit-scrollbar-thumb {
+    background: #c1c1c1;
+    border-radius: 3px;
+  }
+
+  &::-webkit-scrollbar-thumb:hover {
+    background: #a8a8a8;
+  }
+`;
+
 type PartyOptimizerProps = {
   groupName?: string;
   onOptimize: (characters: CharacterData[]) => void;
@@ -56,6 +87,38 @@ export function PartyOptimizer({ groupName, onOptimize }: PartyOptimizerProps) {
   const [toastMessage, setToastMessage] = useState('');
   const [isToastVisible, setIsToastVisible] = useState(false);
 
+  // localStorage 키 생성 (그룹명 포함)
+  const storageKey = `party-optimizer-characters-${groupName || 'default'}`;
+
+  // 컴포넌트 마운트 시 localStorage에서 캐릭터 복원
+  useEffect(() => {
+    try {
+      const savedCharacters = getLocalStorageItem<CharacterData[]>(storageKey);
+      if (savedCharacters && Array.isArray(savedCharacters)) {
+        setSelectedCharacters(savedCharacters);
+        console.log('!!DEBUG 저장된 캐릭터 복원:', savedCharacters.length, '명');
+      }
+    } catch (error) {
+      console.error('!!DEBUG localStorage에서 캐릭터 복원 실패:', error);
+    }
+  }, [storageKey]);
+
+  // 선택된 캐릭터가 변경될 때마다 localStorage에 저장
+  useEffect(() => {
+    try {
+      if (selectedCharacters.length > 0) {
+        setLocalStorageItem(storageKey, selectedCharacters);
+        console.log('!!DEBUG 캐릭터 저장:', selectedCharacters.length, '명');
+      } else {
+        // 캐릭터가 없으면 localStorage에서 제거
+        removeLocalStorageItem(storageKey);
+        console.log('!!DEBUG 캐릭터 저장소 초기화');
+      }
+    } catch (error) {
+      console.error('!!DEBUG localStorage에 캐릭터 저장 실패:', error);
+    }
+  }, [selectedCharacters, storageKey]);
+
   // 캐릭터 추가
   const handleCharacterAdd = (character: CharacterData) => {
     if (selectedCharacters.find((c) => c.key === character.key)) {
@@ -63,11 +126,16 @@ export function PartyOptimizer({ groupName, onOptimize }: PartyOptimizerProps) {
       return;
     }
     setSelectedCharacters((prev) => [...prev, character]);
+    showToast(`${character.name}이(가) 추가되었습니다.`);
   };
 
   // 캐릭터 제거
   const handleCharacterRemove = (characterKey: string) => {
+    const characterToRemove = selectedCharacters.find((c) => c.key === characterKey);
     setSelectedCharacters((prev) => prev.filter((c) => c.key !== characterKey));
+    if (characterToRemove) {
+      showToast(`${characterToRemove.name}이(가) 제거되었습니다.`);
+    }
   };
 
   // 캐릭터 드래그 시작
@@ -117,10 +185,21 @@ export function PartyOptimizer({ groupName, onOptimize }: PartyOptimizerProps) {
 
   // 최적화 실행
   const handleOptimize = () => {
-    if (selectedCharacters.length < 4) {
-      showToast('최소 4명의 캐릭터가 필요합니다.');
+    if (selectedCharacters.length < 2) {
+      showToast('최소 2명의 캐릭터가 필요합니다.');
       return;
     }
+
+    // 모든 가능한 파티 조합 생성
+    const partyResult = generateAllPossibleParties(selectedCharacters);
+
+    // 결과를 콘솔에 출력
+    logPartyGenerationResult(partyResult);
+
+    // 토스트 메시지로 결과 요약 표시
+    showToast(`${partyResult.totalCombinations}개의 파티 조합이 생성되었습니다.`);
+
+    // 상위 컴포넌트에 결과 전달
     onOptimize(selectedCharacters);
   };
 
@@ -179,6 +258,7 @@ export function PartyOptimizer({ groupName, onOptimize }: PartyOptimizerProps) {
           onDrop={handleDrop}
           style={{
             minHeight: '200px',
+            maxHeight: '400px',
             padding: '16px',
             backgroundColor: 'white',
             borderRadius: '12px',
@@ -202,16 +282,7 @@ export function PartyOptimizer({ groupName, onOptimize }: PartyOptimizerProps) {
               우측 상단의 "캐릭터 추가" 버튼을 클릭하세요
             </div>
           ) : (
-            <div
-              style={{
-                display: 'flex',
-                flexDirection: 'column',
-                gap: '8px',
-                overflowY: 'auto',
-                flex: 1,
-                paddingRight: '8px',
-              }}
-            >
+            <ScrollableContainer>
               {sortedAdventureNames.map((adventureName) => (
                 <AdventureGroup key={adventureName}>
                   <AdventureGroupHeader>
@@ -225,29 +296,29 @@ export function PartyOptimizer({ groupName, onOptimize }: PartyOptimizerProps) {
                   </CharacterList>
                 </AdventureGroup>
               ))}
-            </div>
+            </ScrollableContainer>
           )}
         </div>
 
         {/* 최적화 실행 버튼 */}
         <button
           onClick={handleOptimize}
-          disabled={selectedCharacters.length < 4}
+          disabled={selectedCharacters.length < 2}
           style={{
             marginTop: '16px',
             padding: '16px',
-            backgroundColor: selectedCharacters.length < 4 ? '#9ca3af' : '#10b981',
+            backgroundColor: selectedCharacters.length < 2 ? '#9ca3af' : '#10b981',
             color: 'white',
             border: 'none',
             borderRadius: '12px',
-            cursor: selectedCharacters.length < 4 ? 'not-allowed' : 'pointer',
+            cursor: selectedCharacters.length < 2 ? 'not-allowed' : 'pointer',
             fontSize: '16px',
             fontWeight: '600',
             width: '100%',
             transition: 'all 0.2s ease',
           }}
         >
-          최적화 파티 생성 ({selectedCharacters.length}명)
+          파티 조합 생성 ({selectedCharacters.length}명)
         </button>
       </Section>
 
