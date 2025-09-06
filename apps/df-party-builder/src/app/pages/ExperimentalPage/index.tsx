@@ -6,68 +6,7 @@ import { DraggableCharacterSearch } from '../../components/DraggableCharacterSea
 import { Drawer } from '../../components/Drawer';
 import { Toast } from '../../components/Toast';
 import { PageContainer, MainContent, Section, SectionTitle } from '../GroupPage/styles';
-import { getCharacterColor } from '../../consts/character-colors';
-import { PositionIcon } from '../../components/PositionIcon';
-import styled from '@emotion/styled';
-
-// 간단한 캐릭터 미리보기 컴포넌트
-const CharacterPreview = styled.div<{ characterColor?: string }>`
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  padding: 8px 12px;
-  font-size: 0.9rem;
-  color: #666;
-  background: ${({ characterColor }) => characterColor || '#fff5f5'};
-  border-radius: 8px;
-  margin: 4px 0;
-  border: 1px solid #e5e7eb;
-  position: relative;
-
-  .character-info {
-    display: flex;
-    align-items: center;
-    gap: 8px;
-  }
-
-  .name {
-    font-weight: 500;
-    color: #333;
-    max-width: 120px;
-    overflow: hidden;
-    text-overflow: ellipsis;
-    white-space: nowrap;
-  }
-
-  .level {
-    color: #666;
-    font-size: 0.8rem;
-  }
-
-  .score {
-    color: #2196f3;
-    font-weight: 500;
-    font-size: 0.8rem;
-  }
-
-  .remove-button {
-    position: absolute;
-    top: -4px;
-    right: -4px;
-    background: #ef4444;
-    color: white;
-    border: none;
-    border-radius: 50%;
-    width: 20px;
-    height: 20px;
-    cursor: pointer;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-size: 12px;
-    z-index: 10;
-  }
-`;
+import { CharacterPreview } from '../../components/CharacterPreview';
 
 export function ExperimentalPage() {
   const { groupName } = useParams<{ groupName: string }>();
@@ -268,30 +207,15 @@ export function ExperimentalPage() {
                         paddingRight: '8px',
                       }}
                     >
-                      {selectedCharacters.map((character) => {
-                        const characterColor = getCharacterColor(character.job);
-                        const isBuffer = 'buffScore' in character;
-                        const displayScore = isBuffer ? character.buffScore : character.rankDamage;
-
-                        return (
-                          <CharacterPreview
-                            key={character.key}
-                            characterColor={characterColor.gradient}
-                            draggable
-                            onDragStart={(e) => handleCharacterDragStart(e, character)}
-                          >
-                            <div className="character-info">
-                              <PositionIcon position={character.position} size={14} />
-                              <span className="name">{character.name}</span>
-                              <span className="level">명성 {character.level}</span>
-                            </div>
-                            {displayScore && <span className="score">{displayScore}</span>}
-                            <button className="remove-button" onClick={() => handleCharacterRemove(character.key)}>
-                              ×
-                            </button>
-                          </CharacterPreview>
-                        );
-                      })}
+                      {selectedCharacters.map((character) => (
+                        <CharacterPreview
+                          key={character.key}
+                          character={character}
+                          onRemove={handleCharacterRemove}
+                          draggable
+                          onDragStart={handleCharacterDragStart}
+                        />
+                      ))}
                     </div>
                   )}
                 </div>
