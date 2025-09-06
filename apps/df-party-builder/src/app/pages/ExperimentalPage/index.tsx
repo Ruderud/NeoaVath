@@ -1,4 +1,4 @@
-import { useState, useCallback } from 'react';
+import { useState, useCallback, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { CharacterData } from '../../types/types';
 import { ArrowLeft, Users, FlaskConical, TestTube } from 'lucide-react';
@@ -7,6 +7,45 @@ import { Drawer } from '../../components/Drawer';
 import { Toast } from '../../components/Toast';
 import { PageContainer, MainContent, Section, SectionTitle } from '../GroupPage/styles';
 import { CharacterPreview } from '../../components/CharacterPreview';
+import styled from '@emotion/styled';
+
+// 모험단별 그룹 스타일
+const AdventureGroup = styled.div`
+  margin-bottom: 16px;
+`;
+
+const AdventureGroupHeader = styled.div`
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 12px;
+  background: #f8f9fa;
+  border-radius: 6px;
+  margin-bottom: 8px;
+  border-left: 4px solid #3b82f6;
+`;
+
+const AdventureGroupTitle = styled.h4`
+  margin: 0;
+  font-size: 14px;
+  font-weight: 600;
+  color: #374151;
+`;
+
+const AdventureGroupCount = styled.span`
+  background: #e5e7eb;
+  color: #6b7280;
+  padding: 2px 8px;
+  border-radius: 12px;
+  font-size: 12px;
+  font-weight: 500;
+`;
+
+const CharacterList = styled.div`
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+`;
 
 export function ExperimentalPage() {
   const { groupName } = useParams<{ groupName: string }>();
@@ -95,6 +134,19 @@ export function ExperimentalPage() {
     }
     showToast('파티 최적화 기능이 실행되었습니다.');
   };
+
+  // 캐릭터들을 모험단별로 그룹핑
+  const groupedCharacters = selectedCharacters.reduce((groups, character) => {
+    const adventureName = character.adventureName || '알 수 없는 모험단';
+    if (!groups[adventureName]) {
+      groups[adventureName] = [];
+    }
+    groups[adventureName].push(character);
+    return groups;
+  }, {} as Record<string, CharacterData[]>);
+
+  // 모험단 이름으로 정렬
+  const sortedAdventureNames = Object.keys(groupedCharacters).sort();
 
   return (
     <>
@@ -201,20 +253,24 @@ export function ExperimentalPage() {
                       style={{
                         display: 'flex',
                         flexDirection: 'column',
-                        gap: '4px',
+                        gap: '8px',
                         overflowY: 'auto',
                         flex: 1,
                         paddingRight: '8px',
                       }}
                     >
-                      {selectedCharacters.map((character) => (
-                        <CharacterPreview
-                          key={character.key}
-                          character={character}
-                          onRemove={handleCharacterRemove}
-                          draggable
-                          onDragStart={handleCharacterDragStart}
-                        />
+                      {sortedAdventureNames.map((adventureName) => (
+                        <AdventureGroup key={adventureName}>
+                          <AdventureGroupHeader>
+                            <AdventureGroupTitle>{adventureName}</AdventureGroupTitle>
+                            <AdventureGroupCount>{groupedCharacters[adventureName].length}명</AdventureGroupCount>
+                          </AdventureGroupHeader>
+                          <CharacterList>
+                            {groupedCharacters[adventureName].map((character) => (
+                              <CharacterPreview key={character.key} character={character} onRemove={handleCharacterRemove} />
+                            ))}
+                          </CharacterList>
+                        </AdventureGroup>
                       ))}
                     </div>
                   )}
